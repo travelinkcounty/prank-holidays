@@ -15,7 +15,7 @@ const navLinks = [
 
 const Header = () => {
   return (
-    <header className=" shadow-md sticky top-0 z-50 border-b border-[#e3061320]">
+    <header className="bg-white shadow-md sticky top-0 z-50 border-b border-[#e3061320]">
       <div className="container mx-auto px-4 flex items-center justify-between py-1.5 min-h-[46px]">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center">
