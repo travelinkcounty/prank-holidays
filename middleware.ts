@@ -4,7 +4,7 @@ export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Check if maintenance mode is enabled
-  if (process.env.MAINTENANCE_MODE === "true") {
+  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true") {
     // Allow access to maintenance page
     if (pathname == "/maintenance") {
       return NextResponse.next();
