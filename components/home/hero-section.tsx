@@ -1,10 +1,10 @@
 "use client";
 
-import { Plane, Mountain, Palmtree, Sun, MapPin } from "lucide-react";
+import { Plane, Mountain, Palmtree, Sun } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[80vh] py-16 px-4 overflow-hidden bg-black">
+    <div className="relative flex flex-col items-center justify-center min-h-[90vh] py-16 px-4 overflow-hidden bg-black">
       {/* Video Background */}
       <video
         className="absolute inset-0 w-full h-full object-cover z-0"
@@ -26,10 +26,10 @@ export default function Home() {
           <Sun className="w-10 h-10 text-[var(--primary-orange)] animate-spin-slow" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-[var(--primary-yellow)] drop-shadow-lg mb-4 animate-fade-in-up" style={{ fontFamily: 'var(--font-main)' }}>
-          Plan Your Next Adventure with <span className="text-[var(--primary-red)]">Prank Holidays</span>
+          Plan Your Next Adventure with <span className="text-[var(--primary-red)]">Travelink County</span>
         </h1>
         <p className="text-lg sm:text-xl text-white/90 mb-8 animate-fade-in-up delay-100" style={{ fontFamily: 'var(--font-main)' }}>
-          Unforgettable trips, best deals, and memories for a lifetime. Explore mountains, beaches, and cities with us!
+          Unforgettable trips, best deals, and memories for a lifetime.
         </p>
         <a
           href="#"
@@ -38,21 +38,6 @@ export default function Home() {
         >
           Start Planning
         </a>
-      </div>
-      {/* Features Row */}
-      <div className="relative z-20 flex flex-wrap justify-center gap-8 mt-16 animate-fade-in-up delay-300">
-        <div className="flex flex-col items-center">
-          <MapPin className="w-10 h-10 text-[var(--primary-blue)] mb-2 animate-bounce" />
-          <span className="font-semibold text-[var(--primary-blue)] text-white drop-shadow" style={{ fontFamily: 'var(--font-main)' }}>100+ Destinations</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <Sun className="w-10 h-10 text-[var(--primary-orange)] mb-2 animate-spin-slow" />
-          <span className="font-semibold text-[var(--primary-orange)] text-white drop-shadow" style={{ fontFamily: 'var(--font-main)' }}>All Seasons</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <Plane className="w-10 h-10 text-[var(--primary-green)] mb-2 animate-bounce-slow" />
-          <span className="font-semibold text-[var(--primary-green)] text-white drop-shadow" style={{ fontFamily: 'var(--font-main)' }}>Best Deals</span>
-        </div>
       </div>
       {/* Custom Animations */}
       <style jsx>{`

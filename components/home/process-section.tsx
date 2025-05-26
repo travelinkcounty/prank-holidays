@@ -1,46 +1,61 @@
+"use client";
+
 import React from "react";
+import { motion } from "framer-motion";
+import { Globe, DollarSign, Plane } from "lucide-react";
 
 const steps = [
   {
-    title: "Choose Your Prank",
-    description: "Select from a variety of hilarious holiday pranks.",
-    icon: (
-      <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-    ),
+    title: "Pick Your Place",
+    description: "Whether it's a beach or a mountain, choose your favorite spot and kickstart your journey. There's something special for every traveler!",
+    icon: <Globe className="w-14 h-14 text-[#8bc34a] bg-white rounded-full p-2 shadow" />, // Green globe icon
+    border: "border-[#b6d957]",
+    bg: "",
   },
   {
-    title: "Customize Details",
-    description: "Personalize your prank for maximum fun.",
-    icon: (
-      <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-      </svg>
-    ),
+    title: "Book & Pay Easily",
+    description: "Booking and payment are now super simple – confirm your trip in just a few clicks, totally hassle-free!",
+    icon: <DollarSign className="w-14 h-14 text-[#8bc34a] bg-white rounded-full p-2 shadow" />, // Green dollar icon
+    border: "border-[#b6d957]",
+    bg: "",
   },
   {
-    title: "Send & Enjoy",
-    description: "We deliver the prank, you enjoy the reactions!",
-    icon: (
-      <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h2l1 2h13l1-2h2" />
-      </svg>
-    ),
+    title: "Take Off Instantly",
+    description: "Book today and take off right away. Even last-minute plans are now stress-free and easy!",
+    icon: <Plane className="w-14 h-14 text-[#8bc34a] bg-white rounded-full p-2 shadow" />, // Green plane icon
+    border: "border-[#b6d957]",
+    bg: "",
   },
 ];
 
 const ProcessSection = () => (
   <section className="py-16 bg-white">
     <div className="max-w-5xl mx-auto px-4">
-      <h2 className="text-3xl font-bold text-center mb-10">How It Works</h2>
-      <div className="flex flex-col md:flex-row justify-between gap-8">
+      <h2 className="text-5xl font-extrabold text-center mb-10 text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>
+        Our Process
+      </h2>
+      <div className="flex flex-col gap-7 md:grid md:grid-cols-3 md:gap-8 items-stretch">
         {steps.map((step, idx) => (
-          <div key={idx} className="flex-1 flex flex-col items-center text-center p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition">
-            <div className="mb-4">{step.icon}</div>
-            <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-            <p className="text-gray-600">{step.description}</p>
-          </div>
+          <motion.div
+            key={idx}
+            className="h-full"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: idx * 0.12 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.03 }}
+          >
+            <div
+              className={`flex flex-col items-center text-center rounded-xl border ${step.border} bg-white shadow-sm px-8 py-8 transition-all duration-300 ${step.bg} h-full`}
+              style={{ height: '100%' }}
+            >
+              <div className="flex items-center justify-center rounded-full bg-[#ffe066]/30 p-3 mb-4">
+                {step.icon}
+              </div>
+              <span className="font-bold text-[#e63946] text-lg mb-2" style={{ fontFamily: 'var(--font-main)' }}>{step.title}</span>
+              <span className="text-gray-600 text-base leading-tight">{step.description}</span>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>

@@ -20,7 +20,7 @@ const DashboardPage = () => {
         </div>
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#e63946] mb-2" style={{ fontFamily: 'var(--font-main)' }}>
-            Welcome to Prank Holidays Admin!
+            Welcome to Travelink County Admin!
           </h1>
           <p className="text-lg text-gray-600 max-w-xl mx-auto md:mx-0">
             Manage your travel business with ease. Track users, leads, packages, and more—all in one fun, modern dashboard.

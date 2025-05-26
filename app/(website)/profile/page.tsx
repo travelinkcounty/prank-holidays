@@ -1,7 +1,11 @@
-import React from "react";
+import Profile from "./profile";
+import { Metadata } from "next";
 
-const ProfilePage = () => {
-  return <div>ProfilePage</div>;
+export const metadata: Metadata = {
+  title: "My Profile - Travelink County",
+  description: "My Profile of our services and packages.",
 };
 
-export default ProfilePage;
+export default function ProfilePage() {
+    return <Profile />;
+}

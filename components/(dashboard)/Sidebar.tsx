@@ -25,7 +25,7 @@ const Sidebar = () => {
     <>
       {/* Logo at the top, centered */}
       <div className="flex flex-col items-center mb-4 border-b border-gray-200 pb-4">
-        <h1 className="text-2xl font-bold text-black">Prank Holidays</h1>
+        <h1 className="text-2xl font-bold text-black">Travelink County</h1>
         <div className="w-24 h-1 rounded-full mt-2" style={{ background: 'linear-gradient(90deg, #e63946 0%, #ffe066 50%, #457b9d 100%)' }} />
       </div>
       <nav className="flex flex-col gap-2 mt-0">

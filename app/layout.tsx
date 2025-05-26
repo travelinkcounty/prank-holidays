@@ -9,8 +9,8 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Prank Holidays",
-  description: "Pranks Holidays",
+  title: "Travelink County | Let's Travel Together",
+  description: "Travelink County is a travel agency that helps you find the best travel deals and destinations.",
 };
 
 export default function RootLayout({

@@ -1,5 +1,74 @@
 import React from "react";
 import Image from "next/image";
+import { Users, Globe, Lightbulb, ShieldCheck, Heart, CheckCircle } from "lucide-react";
+import { Hotel, UserCheck, Cog, Plane, FileText, Car } from "lucide-react";
+import PackageSection from "@/components/home/package-section";
+
+const features = [
+  "First Class Flights",
+  "5 Star Accommodations",
+  "150 Premium City Tours",
+  "Handpicked Hotels",
+  "Latest Model Vehicles",
+  "24/7 Service",
+];
+
+const values = [
+  { icon: <Users className="w-8 h-8 text-[#e63946]" />, text: "Customer-first approach" },
+  { icon: <ShieldCheck className="w-8 h-8 text-[#457b9d]" />, text: "Integrity and transparency" },
+  { icon: <Lightbulb className="w-8 h-8 text-[#ffe066]" />, text: "Innovation in travel experiences" },
+  { icon: <Globe className="w-8 h-8 text-[#457b9d]" />, text: "Commitment to quality and safety" },
+  { icon: <Heart className="w-8 h-8 text-[#e63946]" />, text: "Passion for exploration" },
+];
+
+const team = [
+  { name: "Nikhil Chaudhary", role: "Founder & CEO", image: "/images/user1.jpg" },
+  { name: "Priya Singh", role: "Travel Expert", image: "/images/user2.jpg" },
+  { name: "Rahul Verma", role: "Operations Head", image: "/images/user3.jpg" },
+];
+
+const services = [
+  {
+    icon: <Globe className="w-9 h-9 text-[#ffe066]" />,
+    title: "International Tours",
+    desc: "Expertly planned tours to iconic landmarks and hidden gems worldwide. Your journey will be as memorable as the destination.",
+  },
+  {
+    icon: <Hotel className="w-9 h-9 text-[#e63946]" />,
+    title: "Hotel Reservation",
+    desc: "Simple, quick, and tailored hotel bookings. Enjoy the comfort of a great stay and the convenience of easy booking.",
+  },
+  {
+    icon: <UserCheck className="w-9 h-9 text-[#457b9d]" />,
+    title: "Membership",
+    desc: "Become a member for exclusive discounts, priority booking, and special perks on every trip. Travel smarter and enjoy luxury.",
+  },
+  {
+    icon: <Cog className="w-9 h-9 text-[#ffe066]" />,
+    title: "Event Management",
+    desc: "Tailored events, seamless execution, and unforgettable moments for every occasion.",
+  },
+  {
+    icon: <Globe className="w-9 h-9 text-[#e63946]" />,
+    title: "Domestic Tours",
+    desc: "Stress-free weekend getaways or extended road trips, packed with unforgettable experiences.",
+  },
+  {
+    icon: <Plane className="w-9 h-9 text-[#457b9d]" />,
+    title: "Flight Booking",
+    desc: "Find the best deals, flexible schedules, and seamless travel arrangements for any destination.",
+  },
+  {
+    icon: <FileText className="w-9 h-9 text-[#ffe066]" />,
+    title: "Visa, Passport Applications",
+    desc: "Guidance through every step of visa and passport applications, ensuring fast processing and worry-free travel.",
+  },
+  {
+    icon: <Car className="w-9 h-9 text-[#e63946]" />,
+    title: "Car Rentals",
+    desc: "Latest model vehicles, handpicked for comfort and safety, available 24/7 for your convenience.",
+  },
+];
 
 const About = () => {
   return (
@@ -10,7 +79,7 @@ const About = () => {
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg tracking-tight leading-tight">
-            About <span className="text-[#ffc72c]">Prank Holidays</span>
+            About <span className="text-[#ffe066]">Travelink County</span>
           </h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto font-semibold drop-shadow-lg mt-2">
             Your trusted travel partner for unforgettable journeys across India and beyond.
@@ -18,34 +87,99 @@ const About = () => {
         </div>
       </div>
 
-      {/* About Content */}
-      <section className="container mx-auto px-4 pb-16 flex flex-col md:flex-row items-center gap-12">
-        <div className="flex-1">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#e30613] mb-4">Our Story</h2>
-          <p className="text-neutral-800 text-lg mb-6">
-            Founded in 2010, Prank Holidays has grown from a small team of passionate travelers into one of India's leading travel companies. Our mission is to make travel accessible, enjoyable, and truly memorable for everyone. With a focus on personalized service and unique experiences, we have helped thousands of clients explore the world with confidence.
-          </p>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#e30613] mb-4">Our Mission</h2>
-          <p className="text-neutral-800 text-lg mb-6">
-            To inspire and enable people to discover new destinations, cultures, and adventures, while providing exceptional value and care at every step of their journey.
-          </p>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#e30613] mb-4">Our Values</h2>
-          <ul className="list-disc pl-6 text-neutral-800 text-lg space-y-2">
-            <li>Customer-first approach</li>
-            <li>Integrity and transparency</li>
-            <li>Innovation in travel experiences</li>
-            <li>Commitment to quality and safety</li>
-            <li>Passion for exploration</li>
-          </ul>
-        </div>
+      {/* About Section Hero (new, as per screenshot) */}
+      <section className="w-full max-w-7xl mx-auto bg-[#f6f7fa] py-10 flex flex-col md:flex-row items-center justify-center gap-10 px-4">
+        {/* Left: Image */}
         <div className="flex-1 flex justify-center">
-          <div className="relative w-full max-w-md h-72 rounded-xl overflow-hidden shadow-lg border-4 border-[#ffc72c]">
-            <Image src="/images/contact-banner.jpg" alt="Our Team" fill className="object-cover" />
+          <div className="w-full max-w-lg h-[320px] rounded-2xl overflow-hidden">
+            <Image
+              src="/images/contact-banner.jpg"
+              alt="About Travelink County"
+              width={520}
+              height={320}
+              className="object-cover w-full h-full"
+            />
           </div>
+        </div>
+        {/* Right: Content */}
+        <div className="flex-1 flex flex-col justify-center max-w-xl">
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-3 text-[#e63946] leading-tight" style={{ fontFamily: 'var(--font-main)' }}>
+            Welcome to <span className="text-[#457b9d]">Travelink County</span>
+          </h1>
+          <p className="text-base text-[#222] mb-4">
+            Travelink County offers cost effective flight, train, or bus reservation to all destinations. We can give you full support to book your Holidays plan with the nominal service charge.
+          </p>
+          <p className="text-base text-[#222] mb-4">
+            Corporate Travels are proven business tools for motivating teams and individuals towards a desired behaviour. Time tested to drive sales, enhance employee engagement, boost morale and promote corporate loyalty.
+          </p>
+          {/* Features */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 mb-6">
+            {features.map((feature, i) => (
+              <div key={i} className="flex items-center gap-2 text-base text-[#e63946] font-medium">
+                <CheckCircle className="w-4 h-4 text-[#ffe066]" />
+                <span className="text-[#222]">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <ServicesSection />
+      <PackageSection />
+
+      {/* CTA Section (wide, on-theme) */}
+      <section className="w-full max-w-7xl mx-auto my-16 px-4">
+        <div className="rounded-2xl flex flex-col md:flex-row items-stretch overflow-hidden shadow-lg">
+          {/* Left: Text */}
+          <div className="flex-1 flex flex-col justify-center p-12">
+            <span className="uppercase text-2xl font-bold text-[#ffe066] mb-2 tracking-wider ">Quick Booking</span>
+            <h2 className="text-4xl font-extrabold mb-2" style={{ fontFamily: 'var(--font-main)' }}>
+              Plan Your Trip Instantly
+            </h2>
+            <p className="text-lg mb-6">
+              Book your next adventure with Travelink County in just a few clicks.
+            </p>
+          </div>
+          {/* Right: Booking Form */}
+          <form className="flex-1 flex flex-col justify-center gap-3 p-12">
+            <input type="text" placeholder="Your Name" className="px-4 py-3 rounded border border-[#e63946]  focus:outline-none" />
+            <input type="email" placeholder="Your Email" className="px-4 py-3 rounded border border-[#e63946]  focus:outline-none" />
+            <input type="text" placeholder="Destination" className="px-4 py-3 rounded border border-[#e63946]  focus:outline-none" />
+            <button
+              type="submit"
+              className="w-full bg-[#ffe066] text-[#e63946] font-bold px-6 py-3 rounded-lg shadow hover:bg-[#e63946] hover:text-white transition-colors text-base mt-2"
+              style={{ fontFamily: 'var(--font-main)' }}
+            >
+              Book Now
+            </button>
+          </form>
         </div>
       </section>
     </div>
   );
 };
+
+const ServicesSection = () => (
+  <section className="w-full max-w-7xl mx-auto px-4 py-20">
+    <h2 className="text-5xl font-extrabold text-center mb-14 text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>
+      Our Services
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      {services.map((service, idx) => (
+        <div
+          key={idx}
+          className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-start hover:shadow-2xl transition group border-2 border-[#ffe066]/40"
+        >
+          <div className="mb-4">{service.icon}</div>
+          <h3 className="text-xl font-bold mb-2 text-[#457b9d]" style={{ fontFamily: 'var(--font-main)' }}>
+            {service.title}
+          </h3>
+          <p className="text-gray-700 text-base">{service.desc}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+);
 
 export default About;

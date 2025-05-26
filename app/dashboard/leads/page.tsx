@@ -20,9 +20,9 @@ type Lead = {
 };
 
 const initialLeads: Lead[] = [
-  { id: 1, name: "Rohit Kumar", email: "rohit@prankholidays.com", phone: "9876543210", status: "New" },
-  { id: 2, name: "Simran Kaur", email: "simran@prankholidays.com", phone: "9123456780", status: "Contacted" },
-  { id: 3, name: "Vikas Patel", email: "vikas@prankholidays.com", phone: "9988776655", status: "Converted" },
+  { id: 1, name: "Rohit Kumar", email: "rohit@travelinkcounty.com", phone: "9876543210", status: "New" },
+  { id: 2, name: "Simran Kaur", email: "simran@travelinkcounty.com", phone: "9123456780", status: "Contacted" },
+  { id: 3, name: "Vikas Patel", email: "vikas@travelinkcounty.com", phone: "9988776655", status: "Converted" },
 ];
 
 export default function LeadsPage() {

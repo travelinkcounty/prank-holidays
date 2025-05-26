@@ -4,28 +4,32 @@ import Image from "next/image";
 
 const packages = [
   {
-    name: "Goa Beach Escape",
-    image: "/images/contact-banner.jpg",
-    price: "₹19,999",
-    description: "3 nights, 4 days stay at a luxury beach resort with all meals included.",
+    image: "/images/goa.jpg",
+    title: "Goa Beach Escape",
+    price: "₹12,999",
+    days: "6D/4N",
+    desc: "Experience the vibrant beaches, nightlife, and culture of Goa.",
   },
   {
-    name: "Himalayan Adventure",
-    image: "/images/contact-banner.jpg",
-    price: "₹24,999",
-    description: "5 days trekking and camping in the Himalayas with expert guides.",
+    image: "/images/manali.jpg",
+    title: "Manali Adventure",
+    price: "₹9,499",
+    days: "4D/3N",
+    desc: "Enjoy snow-capped mountains, rivers, and adventure sports in Manali.",
   },
   {
-    name: "Royal Rajasthan",
-    image: "/images/contact-banner.jpg",
-    price: "₹21,499",
-    description: "4 nights exploring palaces, forts, and vibrant markets of Rajasthan.",
+    image: "/images/jaipur.jpg",
+    title: "Jaipur Heritage",
+    price: "₹7,999",
+    days: "3D/2N",
+    desc: "Explore royal palaces, forts, and the rich history of Jaipur.",
   },
   {
-    name: "Kerala Backwaters",
-    image: "/images/contact-banner.jpg",
-    price: "₹22,999",
-    description: "3 nights on a houseboat with authentic Kerala cuisine and sightseeing.",
+    image: "/images/kerala.jpg",
+    title: "Kerala Backwaters",
+    price: "₹14,499",
+    days: "5D/4N",
+    desc: "Cruise the tranquil backwaters and lush landscapes of Kerala.",
   },
 ];
 
@@ -50,18 +54,18 @@ const PackagesPage = () => {
       <section className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {packages.map((pkg) => (
-            <Card key={pkg.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
+            <Card key={pkg.title} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
               <div className="relative w-full h-48">
-                <Image src={pkg.image} alt={pkg.name} fill className="object-cover" />
+                <Image src={pkg.image} alt={pkg.title} fill className="object-cover" />
               </div>
               <CardHeader>
                 <CardTitle className="text-xl font-bold text-[#e30613] flex flex-col gap-1">
-                  {pkg.name}
+                  {pkg.title}
                   <span className="text-lg font-extrabold text-[#1a4d8f]">{pkg.price}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-[#1a4d8f] font-medium">{pkg.description}</p>
+                <p className="text-[#1a4d8f] font-medium">{pkg.desc}</p>
               </CardContent>
             </Card>
           ))}

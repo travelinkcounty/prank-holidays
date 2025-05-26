@@ -17,9 +17,9 @@ type User = {
 };
 
 const initialUsers: User[] = [
-  { id: 1, name: "Nikhil Chaudhary", email: "nikhil@prankholidays.com", role: "Admin" },
-  { id: 2, name: "Amit Sharma", email: "amit@prankholidays.com", role: "Manager" },
-  { id: 3, name: "Priya Singh", email: "priya@prankholidays.com", role: "User" },
+  { id: 1, name: "Nikhil Chaudhary", email: "nikhil@travelinkcounty.com", role: "Admin" },
+  { id: 2, name: "Amit Sharma", email: "amit@travelinkcounty.com", role: "Manager" },
+  { id: 3, name: "Priya Singh", email: "priya@travelinkcounty.com", role: "User" },
 ];
 
 export default function UsersPage() {
