@@ -23,6 +23,41 @@ const locations = [
     image: "/images/contact-banner.jpg",
     description: "The Silicon Valley of India, known for its parks and cafes.",
   },
+  {
+    name: "Chennai",
+    image: "/images/contact-banner.jpg",
+    description: "The capital of Tamil Nadu, known for its temples and beaches.",
+  },
+  {
+    name: "Hyderabad",
+    image: "/images/contact-banner.jpg",
+    description: "The city of pearls, known for its history and cuisine.",
+  },
+  {
+    name: "Kolkata",
+    image: "/images/contact-banner.jpg",
+    description: "The city of joy, known for its culture and cuisine.",
+  },
+  {
+    name: "Jaipur",
+    image: "/images/contact-banner.jpg",
+    description: "The pink city, known for its forts and palaces.",
+  },
+  {
+    name: "Lucknow",
+    image: "/images/contact-banner.jpg",
+    description: "The city of Nawabs, known for its cuisine and culture.",
+  },
+  {
+    name: "Ahmedabad",
+    image: "/images/contact-banner.jpg",
+    description: "The city of temples, known for its culture and cuisine.",
+  },
+  {
+    name: "Surat",
+    image: "/images/contact-banner.jpg",
+    description: "The city of temples, known for its culture and cuisine.",
+  },
 ];
 
 const Locations = () => {

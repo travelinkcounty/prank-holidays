@@ -12,7 +12,7 @@ const Header = ({ title }: { title: string }) => {
         <div className="flex items-center gap-4">
           {/* User avatar or profile dropdown */}
           <div className="w-9 h-9 rounded-full bg-[#ffe066] flex items-center justify-center font-bold text-[#e63946] border-2 border-[#e63946]">
-            PH
+            TC
           </div>
         </div>
       </div>

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail, Lock, Eye, EyeOff, UserCircle2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, UserCircle2, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -12,17 +13,60 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Try localStorage first
+      let user = null;
+      try {
+        user = JSON.parse(localStorage.getItem("user") || "null");
+      } catch {}
+      // Fallback: Try cookie if needed
+      if (!user) {
+        const match = document.cookie.match(/user=([^;]+)/);
+        if (match) {
+          try {
+            user = JSON.parse(decodeURIComponent(match[1]));
+          } catch {}
+        }
+      }
+      if (user && user.role) {
+        if (user.role === "admin") {
+          router.replace("/dashboard");
+        } else {
+          router.replace("/profile");
+        }
+      }
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
     setLoading(true);
-    // Fake login logic for demo
+    // Mock users
+    const users = [
+      { email: "admin@gmail.com", password: "admin123", role: "admin" },
+      { email: "user@gmail.com", password: "user123", role: "user" },
+    ];
     setTimeout(() => {
-      if (email === "test@prank.com" && password === "prank123") {
+      const found = users.find(u => u.email === email && u.password === password);
+      if (found) {
         setSuccess(true);
         setError("");
+        // Save to localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify({ email: found.email, role: found.role }));
+          // Save to cookie for middleware
+          document.cookie = `user=${encodeURIComponent(JSON.stringify({ email: found.email, role: found.role }))}; path=/`;
+        }
+        if (found.role === "admin") {
+          window.location.href = "/dashboard";
+        } else {
+          window.location.href = "/profile";
+        }
       } else {
         setError("Invalid email or password");
         setSuccess(false);
@@ -86,7 +130,7 @@ const LoginPage = () => {
             disabled={loading}
           >
             {loading ? (
-              <span className="flex items-center gap-2"><span className="animate-spin">🔄</span> Signing in...</span>
+              <span className="flex items-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> Signing in...</span>
             ) : (
               <>Sign In</>
             )}

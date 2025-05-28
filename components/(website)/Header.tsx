@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 
 const navLinks = [
@@ -14,6 +14,33 @@ const navLinks = [
 ];
 
 const Header = () => {
+  const [user, setUser] = useState<{ email: string; role: string } | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      let u = null;
+      try {
+        u = JSON.parse(localStorage.getItem("user") || "null");
+      } catch {}
+      if (!u) {
+        const match = document.cookie.match(/user=([^;]+)/);
+        if (match) {
+          try {
+            u = JSON.parse(decodeURIComponent(match[1]));
+          } catch {}
+        }
+      }
+      setUser(u);
+    }
+  }, []);
+
+  let profileHref = "/profile";
+  let profileLabel = "Profile";
+  if (user?.role === "admin") {
+    profileHref = "/dashboard";
+    profileLabel = "Dashboard";
+  }
+
   return (
     <header className="bg-white shadow-md sticky top-0 z-50 border-b border-[#e3061320]">
       <div className="container mx-auto px-4 flex items-center justify-between py-1.5 min-h-[46px]">
@@ -28,9 +55,21 @@ const Header = () => {
               {link.name}
             </a>
           ))}
-          <a href="/login" className="ml-3 bg-[#e30613] text-white font-bold px-6 py-1.5 rounded-full shadow-lg hover:bg-[#ffc72c] hover:text-[#e30613] transition-colors border-2 border-[#e30613] hover:scale-105 active:scale-100 text-base">
-            Login
-          </a>
+          {user ? (
+            <a
+              href={profileHref}
+              className="ml-3 bg-[#e30613] text-white font-bold px-6 py-1.5 rounded-full shadow-lg hover:bg-[#ffc72c] hover:text-[#e30613] transition-colors border-2 border-[#e30613] hover:scale-105 active:scale-100 text-base"
+            >
+              {profileLabel}
+            </a>
+          ) : (
+            <a
+              href="/login"
+              className="ml-3 bg-[#e30613] text-white font-bold px-6 py-1.5 rounded-full shadow-lg hover:bg-[#ffc72c] hover:text-[#e30613] transition-colors border-2 border-[#e30613] hover:scale-105 active:scale-100 text-base"
+            >
+              Login
+            </a>
+          )}
         </nav>
       </div>
     </header>

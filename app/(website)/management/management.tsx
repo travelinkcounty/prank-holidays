@@ -34,22 +34,22 @@ const management = [
 
 const whyChoose = [
   {
-    icon: <ShieldCheck className="w-8 h-8 text-[#ffc72c] mb-2" />, 
+    icon: <ShieldCheck className="w-8 h-8 text-[#ffc72c] mb-2" />,
     title: "Trusted Expertise",
     desc: "15+ years of industry experience and 1000s of happy travelers.",
   },
   {
-    icon: <Users className="w-8 h-8 text-[#ffc72c] mb-2" />, 
+    icon: <Users className="w-8 h-8 text-[#ffc72c] mb-2" />,
     title: "Personalized Service",
     desc: "Every trip is tailored to your unique needs and dreams.",
   },
   {
-    icon: <Award className="w-8 h-8 text-[#ffc72c] mb-2" />, 
+    icon: <Award className="w-8 h-8 text-[#ffc72c] mb-2" />,
     title: "Award-Winning Team",
     desc: "Recognized for excellence in travel planning and customer care.",
   },
   {
-    icon: <Heart className="w-8 h-8 text-[#ffc72c] mb-2" />, 
+    icon: <Heart className="w-8 h-8 text-[#ffc72c] mb-2" />,
     title: "Passion for Travel",
     desc: "We love what we do and it shows in every journey we create.",
   },
@@ -72,6 +72,34 @@ const Management = () => {
         </div>
       </div>
 
+      {/* Management Grid */}
+      <section className="container mx-auto px-4 pb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+          {management.map((member, idx) => {
+            return (
+              <Card key={member.name} className="bg-white rounded-[2rem] shadow-2xl border border-[#f3f4f6] flex flex-col px-0 pt-0 pb-8 min-h-[520px] h-full justify-start overflow-hidden">
+                <div className="relative w-full h-50 md:h-68 rounded-t-[2rem] overflow-hidden">
+                  <Image src={member.image} alt={member.name} fill className="object-cover w-full h-full" />
+                </div>
+                <div className="px-8 pt-6 flex flex-col items-start">
+                  <CardHeader className="p-0 mb-2 w-full text-left">
+                    <CardTitle className={`text-2xl font-extrabold mb-1 leading-tight text-[#e30613]`}>
+                    {member.name}
+                    </CardTitle>
+                    <div className={`text-lg font-bold mb-1 leading-tight text-[#1a4d8f]`}>
+                    {member.designation}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 flex-1 flex flex-col justify-start w-full text-left">
+                    <p className="text-gray-500 font-medium text-base leading-relaxed mt-2" style={{minHeight:'72px'}}>{member.bio}</p>
+                  </CardContent>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Why Choose Us Section */}
       <section className="max-w-5xl mx-auto px-4 pb-12">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-[#e30613]">Why Choose Us?</h2>
@@ -86,31 +114,7 @@ const Management = () => {
         </div>
       </section>
 
-      {/* Management Grid */}
-      <section className="container mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {management.map((member, idx) => {
-            // Color logic for name and designation
-            let nameColor = "text-[#e30613]";
-            let designationColor = "text-[#1a4d8f]";
-            if (member.name === "Amit Verma") nameColor = "text-[#ffc72c]";
-            return (
-              <Card key={member.name} className="bg-white rounded-3xl shadow-2xl border-0 flex flex-col items-center text-center p-8 h-full min-h-[480px] max-w-sm mx-auto">
-                <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden border-4 border-[#ffc72c] shadow-md mx-auto">
-                  <Image src={member.image} alt={member.name} fill className="object-cover" />
-                </div>
-                <CardHeader className="p-0 mb-2">
-                  <CardTitle className={`text-2xl font-extrabold ${nameColor} mb-1 leading-tight`}>{member.name}</CardTitle>
-                  <div className={`font-bold text-lg mb-2 uppercase ${designationColor}`}>{member.designation}</div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <p className="text-neutral-700 font-medium text-base leading-relaxed mt-2">{member.bio}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
+
       <style jsx>{`
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px);} to { opacity: 1; transform: none; } }
         .animate-fade-in-up { animation: fadeInUp 1.1s both; }

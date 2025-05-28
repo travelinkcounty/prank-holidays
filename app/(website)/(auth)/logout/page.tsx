@@ -8,6 +8,12 @@ const LogoutPage = () => {
   const router = useRouter();
 
   useEffect(() => {
+    // Remove user from localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+      // Remove user cookie (set expiry in past)
+      document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
     const timer = setTimeout(() => {
       router.push("/");
     }, 3000);
