@@ -14,6 +14,7 @@ export default function Home() {
         muted
         playsInline
         poster="/videos/hero-poster.jpg"
+        preload="auto"
       />
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-[#457b9d]/40 to-black/60 z-10" />
