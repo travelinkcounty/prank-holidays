@@ -1,40 +1,37 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Loader2, Plus, Edit, Trash2, Search, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// Mock location type and data
-type Location = {
-  id: number;
-  name: string;
-  description: string;
-  type: string;
-  image?: string;
-};
-
-const initialLocations: Location[] = [
-  { id: 1, name: "Goa Beach", description: "Famous for its beaches and nightlife.", type: "Beach", image: "" },
-  { id: 2, name: "Manali Hills", description: "Popular hill station in Himachal.", type: "Mountain", image: "" },
-  { id: 3, name: "Jaipur City", description: "The Pink City, rich in heritage.", type: "Heritage", image: "" },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { fetchLocations, selectLocations, selectError, selectLoading, updateLocation, deleteLocation as deleteLocationAction, addLocation, Location} from "@/lib/redux/features/locationSlice";
+import { AppDispatch } from "@/lib/redux/store";
 
 export default function LocationsPage() {
-  const [locations, setLocations] = useState<Location[]>(initialLocations);
+  const dispatch = useDispatch<AppDispatch>();
+  const locations = useSelector(selectLocations);
+  const error = useSelector(selectError);
+  const loading = useSelector(selectLoading);
+  
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editLocation, setEditLocation] = useState<Location | null>(null);
   const [form, setForm] = useState({ name: "", description: "", type: "Beach", image: "" });
-  const [deleteLocation, setDeleteLocation] = useState<Location | null>(null);
+  const [locationToDelete, setLocationToDelete] = useState<Location | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteLocation, setDeleteLocation] = useState<Location | null>(null);
+  useEffect(() => {
+    dispatch(fetchLocations());
+  }, [dispatch]);
 
   // Filtered locations
   const filteredLocations = useMemo(
@@ -60,21 +57,24 @@ export default function LocationsPage() {
 
   const openEditModal = (location: Location) => {
     setEditLocation(location);
-    setForm({ name: location.name, description: location.description, type: location.type, image: location.image || "" });
+    setForm({ ...location });
     setImageFile(null);
     setImagePreview(location.image || null);
     setModalOpen(true);
   };
 
-  const handleDelete = () => {
-    if (!deleteLocation) return;
-    setLoading(true);
-    setTimeout(() => {
-      setLocations((prev) => prev.filter((l) => l.id !== deleteLocation.id));
-      setLoading(false);
-      setDeleteLocation(null);
+  const handleDelete = async () => {
+    if (!locationToDelete) return;
+    setIsDeleting(true);
+    try {
+      await dispatch(deleteLocationAction(locationToDelete.id));
+      setLocationToDelete(null);
       toast.success("Location deleted!");
-    }, 800);
+    } catch (error) {
+      toast.error("Failed to delete location");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,30 +85,33 @@ export default function LocationsPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      const imageToUse = imagePreview || form.image || "";
+    setIsEditing(true);
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("description", form.description);
+    formData.append("type", form.type);
+    if (imageFile) {
+      formData.append("image", imageFile);  
+    }
+    
+    try {
       if (editLocation) {
-        setLocations((prev) =>
-          prev.map((l) =>
-            l.id === editLocation.id ? { ...l, ...form, image: imageToUse } : l
-          )
-        );
+        await dispatch(updateLocation(formData, editLocation.id));
         toast.success("Location updated!");
       } else {
-        setLocations((prev) => [
-          ...prev,
-          { id: Date.now(), ...form, image: imageToUse },
-        ]);
+        await dispatch(addLocation(formData));
         toast.success("Location added!");
       }
       setModalOpen(false);
-      setLoading(false);
       setImageFile(null);
       setImagePreview(null);
-    }, 1000);
+    } catch (error) {
+      toast.error(editLocation ? "Failed to update location" : "Failed to add location");
+    } finally {
+      setIsEditing(false);
+    }
   };
 
   return (
@@ -133,9 +136,8 @@ export default function LocationsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="beach">Beach</SelectItem>
-                <SelectItem value="mountain">Mountain</SelectItem>
-                <SelectItem value="heritage">Heritage</SelectItem>
+                <SelectItem value="Domestic">Domestic</SelectItem>
+                <SelectItem value="International">International</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -179,7 +181,7 @@ export default function LocationsPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => setDeleteLocation(location)}
+                    onClick={() => setLocationToDelete(location)}
                     aria-label="Delete"
                     disabled={loading}
                     className="text-destructive cursor-pointer"
@@ -237,8 +239,8 @@ export default function LocationsPage() {
               />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={loading} className="gap-2 cursor-pointer">
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              <Button type="submit" disabled={isEditing} className="gap-2 cursor-pointer">
+                {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editLocation ? "Update" : "Add"}
               </Button>
               <DialogClose asChild>
@@ -252,7 +254,7 @@ export default function LocationsPage() {
       </Dialog>
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={!!deleteLocation} onOpenChange={(open) => !open && setDeleteLocation(null)}>
+      <Dialog open={!!(deleteLocation && deleteLocation.id)} onOpenChange={(open) => !open && setDeleteLocation(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Location</DialogTitle>

@@ -9,7 +9,7 @@ const MaintenancePage = () => {
                 </svg>
                 <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Maintenance Mode</h1>
                 <p className="text-lg text-gray-600 text-center mb-4">We are currently performing scheduled maintenance.<br />Please check back soon!</p>
-                <div className="mt-2 text-sm text-gray-400">&copy; {new Date().getFullYear()} Prank Holiday</div>
+                <div className="mt-2 text-sm text-gray-400">&copy; {new Date().getFullYear()} Travelink County</div>
             </div>
         </div>
     );

@@ -6,9 +6,9 @@ import { RootState } from "../store";
 export interface GalleryItem {
   id: string;
   title: string;
-  url: string;
-  category?: string;
-  // Add more fields as needed
+  image: string;
+  createdOn: string;
+  updatedOn: string;
 }
 
 interface GalleryState {
@@ -54,13 +54,12 @@ const gallerySlice = createSlice({
 
 export const { setGallery, setIsLoading, setError, setSelectedGallery, clearSelectedGallery, clearGallery } = gallerySlice.actions;
 
-export const fetchGallery = async (dispatch: Dispatch) => {
+export const fetchGallery = () => async (dispatch: Dispatch) => {
   dispatch(setIsLoading(true));
   try {
-    const response = await axios.get("/api/gallery/getallgalleryimages");
-    const data: GalleryItem[] = response.data;
+    const response = await axios.get("/api/routes/gallery");
     if (response.status === 200) {
-      dispatch(setGallery(data));
+      dispatch(setGallery(response.data.data));
     } else {
       dispatch(setError(response.data.message));
     }
@@ -70,13 +69,12 @@ export const fetchGallery = async (dispatch: Dispatch) => {
   }
 };
 
-export const fetchGalleryById = async (dispatch: Dispatch, id: string) => {     
+export const fetchGalleryById = (id: string) => async (dispatch: Dispatch) => {     
   dispatch(setIsLoading(true));
   try {
-    const response = await axios.get(`/api/gallery/getgallerybyid/${id}`);
-    const data: GalleryItem = response.data;
+    const response = await axios.get(`/api/routes/gallery/${id}`);
     if (response.status === 200) {
-      dispatch(setSelectedGallery(data));
+      dispatch(setSelectedGallery(response.data.data));
     } else {
       dispatch(setError(response.data.message));
     }
@@ -86,13 +84,18 @@ export const fetchGalleryById = async (dispatch: Dispatch, id: string) => {
   }
 };
 
-export const addGallery = async (dispatch: Dispatch, gallery: GalleryItem) => {
+export const addGallery = (gallery: FormData) => async (dispatch: Dispatch) => {
   dispatch(setIsLoading(true));
   try {
-    const response = await axios.post("/api/gallery/addgallery", gallery);
-    const data: GalleryItem[] = response.data;
+    const response = await axios.post("/api/routes/gallery", gallery,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     if (response.status === 200) {
-      dispatch(setGallery(data));
+      dispatch(setGallery(response.data.data));
     } else {
       dispatch(setError(response.data.message));
     }
@@ -102,13 +105,18 @@ export const addGallery = async (dispatch: Dispatch, gallery: GalleryItem) => {
   }
 };  
 
-export const updateGallery = async (dispatch: Dispatch, gallery: GalleryItem) => {
+export const updateGallery = (gallery: FormData, id: string) => async (dispatch: Dispatch) => {
   dispatch(setIsLoading(true));
   try {
-    const response = await axios.put(`/api/gallery/updategallery/${gallery.id}`, gallery);
-    const data: GalleryItem[] = response.data;
+    const response = await axios.put(`/api/routes/gallery/${id}`, gallery,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     if (response.status === 200) {
-      dispatch(setGallery(data));
+      dispatch(setGallery(response.data.data));
     } else {
       dispatch(setError(response.data.message));
     }
@@ -118,13 +126,12 @@ export const updateGallery = async (dispatch: Dispatch, gallery: GalleryItem) =>
   }
 };  
 
-export const deleteGallery = async (dispatch: Dispatch, id: string) => {
+export const deleteGallery = (id: string) => async (dispatch: Dispatch) => {
   dispatch(setIsLoading(true));
   try {
-    const response = await axios.delete(`/api/gallery/deletegallery/${id}`);
-    const data: GalleryItem[] = response.data;
+    const response = await axios.delete(`/api/routes/gallery/${id}`);
     if (response.status === 200) {
-      dispatch(setGallery(data));
+      dispatch(setGallery(response.data.data));
     } else {
       dispatch(setError(response.data.message)); 
     }

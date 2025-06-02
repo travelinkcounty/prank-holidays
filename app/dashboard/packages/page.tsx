@@ -1,60 +1,53 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Loader2, Plus, Edit, Trash2, Search, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPackages, selectPackages, selectError, selectLoading, updatePackage, deletePackage as deletePackageAction, addPackage, Package, setPackages} from "@/lib/redux/features/packageSlice";
+import { AppDispatch } from "@/lib/redux/store";
 import Image from "next/image";
 
-// Mock package type and data
-type Package = {
-  id: number;
-  title: string;
-  image: string;
-  type: string;
-};
-
-const initialPackages: Package[] = [
-  { id: 1, title: "Goa Beach Fun", image: "/mock/goa.jpg", type: "Beach" },
-  { id: 2, title: "Manali Adventure", image: "/mock/manali.jpg", type: "Mountain" },
-  { id: 3, title: "Jaipur Heritage", image: "/mock/jaipur.jpg", type: "Heritage" },
-  { id: 4, title: "Goa Beach Fun", image: "/mock/goa.jpg", type: "Beach" },
-  { id: 5, title: "Manali Adventure", image: "/mock/manali.jpg", type: "Mountain" },
-  { id: 6, title: "Jaipur Heritage", image: "/mock/jaipur.jpg", type: "Heritage" },
-];
-
 export default function PackagesPage() {
-  const [packages, setPackages] = useState<Package[]>(initialPackages);
+  const dispatch = useDispatch<AppDispatch>();
+  const packages = useSelector(selectPackages);
+  const error = useSelector(selectError);
+  const loading = useSelector(selectLoading);
+
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editPackage, setEditPackage] = useState<Package | null>(null);
-  const [form, setForm] = useState({ title: "", image: "", type: "Beach" });
+  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", days: "", locationId: "" });
   const [deletePackage, setDeletePackage] = useState<Package | null>(null);
-  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    dispatch(fetchPackages());
+  }, [dispatch]);
 
   // Filtered packages
   const filteredPackages = useMemo(
     () =>
-      packages.filter(
+      (Array.isArray(packages) ? packages : []).filter(
         (p) =>
-          (typeFilter === "all" || p.type.toLowerCase() === typeFilter) &&
-          (p.title.toLowerCase().includes(search.toLowerCase()) ||
-            p.type.toLowerCase().includes(search.toLowerCase()))
+          (p.name?.toLowerCase().includes(search.toLowerCase()) ||
+            p.description?.toLowerCase().includes(search.toLowerCase()) ||
+            p.days?.toLowerCase().includes(search.toLowerCase()))
       ),
-    [packages, search, typeFilter]
+    [packages, search]
   );
 
   // Handlers
   const openAddModal = () => {
     setEditPackage(null);
-    setForm({ title: "", image: "", type: "Beach" });
+    setForm({ name: "", description: "", price: 0, image: "", days: "", locationId: "" });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -62,7 +55,14 @@ export default function PackagesPage() {
 
   const openEditModal = (pkg: Package) => {
     setEditPackage(pkg);
-    setForm({ title: pkg.title, image: pkg.image, type: pkg.type });
+    setForm({
+      name: pkg.name,
+      description: pkg.description,
+      price: pkg.price,
+      image: pkg.image,
+      days: pkg.days,
+      locationId: pkg.locationId
+    });
     setImageFile(null);
     setImagePreview(pkg.image || null);
     setModalOpen(true);
@@ -70,10 +70,10 @@ export default function PackagesPage() {
 
   const handleDelete = () => {
     if (!deletePackage) return;
-    setLoading(true);
+    setIsDeleting(true);
     setTimeout(() => {
-      setPackages((prev) => prev.filter((p) => p.id !== deletePackage.id));
-      setLoading(false);
+      setPackages((prev: Package[]) => prev.filter((p: Package) => p.id !== deletePackage.id));
+      setIsDeleting(false);
       setDeletePackage(null);
       toast.success("Package deleted!");
     }, 800);
@@ -89,25 +89,24 @@ export default function PackagesPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    (true);
     setTimeout(() => {
       const imageToUse = imagePreview || form.image;
       if (editPackage) {
-        setPackages((prev) =>
-          prev.map((p) =>
+        setPackages((prev: Package[]) =>
+          prev.map((p: Package) =>
             p.id === editPackage.id ? { ...p, ...form, image: imageToUse } : p
           )
         );
         toast.success("Package updated!");
       } else {
-        setPackages((prev) => [
+        setPackages((prev: Package[]) => [
           ...prev,
-          { id: Date.now(), ...form, image: imageToUse },
+          { id: Date.now().toString(), ...form, image: imageToUse },
         ]);
         toast.success("Package added!");
       }
       setModalOpen(false);
-      setLoading(false);
       setImageFile(null);
       setImagePreview(null);
     }, 1000);
@@ -129,17 +128,6 @@ export default function PackagesPage() {
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="beach">Beach</SelectItem>
-                <SelectItem value="mountain">Mountain</SelectItem>
-                <SelectItem value="heritage">Heritage</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <Button onClick={openAddModal} className="gap-2 w-full sm:w-auto cursor-pointer">
             <Plus className="w-4 h-4" /> Add Package
@@ -156,15 +144,14 @@ export default function PackagesPage() {
             <div key={pkg.id} className="bg-white rounded-2xl shadow-md border border-gray-100 flex flex-col overflow-hidden">
               <div className="relative w-full h-48 bg-gray-100 flex items-center justify-center">
                 {pkg.image ? (
-                  <Image src={pkg.image} alt={pkg.title} fill className="object-cover" />
+                  <Image src={pkg.image} alt={pkg.name} fill className="object-cover" />
                 ) : (
                   <ImageIcon className="w-16 h-16 text-gray-300" />
                 )}
               </div>
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{pkg.title}</div>
-                  <div className="text-xs text-gray-500 mb-2">{pkg.type}</div>
+                  <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{pkg.name}</div>
                 </div>
                 <div className="flex gap-2 mt-2">
                   <Button
@@ -203,9 +190,34 @@ export default function PackagesPage() {
               <DialogTitle>{editPackage ? "Edit Package" : "Add Package"}</DialogTitle>
             </DialogHeader>
             <Input
-              placeholder="Title"
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="Name"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              required
+            />
+            <Input
+              placeholder="Description"
+              value={form.description}
+              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+              required
+            />
+            <Input
+              placeholder="Price"
+              type="number"
+              value={form.price}
+              onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
+              required
+            />
+            <Input
+              placeholder="Days"
+              value={form.days}
+              onChange={(e) => setForm((f) => ({ ...f, days: e.target.value }))}
+              required
+            />
+            <Input
+              placeholder="Location ID"
+              value={form.locationId}
+              onChange={(e) => setForm((f) => ({ ...f, locationId: e.target.value }))}
               required
             />
             <div className="flex flex-col gap-2">
@@ -221,16 +233,6 @@ export default function PackagesPage() {
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#e63946]/10 file:text-[#e63946]"
               />
             </div>
-            <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Beach">Beach</SelectItem>
-                <SelectItem value="Mountain">Mountain</SelectItem>
-                <SelectItem value="Heritage">Heritage</SelectItem>
-              </SelectContent>
-            </Select>
             <DialogFooter>
               <Button type="submit" disabled={loading} className="gap-2 cursor-pointer">
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -247,12 +249,12 @@ export default function PackagesPage() {
       </Dialog>
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={!!deletePackage} onOpenChange={(open) => !open && setDeletePackage(null)}>
+      <Dialog open={!!(deletePackage && deletePackage.id)} onOpenChange={(open) => !open && setDeletePackage(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Package</DialogTitle>
           </DialogHeader>
-          <div>Are you sure you want to delete <span className="font-semibold text-[#e63946]">{deletePackage?.title}</span>? This action cannot be undone.</div>
+          <div>Are you sure you want to delete <span className="font-semibold text-[#e63946]">{deletePackage?.name}</span>? This action cannot be undone.</div>
           <DialogFooter>
             <Button
               variant="destructive"

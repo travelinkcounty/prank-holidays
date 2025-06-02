@@ -1,58 +1,51 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Loader2, Plus, Edit, Trash2, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// Mock plan type and data
-type Plan = {
-  id: number;
-  name: string;
-  description: string;
-  type: string;
-  image?: string;
-};
-
-const initialPlans: Plan[] = [
-  { id: 1, name: "Silver Plan", description: "Basic travel plan for budget trips.", type: "Basic", image: "" },
-  { id: 2, name: "Gold Plan", description: "Premium plan with extra perks.", type: "Premium", image: "" },
-  { id: 3, name: "Family Plan", description: "Special plan for families.", type: "Family", image: "" },
-];
+import { useSelector, useDispatch } from "react-redux";
+import { fetchPlans, selectPlans, selectError, selectLoading, updatePlan, deletePlan as deletePlanAction, addPlan, Plan} from "@/lib/redux/features/planSlice";
+import { AppDispatch } from "@/lib/redux/store";
 
 export default function PlansPage() {
-  const [plans, setPlans] = useState<Plan[]>(initialPlans);
+  const dispatch = useDispatch<AppDispatch>();
+  const plans = useSelector(selectPlans);
+  const error = useSelector(selectError);
+  const loading = useSelector(selectLoading);
+
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<Plan | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", type: "Basic", image: "" });
+  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", locationId: "", features: [] as string[] });
   const [deletePlan, setDeletePlan] = useState<Plan | null>(null);
-  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchPlans());
+  }, [dispatch]);
 
   // Filtered plans
   const filteredPlans = useMemo(
     () =>
-      plans.filter(
+      (Array.isArray(plans) ? plans : []).filter(
         (p) =>
-          (typeFilter === "all" || p.type.toLowerCase() === typeFilter) &&
-          (p.name.toLowerCase().includes(search.toLowerCase()) ||
-            p.type.toLowerCase().includes(search.toLowerCase()) ||
-            p.description.toLowerCase().includes(search.toLowerCase()))
+          p.name.toLowerCase().includes(search.toLowerCase()) ||
+          p.description.toLowerCase().includes(search.toLowerCase())
       ),
-    [plans, search, typeFilter]
+    [plans, search]
   );
 
   // Handlers
   const openAddModal = () => {
     setEditPlan(null);
-    setForm({ name: "", description: "", type: "Basic", image: "" });
+    setForm({ name: "", description: "", price: 0, image: "", locationId: "", features: [] });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -60,7 +53,14 @@ export default function PlansPage() {
 
   const openEditModal = (plan: Plan) => {
     setEditPlan(plan);
-    setForm({ name: plan.name, description: plan.description, type: plan.type, image: plan.image || "" });
+    setForm({
+      name: plan.name,
+      description: plan.description,
+      price: plan.price,
+      image: plan.image || "",
+      locationId: plan.locationId,
+      features: plan.features || []
+    });
     setImageFile(null);
     setImagePreview(plan.image || null);
     setModalOpen(true);
@@ -68,10 +68,10 @@ export default function PlansPage() {
 
   const handleDelete = () => {
     if (!deletePlan) return;
-    setLoading(true);
+    setIsDeleting(true);
     setTimeout(() => {
-      setPlans((prev) => prev.filter((p) => p.id !== deletePlan.id));
-      setLoading(false);
+      dispatch(deletePlanAction(deletePlan.id || ""));
+      setIsDeleting(false);
       setDeletePlan(null);
       toast.success("Plan deleted!");
     }, 800);
@@ -87,25 +87,28 @@ export default function PlansPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsEditing(true);
     setTimeout(() => {
       const imageToUse = imagePreview || form.image || "";
+      const planData: Plan = {
+        name: form.name,
+        description: form.description,
+        price: form.price,
+        image: imageToUse,
+        locationId: form.locationId,
+        features: form.features || [],
+        createdOn: new Date().toISOString(),
+        updatedOn: new Date().toISOString()
+      };
       if (editPlan) {
-        setPlans((prev) =>
-          prev.map((p) =>
-            p.id === editPlan.id ? { ...p, ...form, image: imageToUse } : p
-          )
-        );
+        dispatch(updatePlan(planData, editPlan.id || ""));
         toast.success("Plan updated!");
       } else {
-        setPlans((prev) => [
-          ...prev,
-          { id: Date.now(), ...form, image: imageToUse },
-        ]);
+        dispatch(addPlan(planData));
         toast.success("Plan added!");
       }
       setModalOpen(false);
-      setLoading(false);
+      setIsEditing(false);
       setImageFile(null);
       setImagePreview(null);
     }, 1000);
@@ -127,17 +130,6 @@ export default function PlansPage() {
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="basic">Basic</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-                <SelectItem value="family">Family</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <Button onClick={openAddModal} className="gap-2 w-full sm:w-auto cursor-pointer">
             <Plus className="w-4 h-4" /> Add Plan
@@ -150,6 +142,7 @@ export default function PlansPage() {
         {filteredPlans.length === 0 ? (
           <div className="col-span-full text-center text-gray-400 py-12">No plans found.</div>
         ) : (
+          loading ? <Loader2 className="w-4 h-4 animate-spin" /> :
           filteredPlans.map((plan) => (
             <div key={plan.id} className="bg-white rounded-2xl shadow-md border border-gray-100 flex flex-col overflow-hidden">
               <div className="flex items-center justify-center h-32 bg-gray-100">
@@ -162,7 +155,6 @@ export default function PlansPage() {
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{plan.name}</div>
-                  <div className="text-xs text-gray-500 mb-2">{plan.type}</div>
                   <div className="text-sm text-gray-700 mb-2 line-clamp-2">{plan.description}</div>
                 </div>
                 <div className="flex gap-2 mt-2">
@@ -181,7 +173,7 @@ export default function PlansPage() {
                     variant="ghost"
                     onClick={() => setDeletePlan(plan)}
                     aria-label="Delete"
-                    disabled={loading}
+                    disabled={isDeleting}
                     className="text-destructive cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
@@ -213,16 +205,19 @@ export default function PlansPage() {
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               required
             />
-            <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Basic">Basic</SelectItem>
-                <SelectItem value="Premium">Premium</SelectItem>
-                <SelectItem value="Family">Family</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              placeholder="Price"
+              type="number"
+              value={form.price}
+              onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
+              required
+            />
+            <Input
+              placeholder="Location ID"
+              value={form.locationId}
+              onChange={(e) => setForm((f) => ({ ...f, locationId: e.target.value }))}
+              required
+            />
             <div className="flex flex-col gap-2">
               <label className="block text-sm font-medium">Image</label>
               {imagePreview ? (
@@ -237,8 +232,8 @@ export default function PlansPage() {
               />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={loading} className="gap-2 cursor-pointer">
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              <Button type="submit" disabled={isEditing} className="gap-2 cursor-pointer">
+                {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editPlan ? "Update" : "Add"}
               </Button>
               <DialogClose asChild>
@@ -262,13 +257,13 @@ export default function PlansPage() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={isDeleting}
               className="gap-2 cursor-pointer"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />} Delete
+              {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />} Delete
             </Button>
             <DialogClose asChild>
-              <Button type="button" variant="ghost" disabled={loading}>
+              <Button type="button" variant="ghost" disabled={isDeleting}>
                 Cancel
               </Button>
             </DialogClose>

@@ -8,30 +8,24 @@ import { Loader2, Plus, Edit, Trash2, Search, Image as ImageIcon } from "lucide-
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Image from "next/image";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchGallery, selectGallery, selectError, selectIsLoading, GalleryItem, deleteGallery, addGallery, updateGallery } from "@/lib/redux/features/gallerySlice";
+import { AppDispatch } from "@/lib/redux/store";
 
-// Mock image type and data
-type GalleryImage = {
-  id: number;
-  title: string;
-  url: string;
-  category: string;
-};
-
-const initialImages: GalleryImage[] = [
-  { id: 1, title: "Goa Beach Sunset", url: "/mock/goa.jpg", category: "Beach" },
-  { id: 2, title: "Manali Snow", url: "/mock/manali.jpg", category: "Mountain" },
-  { id: 3, title: "Jaipur Palace", url: "/mock/jaipur.jpg", category: "Heritage" },
-];
 
 export default function GalleryPage() {
-  const [images, setImages] = useState<GalleryImage[]>(initialImages);
+
+  const dispatch = useDispatch<AppDispatch>();
+  const galleryImages = useSelector(selectGallery);
+  const error = useSelector(selectError);
+  const isLoading = useSelector(selectIsLoading);
+
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editImage, setEditImage] = useState<GalleryImage | null>(null);
-  const [form, setForm] = useState({ title: "", url: "", category: "Beach" });
-  const [deleteImage, setDeleteImage] = useState<GalleryImage | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [editImage, setEditImage] = useState<GalleryItem | null>(null);
+  const [form, setForm] = useState({ title: "", image: "" });
+  const [deleteImage, setDeleteImage] = useState<GalleryItem | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,37 +33,36 @@ export default function GalleryPage() {
   // Filtered images
   const filteredImages = useMemo(
     () =>
-      images.filter(
+      (Array.isArray(galleryImages) ? galleryImages : []).filter(
         (img) =>
-          (categoryFilter === "all" || img.category.toLowerCase() === categoryFilter) &&
-          (img.title.toLowerCase().includes(search.toLowerCase()) ||
-            img.category.toLowerCase().includes(search.toLowerCase()))
+          img.title.toLowerCase().includes(search.toLowerCase())
       ),
-    [images, search, categoryFilter]
+    [galleryImages, search]
   );
 
   // Handlers
   const openAddModal = () => {
     setEditImage(null);
-    setForm({ title: "", url: "", category: "Beach" });
+    setForm({ title: "", image: "" });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
   };
 
-  const openEditModal = (img: GalleryImage) => {
+  const openEditModal = (img: GalleryItem) => {
     setEditImage(img);
-    setForm({ title: img.title, url: img.url, category: img.category });
+    setForm({ title: img.title, image: img.image });
     setImageFile(null);
-    setImagePreview(img.url || null);
+    setImagePreview(img.image || null);
     setModalOpen(true);
   };
 
   const handleDelete = () => {
     if (!deleteImage) return;
+  
     setLoading(true);
     setTimeout(() => {
-      setImages((prev) => prev.filter((img) => img.id !== deleteImage.id));
+      dispatch(deleteGallery(deleteImage.id));
       setLoading(false);
       setDeleteImage(null);
       toast.success("Image deleted!");
@@ -88,19 +81,20 @@ export default function GalleryPage() {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
-      const urlToUse = imagePreview || form.url;
+      const formData = new FormData();
+      formData.append("title", form.title);
+      if (imageFile) {
+        formData.append("image", imageFile);
+      } else if (form.image) {
+        formData.append("image", form.image);
+      }
+      formData.append("createdOn", new Date().toISOString());
+      formData.append("updatedOn", new Date().toISOString());
       if (editImage) {
-        setImages((prev) =>
-          prev.map((img) =>
-            img.id === editImage.id ? { ...img, ...form, url: urlToUse } : img
-          )
-        );
+        dispatch(updateGallery(formData, editImage.id));
         toast.success("Image updated!");
       } else {
-        setImages((prev) => [
-          ...prev,
-          { id: Date.now(), ...form, url: urlToUse },
-        ]);
+        dispatch(addGallery(formData));
         toast.success("Image added!");
       }
       setModalOpen(false);
@@ -126,17 +120,6 @@ export default function GalleryPage() {
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="beach">Beach</SelectItem>
-                <SelectItem value="mountain">Mountain</SelectItem>
-                <SelectItem value="heritage">Heritage</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <Button onClick={openAddModal} className="gap-2 w-full sm:w-auto cursor-pointer">
             <Plus className="w-4 h-4" /> Add Image
@@ -152,8 +135,8 @@ export default function GalleryPage() {
           filteredImages.map((img) => (
             <div key={img.id} className="bg-white rounded-2xl shadow-md border border-gray-100 flex flex-col overflow-hidden">
               <div className="relative w-full h-48 bg-gray-100 flex items-center justify-center">
-                {img.url ? (
-                  <Image src={img.url} alt={img.title} fill className="object-cover" />
+                {img.image ? (
+                  <Image src={img.image} alt={img.title} fill className="object-cover" />
                 ) : (
                   <ImageIcon className="w-16 h-16 text-gray-300" />
                 )}
@@ -161,7 +144,6 @@ export default function GalleryPage() {
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{img.title}</div>
-                  <div className="text-xs text-gray-500 mb-2">{img.category}</div>
                 </div>
                 <div className="flex gap-2 mt-2">
                   <Button
@@ -218,16 +200,6 @@ export default function GalleryPage() {
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#e63946]/10 file:text-[#e63946]"
               />
             </div>
-            <Select value={form.category} onValueChange={(v) => setForm((f) => ({ ...f, category: v }))}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Beach">Beach</SelectItem>
-                <SelectItem value="Mountain">Mountain</SelectItem>
-                <SelectItem value="Heritage">Heritage</SelectItem>
-              </SelectContent>
-            </Select>
             <DialogFooter>
               <Button type="submit" disabled={loading} className="gap-2 cursor-pointer">
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}

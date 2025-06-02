@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -9,36 +9,34 @@ import { Loader2, Plus, Edit, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchLeads, selectLeads, selectLoading, selectError, updateLead, deleteLead, addLead } from "@/lib/redux/features/leadSlice";
+import { AppDispatch } from "@/lib/redux/store";
 
-// Mock lead type and data
-type Lead = {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  status: string;
-};
-
-const initialLeads: Lead[] = [
-  { id: 1, name: "Rohit Kumar", email: "rohit@travelinkcounty.com", phone: "9876543210", status: "New" },
-  { id: 2, name: "Simran Kaur", email: "simran@travelinkcounty.com", phone: "9123456780", status: "Contacted" },
-  { id: 3, name: "Vikas Patel", email: "vikas@travelinkcounty.com", phone: "9988776655", status: "Converted" },
-];
 
 export default function LeadsPage() {
-  const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  const dispatch = useDispatch<AppDispatch>();
+  const leads = useSelector(selectLeads);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editLead, setEditLead] = useState<Lead | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", status: "New" });
-  const [deleteLead, setDeleteLead] = useState<Lead | null>(null);
+  const [editLead, setEditLead] = useState<any>(null);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", status: "New" });
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [leadToDelete, setLeadToDelete] = useState<string | null>(null);
+
+  useEffect(() => {
+    dispatch(fetchLeads());
+  }, [dispatch]);
 
   // Filtered leads
   const filteredLeads = useMemo(
     () =>
-      leads.filter(
+      leads?.filter(
         (l) =>
           (statusFilter === "all" || l.status.toLowerCase() === statusFilter) &&
           (l.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -52,49 +50,46 @@ export default function LeadsPage() {
   // Handlers
   const openAddModal = () => {
     setEditLead(null);
-    setForm({ name: "", email: "", phone: "", status: "New" });
+    setForm({ name: "", email: "", phone: "", message: "", status: "New" });
     setModalOpen(true);
   };
 
-  const openEditModal = (lead: Lead) => {
+  const openEditModal = (lead: any) => {
     setEditLead(lead);
-    setForm({ name: lead.name, email: lead.email, phone: lead.phone, status: lead.status });
+    setForm({ name: lead.name, email: lead.email, phone: lead.phone, message: lead.message, status: lead.status });
     setModalOpen(true);
   };
 
-  const handleDelete = () => {
-    if (!deleteLead) return;
-    setLoading(true);
-    setTimeout(() => {
-      setLeads((prev) => prev.filter((l) => l.id !== deleteLead.id));
-      setLoading(false);
-      setDeleteLead(null);
-      toast.success("Lead deleted!");
-    }, 800);
+  const handleDelete = async () => {
+    if (!leadToDelete) return;
+    setIsDeleting(true);
+    await dispatch(deleteLead(leadToDelete));
+    setIsDeleting(false); 
+    dispatch(fetchLeads());
+    toast.success("Lead deleted!");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      if (editLead) {
-        setLeads((prev) =>
-          prev.map((l) =>
-            l.id === editLead.id ? { ...l, ...form } : l
-          )
-        );
-        toast.success("Lead updated!");
-      } else {
-        setLeads((prev) => [
-          ...prev,
-          { id: Date.now(), ...form },
-        ]);
-        toast.success("Lead added!");
-      }
-      setModalOpen(false);
-      setLoading(false);
-    }, 1000);
+    setIsEditing(true);
+    if (editLead) {
+      const lead = { ...form, id: editLead.id, createdOn: editLead.createdOn, updatedOn: new Date().toISOString() };
+      await dispatch(updateLead(editLead.id, lead));
+      toast.success("Lead updated!");
+    } else {
+      const newLead = { ...form, id: Math.random().toString(36).substr(2, 9), createdOn: new Date().toISOString(), updatedOn: new Date().toISOString() };
+      await dispatch(addLead(newLead));
+      toast.success("Lead added!");
+    }
+    setModalOpen(false);
+    setIsEditing(false);
+    setIsDeleting(false);
+    dispatch(fetchLeads());
   };
+
+  if(error) {
+    return <div>{error}</div>
+  }
 
   return (
     <div className="mx-auto p-0 flex flex-col gap-8">
@@ -143,6 +138,13 @@ export default function LeadsPage() {
             </TableRow>
           </TableHeader>
           <TableBody >
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-gray-400">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                </TableCell>
+              </TableRow>
+            )}
             {filteredLeads.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-gray-400">
@@ -192,9 +194,9 @@ export default function LeadsPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => setDeleteLead(lead)}
+                      onClick={() => setLeadToDelete(lead.id)}
                       aria-label="Delete"
-                      disabled={loading}
+                      disabled={isDeleting}
                       className="text-destructive"
                     >
                       <Trash2 className="w-4 h-4 mr-1" />
@@ -245,8 +247,8 @@ export default function LeadsPage() {
               </SelectContent>
             </Select>
             <DialogFooter>
-              <Button type="submit" disabled={loading} className="gap-2">
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              <Button type="submit" disabled={isEditing} className="gap-2">
+                {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editLead ? "Update" : "Add"}
               </Button>
               <DialogClose asChild>
@@ -260,23 +262,23 @@ export default function LeadsPage() {
       </Dialog>
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={!!deleteLead} onOpenChange={(open) => !open && setDeleteLead(null)}>
+      <Dialog open={!!leadToDelete} onOpenChange={(open) => !open && setLeadToDelete(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Lead</DialogTitle>
           </DialogHeader>
-          <div>Are you sure you want to delete <span className="font-semibold text-[#e63946]">{deleteLead?.name}</span>? This action cannot be undone.</div>
+          <div>Are you sure you want to delete <span className="font-semibold text-[#e63946]">{leadToDelete}</span>? This action cannot be undone.</div>
           <DialogFooter>
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={isDeleting}
               className="gap-2"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />} Delete
+              {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />} Delete
             </Button>
             <DialogClose asChild>
-              <Button type="button" variant="ghost" disabled={loading}>
+              <Button type="button" variant="ghost" disabled={isDeleting}>
                 Cancel
               </Button>
             </DialogClose>

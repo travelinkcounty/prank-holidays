@@ -79,19 +79,22 @@ const ContactPage = () => {
                         <ul className="space-y-6 w-full text-[1.15rem] md:text-xl font-semibold text-neutral-800">
                             <li className="flex items-start gap-4">
                                 <span className="mt-1"><MapPin className="w-6 h-6 text-[#e30613]" /></span>
-                                <span>811, 8th Floor, Meghdoot Building 94,<br />Nehru Place, New Delhi-110019</span>
+                                <div>
+                                    <p className="font-semibold">Travelink County Pvt. Ltd.</p>
+                                    <p className="text-gray-600">FB/B1, Mathura Rd, Block B-1, Block E, Mohan Cooperative Industrial Estate, Badarpur, New Delhi, Delhi 110044</p>
+                                </div>
                             </li>
                             <li className="flex items-center gap-4">
                                 <Phone className="w-6 h-6 text-[#e30613]" />
-                                <span>+91-11-45725977</span>
+                                +91 - 9717308208
                             </li>
                             <li className="flex items-center gap-4">
                                 <Phone className="w-6 h-6 text-[#e30613]" />
-                                <span>+91-9717308208</span>
+                                +91 - 9220413324
                             </li>
                             <li className="flex items-center gap-4">
                                 <Mail className="w-6 h-6 text-[#e30613]" />
-                                <span>care@prankholidays.com</span>
+                                <span>info@travelinkcounty.com</span>
                             </li>
                         </ul>
                         <div className="flex gap-4 mt-8">
@@ -152,17 +155,15 @@ const ContactPage = () => {
 
             {/* Google Map */}
             <section className=" mx-auto p-0">
-                <div className="rounded-xl overflow-hidden shadow-lg border border-[#e3061320]">
+                <div className=" overflow-hidden shadow-lg border border-[#e3061320]">
                     <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3504.708984311857!2d77.24876667552991!3d28.548465687893337!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce3c3fb00d44d%3A0xe45a69a29790e68b!2sPRANK%20Holidays%20Private%20Ltd!5e0!3m2!1sen!2sin!4v1747915210093!5m2!1sen!2sin" width="100%"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3506.1129592121843!2d77.29684207552862!3d28.506248989804043!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce7610a80d203%3A0x29ad7342e5dc9348!2sTravelink%20County%20Private%20Limited!5e0!3m2!1sen!2sin!4v1748864512264!5m2!1sen!2sin"
                         height="600"
-                        style={{ border: 0 }}
+                        width="100%"
                         allowFullScreen={true}
-                        loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                         title="Google Map"
                     ></iframe>
-
                 </div>
             </section>
         </div>
