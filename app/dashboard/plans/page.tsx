@@ -9,17 +9,20 @@ import { toast } from "sonner";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchPlans, selectPlans, selectError, selectLoading, updatePlan, deletePlan as deletePlanAction, addPlan, Plan} from "@/lib/redux/features/planSlice";
 import { AppDispatch } from "@/lib/redux/store";
+import { selectLocations, fetchLocations } from "@/lib/redux/features/locationSlice";
+import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
 
 export default function PlansPage() {
   const dispatch = useDispatch<AppDispatch>();
   const plans = useSelector(selectPlans);
+  const locations = useSelector(selectLocations);
   const error = useSelector(selectError);
   const loading = useSelector(selectLoading);
 
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<Plan | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", locationId: "", features: [] as string[] });
+  const [form, setForm] = useState({ name: "", description: "", price: "", image: "", locationId: "", features: [] as string[] });
   const [deletePlan, setDeletePlan] = useState<Plan | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -29,6 +32,7 @@ export default function PlansPage() {
 
   useEffect(() => {
     dispatch(fetchPlans());
+    dispatch(fetchLocations());
   }, [dispatch]);
 
   // Filtered plans
@@ -45,7 +49,7 @@ export default function PlansPage() {
   // Handlers
   const openAddModal = () => {
     setEditPlan(null);
-    setForm({ name: "", description: "", price: 0, image: "", locationId: "", features: [] });
+    setForm({ name: "", description: "", price: "", image: "", locationId: "", features: [] });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -56,7 +60,7 @@ export default function PlansPage() {
     setForm({
       name: plan.name,
       description: plan.description,
-      price: plan.price,
+      price: plan.price.toString(),
       image: plan.image || "",
       locationId: plan.locationId,
       features: plan.features || []
@@ -93,7 +97,7 @@ export default function PlansPage() {
       const planData: Plan = {
         name: form.name,
         description: form.description,
-        price: form.price,
+        price: Number(form.price),
         image: imageToUse,
         locationId: form.locationId,
         features: form.features || [],
@@ -207,17 +211,27 @@ export default function PlansPage() {
             />
             <Input
               placeholder="Price"
-              type="number"
+              type="text"
               value={form.price}
-              onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
+              onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
               required
             />
-            <Input
-              placeholder="Location ID"
+            <Select
               value={form.locationId}
-              onChange={(e) => setForm((f) => ({ ...f, locationId: e.target.value }))}
+              onValueChange={(value) => setForm((f) => ({ ...f, locationId: value }))}
               required
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Location" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map((location) => (
+                  <SelectItem key={location.id} value={location.id}>
+                    {location.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex flex-col gap-2">
               <label className="block text-sm font-medium">Image</label>
               {imagePreview ? (

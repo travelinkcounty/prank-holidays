@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         }
 
         // Upload image to Firebase Storage (800x600 for packages)
-        const imageUrl = await UploadImage(file, 600, 400);
+        const imageUrl = await UploadImage(file);
         consoleManager.log("✅ Package image uploaded:", imageUrl);
 
         // Save package data in Firestore

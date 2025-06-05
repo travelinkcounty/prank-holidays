@@ -1,22 +1,21 @@
 import { NextResponse } from "next/server";
-import GalleryService from "../../../services/galleryServices";
+import LocationService from "../../../services/locationServices";
 import consoleManager from "../../../utils/consoleManager";
 import { ReplaceImage } from "../../../controller/imageController";
-
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
 
     try {
-        const gallery = await GalleryService.getGalleryById(id);
+        const location = await LocationService.getLocationById(id);
         return NextResponse.json({
             statusCode: 200,
-            message: "Gallery fetched successfully",
-            data: gallery,
+            message: "Location fetched successfully",
+            data: location,
             errorCode: "NO",
             errorMessage: "",
         }, { status: 200 });
     } catch (error: any) {
-        consoleManager.error("❌ Error in GET /api/gallery/[id]:", error);
+        consoleManager.error("❌ Error in GET /api/locations/[id]:", error);
         return NextResponse.json({
             statusCode: 500,
             errorCode: "INTERNAL_ERROR",
@@ -28,23 +27,26 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const formData = await req.formData();
-    const title = formData.get("title");
+    const name = formData.get("name");
     const image = formData.get("image");
+    const type = formData.get("type");
+
+    const location = await LocationService.getLocationById(id);
+    const oldImageUrl = location.image;
+
+    const imageUrl = await ReplaceImage(image, oldImageUrl);
 
     try {
-        const gallery = await GalleryService.getGalleryById(id);
-        const oldImageUrl = gallery.image;
-        const imageUrl = await ReplaceImage(image, oldImageUrl);
-        const updatedGallery = await GalleryService.updateGallery(id, { title, image: imageUrl });
+        const updatedLocation = await LocationService.updateLocation(id, { name, image: imageUrl, type });
         return NextResponse.json({
             statusCode: 200,
-            message: "Gallery updated successfully",
-            data: updatedGallery,
+            message: "Location updated successfully",
+            data: updatedLocation,
             errorCode: "NO",
             errorMessage: "",
         }, { status: 200 });
     } catch (error: any) {
-        consoleManager.error("❌ Error in PUT /api/gallery/[id]:", error);
+        consoleManager.error("❌ Error in PUT /api/locations/[id]:", error);
         return NextResponse.json({
             statusCode: 500,
             errorCode: "INTERNAL_ERROR",
@@ -57,15 +59,15 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const { id } = await params;
 
     try {
-        await GalleryService.deleteGallery(id);
+        await LocationService.deleteLocation(id);
         return NextResponse.json({
             statusCode: 200,
-            message: "Gallery deleted successfully",
+            message: "Location deleted successfully",
             errorCode: "NO",
             errorMessage: "",
         }, { status: 200 });
     } catch (error: any) {
-        consoleManager.error("❌ Error in DELETE /api/gallery/[id]:", error);
+        consoleManager.error("❌ Error in DELETE /api/locations/[id]:", error);
         return NextResponse.json({
             statusCode: 500,
             errorCode: "INTERNAL_ERROR",

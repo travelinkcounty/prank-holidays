@@ -35,7 +35,7 @@ const Header = () => {
       }
       setUser(u);
     }
-  }, []);
+  }, [pathname]);
 
   let profileHref = "/profile";
   let profileLabel = "Profile";
@@ -60,7 +60,7 @@ const Header = () => {
                 key={link.name}
                 href={link.href}
                 className={
-                  `px-2 py-1 rounded-md transition-colors ` +
+                  `px-2 py-1 rounded-md transition-colors cursor-pointer ` +
                   (isActive
                     ? "text-yellow-500 font-bold"
                     : "text-[#1a4d8f] hover:text-[#ffc72c] hover:bg-[#fff1e6]")

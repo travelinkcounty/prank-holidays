@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import PlanService from "../../services/planServices";
 import consoleManager from "../../utils/consoleManager";
+import { UploadImage } from "../../controller/imageController";
 
 // Get all testimonials (GET)
 export async function GET(req: Request) {
@@ -28,7 +29,13 @@ export async function GET(req: Request) {
 // Add a new testimonial (POST)
 export async function POST(req: Request) {
     try {
-        const { name, description, price, image, locationId, features } = await req.json();
+        const formData = await req.formData();
+        const name = formData.get("name");
+        const description = formData.get("description");
+        const price = formData.get("price");
+        const image = formData.get("image");
+        const locationId = formData.get("locationId");
+        const features = formData.get("features");
         
         if (!name || !description || !price || !image || !locationId || !features) {
             return NextResponse.json({
@@ -38,12 +45,14 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
+        const imageUrl = await UploadImage(image);
+
         // Save testimonial in DB
         const newPlan = await PlanService.addPlan({
             name,
             description,
             price,
-            image,
+            image: imageUrl,
             locationId,
             features,
         });

@@ -1,8 +1,11 @@
 'use client'
 
-import React, { useState } from "react";
-import { User, Users, BadgeCheck, Edit, PlusCircle, LogOut, Settings, History as HistoryIcon } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { User, Users, BadgeCheck, Edit, LogOut, History as HistoryIcon } from "lucide-react";
 import Image from "next/image";
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/redux/store";
+import { fetchUserById, selectSelectedUser } from "@/lib/redux/features/userSlice";
 
 const user = {
     name: "Nikhil Chaudhary",
@@ -16,10 +19,6 @@ const user = {
         end: "2024-01-01",
         benefits: ["Priority Support", "Exclusive Deals", "Free Upgrades"],
     },
-    family: [
-        { name: "Priya Chaudhary", relation: "Spouse", age: 32, photo: "/images/contact-banner.jpg" },
-        { name: "Aarav Chaudhary", relation: "Son", age: 7, photo: "/images/contact-banner.jpg" },
-    ],
     address: "123, Green Avenue, New Delhi, India",
     state: "Delhi",
     city: "New Delhi",
@@ -36,14 +35,21 @@ const user = {
 const navLinks = [
     { label: "Profile", icon: <User className="w-5 h-5 mr-2" />, key: "profile" },
     { label: "Membership", icon: <BadgeCheck className="w-5 h-5 mr-2" />, key: "membership" },
-    { label: "Family", icon: <Users className="w-5 h-5 mr-2" />, key: "family" },
     { label: "History", icon: <HistoryIcon className="w-5 h-5 mr-2" />, key: "history" },
-    { label: "Settings", icon: <Settings className="w-5 h-5 mr-2" />, key: "settings" },
     { label: "Logout", icon: <LogOut className="w-5 h-5 mr-2" />, key: "logout", danger: true },
 ];
 
 const Profile = () => {
+    const dispatch = useDispatch<AppDispatch>();
+    const userData = useSelector(selectSelectedUser);
     const [active, setActive] = useState("profile");
+
+    useEffect(() => {
+        const userId = JSON.parse(localStorage.getItem("user") || "null").id;
+        if (userId) {
+            dispatch(fetchUserById(userId));
+        }
+    }, [dispatch]);
 
     // Section renderers
     const renderSection = () => {
@@ -90,29 +96,6 @@ const Profile = () => {
                 </div>
             );
         }
-        if (active === "family") {
-            return (
-                <div className="bg-white rounded-2xl shadow p-8 md:p-10 border border-[#ffe066]/30 w-full max-w-4xl md:ml-0 flex flex-col gap-6">
-                    <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-2xl font-bold text-[#e30613] flex items-center gap-2"><Users className="w-6 h-6 text-[#ffe066]" /> Family Details</h3>
-                        <button className="p-1 rounded-full hover:bg-gray-100"><PlusCircle className="w-6 h-6 text-[#457b9d]" /></button>
-                    </div>
-                    <div className="flex flex-wrap gap-4">
-                        {user.family.map((member, idx) => (
-                            <div key={idx} className="flex flex-row flex-wrap items-center gap-4 bg-[#f8fafc] rounded-xl p-3 border border-[#ffe066]/20 w-full">
-                                <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-[#ffe066]">
-                                    <Image src={member.photo} alt={member.name} fill className="object-cover" />
-                                </div>
-                                <div className="font-bold text-[#e30613]">{member.name}</div>
-                                <div className="text-sm text-[#457b9d] font-semibold">{member.relation}</div>
-                                <div className="text-xs text-gray-500">Age: {member.age}</div>
-                                <button className="p-1 rounded-full hover:bg-gray-100 ml-auto"><Edit className="w-4 h-4 text-gray-400" /></button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
         if (active === "history") {
             return (
                 <div className="bg-white rounded-2xl shadow p-8 md:p-10 border border-[#ffe066]/30 w-full max-w-4xl md:ml-0 flex flex-col gap-6">
@@ -150,24 +133,6 @@ const Profile = () => {
                 </div>
             );
         }
-        if (active === "settings") {
-            return (
-                <div className="bg-white rounded-2xl shadow p-8 md:p-10 border border-[#ffe066]/30 w-full max-w-4xl md:ml-0 flex flex-col gap-6">
-                    <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-2xl font-bold text-[#e30613] flex items-center gap-2"><User className="w-6 h-6 text-[#ffe066]" /> Other Details</h3>
-                        <button className="p-1 rounded-full hover:bg-gray-100"><Edit className="w-6 h-6 text-gray-400" /></button>
-                    </div>
-                    <div className="flex flex-col gap-4 text-lg font-semibold text-[#23272b]">
-                        <div><span className="font-bold">Date of Birth:</span> {user.dob}</div>
-                        <div><span className="font-bold">Address:</span> {user.address}</div>
-                        <div><span className="font-bold">State:</span> {user.state}</div>
-                        <div><span className="font-bold">City:</span> {user.city}</div>
-                        <div><span className="font-bold">Pincode:</span> {user.pincode}</div>
-                        <div><span className="font-bold">Emergency Contact:</span> {user.emergency}</div>
-                    </div>
-                </div>
-            );
-        }
         if (active === "logout") {
             // You can add logout logic here
             return (
@@ -199,7 +164,7 @@ const Profile = () => {
                         {navLinks.map((link) => (
                             <li key={link.label}>
                                 <button
-                                    className={`w-full flex items-center px-4 py-2 rounded-xl font-semibold transition-colors duration-200 hover:bg-[#ffe066]/40 hover:text-[#e30613] ${link.danger ? 'text-red-600 hover:bg-red-50' : 'text-[#1a4d8f]'} ${active === link.key ? 'bg-[#ffe066]/60 text-[#e30613]' : ''}`}
+                                    className={`w-full cursor-pointer flex items-center px-4 py-2 rounded-xl font-semibold transition-colors duration-200 hover:bg-[#ffe066]/40 hover:text-[#e30613] ${link.danger ? 'text-red-600 hover:bg-red-50' : 'text-[#1a4d8f]'} ${active === link.key ? 'bg-[#ffe066]/60 text-[#e30613]' : ''}`}
                                     onClick={() => setActive(link.key)}
                                 >
                                     {link.icon}{link.label}

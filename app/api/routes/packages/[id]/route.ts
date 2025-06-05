@@ -24,7 +24,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             data: packages,
             errorCode: "NO",
             errorMessage: "",
-        }, { status: 200 });
+        }, { status: 200 });    
     } catch (error: any) {
         consoleManager.error("Error in GET /api/package/[id]:", error);
         return NextResponse.json({
@@ -43,11 +43,19 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         if (!id) throw new Error("Package ID is required");
 
         let updateData: any = {};
-        const title = formData.get("title");
+        const name = formData.get("name");
         const image = formData.get("image"); // File input
+        const description = formData.get("description");
+        const price = formData.get("price");
+        const locationId = formData.get("locationId");
+        const days = formData.get("days");
 
 
-        if (title) updateData.title = title;
+        if (name) updateData.name = name;
+        if (description) updateData.description = description;
+        if (price) updateData.price = price;
+        if (locationId) updateData.locationId = locationId;
+        if (days) updateData.days = days;
 
 
         // Fetch existing package to get old image URL
@@ -65,7 +73,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             if (!existingPackage.image) {
                 consoleManager.warn("No old image URL found for replacement.");
             }
-            const imageUrl = await ReplaceImage(image, existingPackage.image, 600, 400);
+            const imageUrl = await ReplaceImage(image, existingPackage.image);
             updateData.image = imageUrl;
         } else {
             updateData.image = existingPackage.image; // Keep the existing image
@@ -110,7 +118,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
         // Delete package image using ReplaceImage function (null prevents re-upload)
         if (existingPackage.image) {
-            await ReplaceImage(null, existingPackage.image, 0, 0);
+            await ReplaceImage(null, existingPackage.image);
         }
 
         // Delete package from DB

@@ -48,8 +48,8 @@ const LoginPage = () => {
     setLoading(true);
     // Mock users
     const users = [
-      { email: "admin@gmail.com", password: "admin123", role: "admin" },
-      { email: "user@gmail.com", password: "user123", role: "user" },
+      { id: 1, email: "admin@gmail.com", password: "admin123", role: "admin" },
+      { id: 2, email: "user@gmail.com", password: "user123", role: "user" },
     ];
     setTimeout(() => {
       const found = users.find(u => u.email === email && u.password === password);
@@ -58,9 +58,9 @@ const LoginPage = () => {
         setError("");
         // Save to localStorage
         if (typeof window !== "undefined") {
-          localStorage.setItem("user", JSON.stringify({ email: found.email, role: found.role }));
+          localStorage.setItem("user", JSON.stringify({ id: found.id, email: found.email, role: found.role }));
           // Save to cookie for middleware
-          document.cookie = `user=${encodeURIComponent(JSON.stringify({ email: found.email, role: found.role }))}; path=/`;
+          document.cookie = `user=${encodeURIComponent(JSON.stringify({ id: found.id, email: found.email, role: found.role }))}; path=/`;
         }
         if (found.role === "admin") {
           window.location.href = "/dashboard";

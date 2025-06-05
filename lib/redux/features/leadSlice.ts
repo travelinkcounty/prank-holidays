@@ -3,14 +3,14 @@ import axios from "axios";
 import { RootState } from "../store";
 
 interface Lead {
-  id: string;
+  id?: string;
   name: string;
   email: string;
   phone: string;
   message: string;
-  status: string;
-  createdOn: string;
-  updatedOn: string;
+  status?: string;
+  createdOn?: string;
+  updatedOn?: string;
 }
 
 interface LeadState {

@@ -20,15 +20,15 @@ export default function LocationsPage() {
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editLocation, setEditLocation] = useState<Location | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", type: "Beach", image: "" });
-  const [locationToDelete, setLocationToDelete] = useState<Location | null>(null);
+  const [form, setForm] = useState({ name: "", type: "domestic", image: "" });
+  const [deleteLocation, setDeleteLocation] = useState<Location | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteLocation, setDeleteLocation] = useState<Location | null>(null);
+
   useEffect(() => {
     dispatch(fetchLocations());
   }, [dispatch]);
@@ -40,8 +40,7 @@ export default function LocationsPage() {
         (l) =>
           (typeFilter === "all" || l.type.toLowerCase() === typeFilter) &&
           (l.name.toLowerCase().includes(search.toLowerCase()) ||
-            l.type.toLowerCase().includes(search.toLowerCase()) ||
-            l.description.toLowerCase().includes(search.toLowerCase()))
+            l.type.toLowerCase().includes(search.toLowerCase()))
       ),
     [locations, search, typeFilter]
   );
@@ -49,7 +48,7 @@ export default function LocationsPage() {
   // Handlers
   const openAddModal = () => {
     setEditLocation(null);
-    setForm({ name: "", description: "", type: "Beach", image: "" });
+    setForm({ name: "", type: "domestic", image: "" });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -64,16 +63,17 @@ export default function LocationsPage() {
   };
 
   const handleDelete = async () => {
-    if (!locationToDelete) return;
+    if (!deleteLocation) return;
     setIsDeleting(true);
     try {
-      await dispatch(deleteLocationAction(locationToDelete.id));
-      setLocationToDelete(null);
+      await dispatch(deleteLocationAction(deleteLocation.id));
+      setDeleteLocation(null);
       toast.success("Location deleted!");
     } catch (error) {
       toast.error("Failed to delete location");
     } finally {
       setIsDeleting(false);
+      dispatch(fetchLocations());
     }
   };
 
@@ -90,7 +90,6 @@ export default function LocationsPage() {
     setIsEditing(true);
     const formData = new FormData();
     formData.append("name", form.name);
-    formData.append("description", form.description);
     formData.append("type", form.type);
     if (imageFile) {
       formData.append("image", imageFile);  
@@ -111,6 +110,7 @@ export default function LocationsPage() {
       toast.error(editLocation ? "Failed to update location" : "Failed to add location");
     } finally {
       setIsEditing(false);
+      dispatch(fetchLocations());
     }
   };
 
@@ -136,8 +136,8 @@ export default function LocationsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Domestic">Domestic</SelectItem>
-                <SelectItem value="International">International</SelectItem>
+                <SelectItem value="domestic">Domestic</SelectItem>
+                <SelectItem value="international">International</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -165,7 +165,6 @@ export default function LocationsPage() {
                 <div>
                   <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{location.name}</div>
                   <div className="text-xs text-gray-500 mb-2">{location.type}</div>
-                  <div className="text-sm text-gray-700 mb-2 line-clamp-2">{location.description}</div>
                 </div>
                 <div className="flex gap-2 mt-2">
                   <Button
@@ -181,7 +180,7 @@ export default function LocationsPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => setLocationToDelete(location)}
+                    onClick={() => setDeleteLocation(location)}
                     aria-label="Delete"
                     disabled={loading}
                     className="text-destructive cursor-pointer"
@@ -209,20 +208,13 @@ export default function LocationsPage() {
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               required
             />
-            <Input
-              placeholder="Description"
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              required
-            />
-            <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
+            <Select value={form.type} defaultValue="Domestic" onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Type" />
+                <SelectValue placeholder="Select Location Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Beach">Beach</SelectItem>
-                <SelectItem value="Mountain">Mountain</SelectItem>
-                <SelectItem value="Heritage">Heritage</SelectItem>
+                <SelectItem value="domestic">Domestic</SelectItem>
+                <SelectItem value="international">International</SelectItem>
               </SelectContent>
             </Select>
             <div className="flex flex-col gap-2">

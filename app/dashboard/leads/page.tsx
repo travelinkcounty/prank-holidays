@@ -38,11 +38,11 @@ export default function LeadsPage() {
     () =>
       leads?.filter(
         (l) =>
-          (statusFilter === "all" || l.status.toLowerCase() === statusFilter) &&
+          (statusFilter === "all" || l.status?.toLowerCase() === statusFilter) &&
           (l.name.toLowerCase().includes(search.toLowerCase()) ||
             l.email.toLowerCase().includes(search.toLowerCase()) ||
             l.phone.toLowerCase().includes(search.toLowerCase()) ||
-            l.status.toLowerCase().includes(search.toLowerCase()))
+            l.status?.toLowerCase().includes(search.toLowerCase()))
       ),
     [leads, search, statusFilter]
   );
@@ -194,7 +194,7 @@ export default function LeadsPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => setLeadToDelete(lead.id)}
+                      onClick={() => setLeadToDelete(lead.id || null)}
                       aria-label="Delete"
                       disabled={isDeleting}
                       className="text-destructive"

@@ -9,18 +9,21 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPackages, selectPackages, selectError, selectLoading, updatePackage, deletePackage as deletePackageAction, addPackage, Package, setPackages} from "@/lib/redux/features/packageSlice";
 import { AppDispatch } from "@/lib/redux/store";
+import { selectLocations, fetchLocations } from "@/lib/redux/features/locationSlice";
+import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
 import Image from "next/image";
 
 export default function PackagesPage() {
   const dispatch = useDispatch<AppDispatch>();
   const packages = useSelector(selectPackages);
+  const locations = useSelector(selectLocations);
   const error = useSelector(selectError);
   const loading = useSelector(selectLoading);
 
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editPackage, setEditPackage] = useState<Package | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", days: "", locationId: "" });
+  const [form, setForm] = useState({ name: "", description: "", price: "", image: "", days: "", locationId: "" });
   const [deletePackage, setDeletePackage] = useState<Package | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -30,6 +33,7 @@ export default function PackagesPage() {
 
   useEffect(() => {
     dispatch(fetchPackages());
+    dispatch(fetchLocations());
   }, [dispatch]);
 
   // Filtered packages
@@ -37,17 +41,17 @@ export default function PackagesPage() {
     () =>
       (Array.isArray(packages) ? packages : []).filter(
         (p) =>
-          (p.name?.toLowerCase().includes(search.toLowerCase()) ||
-            p.description?.toLowerCase().includes(search.toLowerCase()) ||
-            p.days?.toLowerCase().includes(search.toLowerCase()))
+          p.name?.toLowerCase().includes(search.toLowerCase()) ||
+          p.description?.toLowerCase().includes(search.toLowerCase()) ||
+          locations.find((l) => l.id === p.locationId)?.name?.toLowerCase().includes(search.toLowerCase())
       ),
-    [packages, search]
+    [packages, search, locations]
   );
 
   // Handlers
   const openAddModal = () => {
     setEditPackage(null);
-    setForm({ name: "", description: "", price: 0, image: "", days: "", locationId: "" });
+    setForm({ name: "", description: "", price: "", image: "", days: "", locationId: "" });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -58,7 +62,7 @@ export default function PackagesPage() {
     setForm({
       name: pkg.name,
       description: pkg.description,
-      price: pkg.price,
+      price: pkg.price.toString(),
       image: pkg.image,
       days: pkg.days,
       locationId: pkg.locationId
@@ -68,15 +72,19 @@ export default function PackagesPage() {
     setModalOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deletePackage) return;
     setIsDeleting(true);
-    setTimeout(() => {
-      setPackages((prev: Package[]) => prev.filter((p: Package) => p.id !== deletePackage.id));
-      setIsDeleting(false);
+    try {
+      await dispatch(deletePackageAction(deletePackage.id));
       setDeletePackage(null);
       toast.success("Package deleted!");
-    }, 800);
+    } catch (error) {
+      toast.error("Failed to delete package");
+    } finally {
+      setIsDeleting(false);
+      dispatch(fetchPackages());
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,29 +95,39 @@ export default function PackagesPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    (true);
-    setTimeout(() => {
-      const imageToUse = imagePreview || form.image;
+    setIsEditing(true);
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("description", form.description);
+    formData.append("price", form.price);
+    formData.append("days", form.days);
+    formData.append("locationId", form.locationId);
+    if (imageFile) {
+      formData.append("image", imageFile);
+    } else if (form.image) {
+      formData.append("image", form.image);
+    }
+    try {
       if (editPackage) {
-        setPackages((prev: Package[]) =>
-          prev.map((p: Package) =>
-            p.id === editPackage.id ? { ...p, ...form, image: imageToUse } : p
-          )
-        );
+        await dispatch(updatePackage(formData, editPackage.id));
         toast.success("Package updated!");
       } else {
-        setPackages((prev: Package[]) => [
-          ...prev,
-          { id: Date.now().toString(), ...form, image: imageToUse },
-        ]);
+        await dispatch(addPackage(formData));
         toast.success("Package added!");
       }
       setModalOpen(false);
+      setEditPackage(null);
+      setForm({ name: "", description: "", price: "", image: "", days: "", locationId: "" });
       setImageFile(null);
       setImagePreview(null);
-    }, 1000);
+    } catch (error) {
+      toast.error(editPackage ? "Failed to update package" : "Failed to add package");
+    } finally {
+      setIsEditing(false);
+      dispatch(fetchPackages());
+    }
   };
 
   return (
@@ -169,7 +187,7 @@ export default function PackagesPage() {
                     variant="ghost"
                     onClick={() => setDeletePackage(pkg)}
                     aria-label="Delete"
-                    disabled={loading}
+                    disabled={isDeleting}
                     className="text-destructive cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
@@ -203,23 +221,33 @@ export default function PackagesPage() {
             />
             <Input
               placeholder="Price"
-              type="number"
+              type="text"
               value={form.price}
-              onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
+              onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
               required
             />
             <Input
-              placeholder="Days"
+              placeholder="Days in Format: 3N 2D"
               value={form.days}
               onChange={(e) => setForm((f) => ({ ...f, days: e.target.value }))}
               required
             />
-            <Input
-              placeholder="Location ID"
+            <Select
               value={form.locationId}
-              onChange={(e) => setForm((f) => ({ ...f, locationId: e.target.value }))}
+              onValueChange={(value) => setForm((f) => ({ ...f, locationId: value }))}
               required
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Location" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map((location) => (
+                  <SelectItem key={location.id} value={location.id}>
+                    {location.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex flex-col gap-2">
               <label className="block text-sm font-medium">Image</label>
               {imagePreview ? (
@@ -234,8 +262,8 @@ export default function PackagesPage() {
               />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={loading} className="gap-2 cursor-pointer">
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              <Button type="submit" disabled={isEditing} className="gap-2 cursor-pointer">
+                {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editPackage ? "Update" : "Add"}
               </Button>
               <DialogClose asChild>
@@ -259,13 +287,13 @@ export default function PackagesPage() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={isDeleting}
               className="gap-2 cursor-pointer"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />} Delete
+              {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />} Delete
             </Button>
             <DialogClose asChild>
-              <Button type="button" variant="ghost" disabled={loading}>
+              <Button type="button" variant="ghost" disabled={isDeleting}>
                 Cancel
               </Button>
             </DialogClose>

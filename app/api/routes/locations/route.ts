@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { UploadImage } from "../../controller/imageController";
-import PackageService from "../../services/packageServices";
+import LocationService from "../../services/locationServices";
 import consoleManager from "../../utils/consoleManager";
 
 // Get all packages (GET)
@@ -8,19 +8,18 @@ export async function GET(req: Request) {
     try {
 
         // Fetch packages based on status filter
-        const packages = await PackageService.getAllPackages();
-        consoleManager.log("Fetched all packages:", packages.length);
-
+        const locations = await LocationService.getAllLocations();
+        consoleManager.log("Fetched all locations:", locations.length);
 
         return NextResponse.json({
             statusCode: 200,
-            message: "Packages fetched successfully",
-            data: packages,
+            message: "Locations fetched successfully",
+            data: locations,
             errorCode: "NO",
             errorMessage: "",
         }, { status: 200 });
     } catch (error: any) {
-        consoleManager.error("❌ Error in GET /api/package:", error);
+        consoleManager.error("❌ Error in GET /api/locations:", error);
         return NextResponse.json({
             statusCode: 500,
             errorCode: "INTERNAL_ERROR",
@@ -34,11 +33,8 @@ export async function POST(req: Request) {
     try {
         const formData = await req.formData();
         const name = formData.get("name");
+        const type = formData.get("type");
         const file = formData.get("image");
-        const description = formData.get("description");
-        const price = formData.get("price");
-        const locationId = formData.get("locationId");
-        const days = formData.get("days");
 
         if (!name || !file) {
             return NextResponse.json({
@@ -48,32 +44,29 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // Upload image to Firebase Storage (800x600 for packages)
+        // Upload image to Firebase Storage (800x600 for locations)
         const imageUrl = await UploadImage(file);
-        consoleManager.log("✅ Package image uploaded:", imageUrl);
+        consoleManager.log("✅ Location image uploaded:", imageUrl);
 
-        // Save package data in Firestore
-        const newPackage = await PackageService.addPackage({
+        // Save location data in Firestore
+        const newLocation = await LocationService.addLocation({
             name,
+            type,
             image: imageUrl,
-            description,
-            price,
-            locationId,
-            days,
         });
 
-        consoleManager.log("✅ Package created successfully:", newPackage);
+        consoleManager.log("✅ Location created successfully:", newLocation);
 
         return NextResponse.json({
             statusCode: 201,
-            message: "Package added successfully",
-            data: newPackage,
+            message: "Location added successfully",
+            data: newLocation,
             errorCode: "NO",
             errorMessage: "",
         }, { status: 201 });
 
     } catch (error: any) {
-        consoleManager.error("❌ Error in POST /api/package:", error);
+        consoleManager.error("❌ Error in POST /api/locations:", error);
         return NextResponse.json({
             statusCode: 500,
             errorCode: "INTERNAL_ERROR",

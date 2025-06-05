@@ -1,22 +1,17 @@
 import sharp from "sharp";
 import { adminStorage } from "../config/firebase";
 
-const UploadImage = async (file: any, width: number, height: number) => {
+const UploadImage = async (file: any) => {
   try {
     const arrayBuffer = await file.arrayBuffer(); // Convert Blob to ArrayBuffer
     const buffer = Buffer.from(arrayBuffer); // Convert to Buffer
 
     const bucket = adminStorage.bucket();
-    const filePath = `stall-craft/${Date.now()}_${file.name}`; // Generate unique file path
+    const filePath = `travelink/${Date.now()}_${file.name}`; // Generate unique file path
     const firebaseFile = bucket.file(filePath);
-
-    // Convert width & height to numbers
-    const imgWidth = parseInt(width.toString());
-    const imgHeight = parseInt(height.toString());
 
     // Resize image using sharp
     const resizedBuffer = await sharp(buffer)
-      .resize(imgWidth, imgHeight, { fit: sharp.fit.cover })
       .toBuffer();
 
     const blobStream = firebaseFile.createWriteStream({
@@ -36,7 +31,7 @@ const UploadImage = async (file: any, width: number, height: number) => {
   }
 };
 
-const ReplaceImage = async (file: any, oldImageUrl: string, width: number, height: number) => {
+const ReplaceImage = async (file: any, oldImageUrl: string) => {
   try {
     const bucket = adminStorage.bucket();
 
@@ -71,7 +66,7 @@ const ReplaceImage = async (file: any, oldImageUrl: string, width: number, heigh
 
     // Upload new image if provided
     if (file) {
-      return await UploadImage(file, width, height);
+      return await UploadImage(file);
     } else {
       return null; // Return null if no new image is provided
     }

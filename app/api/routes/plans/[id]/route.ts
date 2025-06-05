@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import PlanService from "../../../services/planServices";
 import consoleManager from "../../../utils/consoleManager";
+import { ReplaceImage } from "../../../controller/imageController";
+
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -26,9 +28,19 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
-        const { name, description, price, image, locationId, features } = await req.json();
-        const updatedPlan = await PlanService.updatePlan(id, { name, description, price, image, locationId, features });
-
+        const formData = await req.formData();
+        const name = formData.get("name");
+        const description = formData.get("description");
+        const price = formData.get("price");
+        const image = formData.get("image");
+        const locationId = formData.get("locationId");
+        const features = formData.get("features");
+        const plan = await PlanService.getPlanById(id);
+        const oldImageUrl = plan.image;
+        
+        const imageUrl = await ReplaceImage(image, oldImageUrl);
+        const updatedPlan = await PlanService.updatePlan(id, { name, description, price, image: imageUrl, locationId, features });
+        
         return NextResponse.json({
             statusCode: 200,
             message: "Plan updated successfully",

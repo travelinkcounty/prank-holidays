@@ -44,7 +44,7 @@ export async function POST(req: Request) {
         }
 
         // Upload image to Firebase Storage (800x600 for galleries)
-        const imageUrl = await UploadImage(file, 800, 600);
+        const imageUrl = await UploadImage(file);
         consoleManager.log("✅ Gallery image uploaded:", imageUrl);
 
         // Save gallery data in Firestore

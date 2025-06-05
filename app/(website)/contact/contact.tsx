@@ -6,7 +6,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
+import { addLead } from "@/lib/redux/features/leadSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/redux/store";
 const socialLinks = [
     {
         icon: Facebook,
@@ -26,6 +28,7 @@ const socialLinks = [
 ];
 
 const ContactPage = () => {
+    const dispatch = useDispatch<AppDispatch>();
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         name: "",
@@ -39,16 +42,28 @@ const ContactPage = () => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setSuccess(false);
-        setTimeout(() => {
-            setLoading(false);
-            console.log(form);
+        
+        const lead = {
+            ...form,
+            status: "new",
+            createdOn: new Date().toISOString(),
+            updatedOn: new Date().toISOString(),
+        };
+
+        try {
+            await dispatch(addLead(lead));
             setSuccess(true);
             setForm({ name: "", phone: "", email: "", message: "" });
-        }, 1200);
+            setTimeout(() => setSuccess(false), 2000);
+        } catch (error) {
+            console.error('Failed to submit lead:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -119,6 +134,13 @@ const ContactPage = () => {
                         <CardTitle className="text-2xl font-bold text-[#e30613]">Send us a Message</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        {success && (
+                          <div className="col-span-1 md:col-span-2 mb-6">
+                            <div className="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-md text-center font-semibold">
+                              Your message has been sent successfully!<br/>We will connect with you soon.
+                            </div>
+                          </div>
+                        )}
                         <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
                             <div className="flex flex-col col-span-1 md:col-span-1">
                                 <label className="block mb-1 font-semibold text-[#1a4d8f]">Name</label>
@@ -142,13 +164,6 @@ const ContactPage = () => {
                                 </Button>
                             </div>
                         </form>
-                        {success && (
-                          <div className="col-span-1 md:col-span-2 mt-6">
-                            <div className="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-md text-center font-semibold">
-                              Your message has been sent successfully!
-                            </div>
-                          </div>
-                        )}
                     </CardContent>
                 </Card>
             </section>

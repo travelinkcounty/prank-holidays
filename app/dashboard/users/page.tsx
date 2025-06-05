@@ -14,12 +14,15 @@ type User = {
   name: string;
   email: string;
   role: string;
+  address: string;
+  phone: string;
+  image: string;
 };
 
 const initialUsers: User[] = [
-  { id: 1, name: "Nikhil Chaudhary", email: "nikhil@travelinkcounty.com", role: "Admin" },
-  { id: 2, name: "Amit Sharma", email: "amit@travelinkcounty.com", role: "Manager" },
-  { id: 3, name: "Priya Singh", email: "priya@travelinkcounty.com", role: "User" },
+  { id: 1, name: "Nikhil Chaudhary", email: "nikhil@travelinkcounty.com", role: "Admin", address: "123 Main St, Anytown, USA", phone: "123-456-7890", image: "https://via.placeholder.com/150" },
+  { id: 2, name: "Amit Sharma", email: "amit@travelinkcounty.com", role: "Manager", address: "456 Oak Ave, Anytown, USA", phone: "123-456-7890", image: "https://via.placeholder.com/150" },
+  { id: 3, name: "Priya Singh", email: "priya@travelinkcounty.com", role: "User", address: "789 Pine St, Anytown, USA", phone: "123-456-7890", image: "https://via.placeholder.com/150" },
 ];
 
 export default function UsersPage() {
@@ -81,14 +84,14 @@ export default function UsersPage() {
       if (editUser) {
         setUsers((prev) =>
           prev.map((u) =>
-            u.id === editUser.id ? { ...u, ...form } : u
+            u.id === editUser.id ? { ...u, ...form, address: "", phone: "", image: "" } : u
           )
         );
         toast.success("User updated!");
       } else {
         setUsers((prev) => [
           ...prev,
-          { id: Date.now(), ...form },
+          { id: Date.now(), ...form, address: "", phone: "", image: "" },
         ]);
         toast.success("User added!");
       }
