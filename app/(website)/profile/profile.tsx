@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { User, Users, BadgeCheck, Edit, LogOut, History as HistoryIcon } from "lucide-react";
+import { User, Users, BadgeCheck, Edit, LogOut, History as HistoryIcon, Link } from "lucide-react";
 import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { fetchUserById, selectSelectedUser } from "@/lib/redux/features/userSlice";
+import { useRouter } from "next/navigation";
 
 const user = {
     name: "Nikhil Chaudhary",
@@ -43,6 +44,7 @@ const Profile = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userData = useSelector(selectSelectedUser);
     const [active, setActive] = useState("profile");
+    const router = useRouter();
 
     useEffect(() => {
         const userId = JSON.parse(localStorage.getItem("user") || "null").id;
@@ -134,14 +136,8 @@ const Profile = () => {
             );
         }
         if (active === "logout") {
-            // You can add logout logic here
-            return (
-                <div className="flex flex-col items-center justify-center h-full py-20">
-                    <LogOut className="w-12 h-12 text-red-500 mb-4" />
-                    <div className="text-xl font-bold text-red-600 mb-2">Logged Out</div>
-                    <div className="text-gray-500">You have been logged out.</div>
-                </div>
-            );
+            // Navigate to /logout
+            router.push("/logout");
         }
         return null;
     };
@@ -165,7 +161,13 @@ const Profile = () => {
                             <li key={link.label}>
                                 <button
                                     className={`w-full cursor-pointer flex items-center px-4 py-2 rounded-xl font-semibold transition-colors duration-200 hover:bg-[#ffe066]/40 hover:text-[#e30613] ${link.danger ? 'text-red-600 hover:bg-red-50' : 'text-[#1a4d8f]'} ${active === link.key ? 'bg-[#ffe066]/60 text-[#e30613]' : ''}`}
-                                    onClick={() => setActive(link.key)}
+                                    onClick={() => {
+                                        if (link.key === 'logout') {
+                                            router.push('/logout');
+                                        } else {
+                                            setActive(link.key);
+                                        }
+                                    }}
                                 >
                                     {link.icon}{link.label}
                                 </button>

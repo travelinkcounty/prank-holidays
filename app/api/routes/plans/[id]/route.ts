@@ -32,14 +32,19 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         const name = formData.get("name");
         const description = formData.get("description");
         const price = formData.get("price");
+        const nights = formData.get("nights");
+        const days = formData.get("days");
         const image = formData.get("image");
-        const locationId = formData.get("locationId");
-        const features = formData.get("features");
+        const location = formData.get("location");
+
         const plan = await PlanService.getPlanById(id);
         const oldImageUrl = plan.image;
         
-        const imageUrl = await ReplaceImage(image, oldImageUrl);
-        const updatedPlan = await PlanService.updatePlan(id, { name, description, price, image: imageUrl, locationId, features });
+        let imageUrl = oldImageUrl;
+        if (image && typeof image !== "string") {
+            imageUrl = await ReplaceImage(image, oldImageUrl);
+        }
+        const updatedPlan = await PlanService.updatePlan(id, { name, description, price, image: imageUrl, location, days, nights });
         
         return NextResponse.json({
             statusCode: 200,

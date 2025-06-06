@@ -10,7 +10,24 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchPlans, selectPlans, selectError, selectLoading, updatePlan, deletePlan as deletePlanAction, addPlan, Plan} from "@/lib/redux/features/planSlice";
 import { AppDispatch } from "@/lib/redux/store";
 import { selectLocations, fetchLocations } from "@/lib/redux/features/locationSlice";
-import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
+import ReactSelect from "react-select";
+import { components } from "react-select";
+import { Textarea } from "@/components/ui/textarea";
+
+// Custom Option for grid-style checkboxes in react-select
+const Option = (props: any) => (
+  <components.Option {...props}>
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={props.isSelected}
+        onChange={() => null}
+        className="accent-[#e63946]"
+      />
+      {props.label}
+    </label>
+  </components.Option>
+);
 
 export default function PlansPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,8 +38,8 @@ export default function PlansPage() {
 
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [editPlan, setEditPlan] = useState<Plan | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: "", image: "", locationId: "", features: [] as string[] });
+  const [editPlan, setEditPlan] = useState<Plan | null>(null);    
+  const [form, setForm] = useState<{ name: string; description: string; price: string; image: string; location: string[]; nights: string; days: string; }>({ name: "", description: "", price: "", image: "", location: [], nights: "", days: "" });
   const [deletePlan, setDeletePlan] = useState<Plan | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -49,7 +66,7 @@ export default function PlansPage() {
   // Handlers
   const openAddModal = () => {
     setEditPlan(null);
-    setForm({ name: "", description: "", price: "", image: "", locationId: "", features: [] });
+    setForm({ name: "", description: "", price: "", image: "", location: [], nights: "", days: "" });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -62,8 +79,9 @@ export default function PlansPage() {
       description: plan.description,
       price: plan.price.toString(),
       image: plan.image || "",
-      locationId: plan.locationId,
-      features: plan.features || []
+      location: plan.location,
+      nights: plan.nights,
+      days: plan.days,
     });
     setImageFile(null);
     setImagePreview(plan.image || null);
@@ -89,33 +107,42 @@ export default function PlansPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsEditing(true);
-    setTimeout(() => {
-      const imageToUse = imagePreview || form.image || "";
-      const planData: Plan = {
-        name: form.name,
-        description: form.description,
-        price: Number(form.price),
-        image: imageToUse,
-        locationId: form.locationId,
-        features: form.features || [],
-        createdOn: new Date().toISOString(),
-        updatedOn: new Date().toISOString()
-      };
+
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("description", form.description);
+    formData.append("price", form.price);
+    formData.append("nights", form.nights);
+    formData.append("days", form.days);
+    formData.append("location", JSON.stringify(form.location));
+    if (imageFile) {
+      formData.append("image", imageFile);
+    } else if (editPlan && editPlan.image) {
+      formData.append("image", editPlan.image);
+    }
+
+    try {
       if (editPlan) {
-        dispatch(updatePlan(planData, editPlan.id || ""));
+        await dispatch(updatePlan(formData, editPlan.id || ""));
         toast.success("Plan updated!");
       } else {
-        dispatch(addPlan(planData));
+        await dispatch(addPlan(formData));
         toast.success("Plan added!");
       }
       setModalOpen(false);
-      setIsEditing(false);
+      setEditPlan(null);
+      setForm({ name: "", description: "", price: "", image: "", location: [], nights: "", days: "" });
       setImageFile(null);
       setImagePreview(null);
-    }, 1000);
+    } catch (error) {
+      toast.error(editPlan ? "Failed to update plan" : "Failed to add plan");
+    } finally {
+      setIsEditing(false);
+      dispatch(fetchPlans());
+    }
   };
 
   return (
@@ -192,47 +219,79 @@ export default function PlansPage() {
 
       {/* Add/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>{editPlan ? "Edit Plan" : "Add Plan"}</DialogTitle>
-            </DialogHeader>
-            <Input
-              placeholder="Name"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Description"
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Price"
-              type="text"
-              value={form.price}
-              onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-              required
-            />
-            <Select
-              value={form.locationId}
-              onValueChange={(value) => setForm((f) => ({ ...f, locationId: value }))}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Location" />
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map((location) => (
-                  <SelectItem key={location.id} value={location.id}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="flex flex-col gap-2">
+        <DialogContent className="overflow-y-auto max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>{editPlan ? "Edit Plan" : "Add Plan"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col col-span-1 md:col-span-2">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Name</label>
+              <Input
+                placeholder="Name"
+                value={form.name || ""}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col col-span-1 md:col-span-2">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Description</label>
+              <Textarea
+                placeholder="Description"
+                value={form.description || ""}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                required
+                rows={4}
+              />
+            </div>
+            <div className="flex flex-col col-span-1">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Price</label>
+              <Input
+                placeholder="Price"
+                type="text"
+                value={form.price || ""}
+                onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col col-span-1">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Days (e.g. 3D)</label>
+              <Input
+                placeholder="Days in Format: 3D"
+                value={form.days || ""}
+                onChange={(e) => setForm((f) => ({ ...f, days: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col col-span-1">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Nights (e.g. 3N)</label>
+              <Input
+                placeholder="Nights in Format: 3N"
+                value={form.nights || ""}
+                onChange={(e) => setForm((f) => ({ ...f, nights: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col col-span-1 md:col-span-2">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Locations</label>
+              <ReactSelect
+                isMulti
+                isSearchable
+                options={locations.map(loc => ({ value: loc.id, label: loc.name }))}
+                value={locations
+                  .filter(loc => form.location.includes(loc.id))
+                  .map(loc => ({ value: loc.id, label: loc.name }))}
+                onChange={(selected: any) => {
+                  setForm(f => ({
+                    ...f,
+                    location: selected ? selected.map((opt: any) => opt.value) : []
+                  }));
+                }}
+                className="mb-2"
+                classNamePrefix="react-select"
+                components={{ Option }}
+              />
+            </div>
+            <div className="flex flex-col gap-2 col-span-1 md:col-span-2">
               <label className="block text-sm font-medium">Image</label>
               {imagePreview ? (
                 <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg mb-2 border" />
@@ -245,7 +304,7 @@ export default function PlansPage() {
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#e63946]/10 file:text-[#e63946]"
               />
             </div>
-            <DialogFooter>
+            <DialogFooter className="col-span-1 md:col-span-2 flex justify-end gap-2 mt-4">
               <Button type="submit" disabled={isEditing} className="gap-2 cursor-pointer">
                 {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editPlan ? "Update" : "Add"}

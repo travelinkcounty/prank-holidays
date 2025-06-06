@@ -49,14 +49,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         const price = formData.get("price");
         const locationId = formData.get("locationId");
         const days = formData.get("days");
-
+        const nights = formData.get("nights");
 
         if (name) updateData.name = name;
         if (description) updateData.description = description;
         if (price) updateData.price = price;
         if (locationId) updateData.locationId = locationId;
         if (days) updateData.days = days;
-
+        if (nights) updateData.nights = nights;
 
         // Fetch existing package to get old image URL
         const existingPackage = await PackageService.getPackageById(id);
@@ -105,21 +105,6 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     try {
         const { id } = await params;
         if (!id) throw new Error("Package ID is required");
-
-        // Fetch existing package to get old image URL
-        const existingPackage = await PackageService.getPackageById(id);
-        if (!existingPackage) {
-            return NextResponse.json({
-                statusCode: 404,
-                errorCode: "NOT_FOUND",
-                errorMessage: "Package not found",
-            }, { status: 404 });
-        }
-
-        // Delete package image using ReplaceImage function (null prevents re-upload)
-        if (existingPackage.image) {
-            await ReplaceImage(null, existingPackage.image);
-        }
 
         // Delete package from DB
         await PackageService.deletePackage(id);

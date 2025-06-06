@@ -39,7 +39,8 @@ export async function POST(req: Request) {
         const price = formData.get("price");
         const locationId = formData.get("locationId");
         const days = formData.get("days");
-
+        const nights = formData.get("nights");
+        
         if (!name || !file) {
             return NextResponse.json({
                 statusCode: 400,
@@ -60,6 +61,7 @@ export async function POST(req: Request) {
             price,
             locationId,
             days,
+            nights,
         });
 
         consoleManager.log("✅ Package created successfully:", newPackage);

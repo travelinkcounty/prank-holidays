@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -29,6 +29,10 @@ export default function GalleryPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    dispatch(fetchGallery());
+  }, [dispatch]);
 
   // Filtered images
   const filteredImages = useMemo(
@@ -59,10 +63,10 @@ export default function GalleryPage() {
 
   const handleDelete = () => {
     if (!deleteImage) return;
-  
     setLoading(true);
-    setTimeout(() => {
-      dispatch(deleteGallery(deleteImage.id));
+    setTimeout(async () => {
+      await dispatch(deleteGallery(deleteImage.id));
+      await dispatch(fetchGallery());
       setLoading(false);
       setDeleteImage(null);
       toast.success("Image deleted!");
@@ -80,21 +84,23 @@ export default function GalleryPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       const formData = new FormData();
       formData.append("title", form.title);
       if (imageFile) {
         formData.append("image", imageFile);
-      } else if (form.image) {
-        formData.append("image", form.image);
+      } else if (editImage && editImage.image) {
+        formData.append("image", editImage.image);
       }
       formData.append("createdOn", new Date().toISOString());
       formData.append("updatedOn", new Date().toISOString());
       if (editImage) {
-        dispatch(updateGallery(formData, editImage.id));
+        await dispatch(updateGallery(formData, editImage.id));
+        await dispatch(fetchGallery());
         toast.success("Image updated!");
       } else {
-        dispatch(addGallery(formData));
+        await dispatch(addGallery(formData));
+        await dispatch(fetchGallery());
         toast.success("Image added!");
       }
       setModalOpen(false);
@@ -189,8 +195,12 @@ export default function GalleryPage() {
             />
             <div className="flex flex-col gap-2">
               <label className="block text-sm font-medium">Image</label>
-              {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg mb-2 border" />
+              {(imagePreview || form.image) ? (
+                <img
+                  src={imagePreview || form.image}
+                  alt="Preview"
+                  className="w-full h-40 object-cover rounded-lg mb-2 border"
+                />
               ) : null}
               <input
                 type="file"

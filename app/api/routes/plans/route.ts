@@ -34,27 +34,43 @@ export async function POST(req: Request) {
         const description = formData.get("description");
         const price = formData.get("price");
         const image = formData.get("image");
-        const locationId = formData.get("locationId");
-        const features = formData.get("features");
-        
-        if (!name || !description || !price || !image || !locationId || !features) {
+        const locationRaw = formData.get("location");
+        const nights = formData.get("nights");
+        const days = formData.get("days");
+
+        if (!name || !description || !price || !image) {
             return NextResponse.json({
                 statusCode: 400,
                 errorCode: "BAD_REQUEST",
-                errorMessage: "Name, description, price, image, locationId, and features are required",
+                errorMessage: "Name, description, price, image, location are required",
             }, { status: 400 });
         }
 
-        const imageUrl = await UploadImage(image);
+        let imageUrl = "";
+        if (image && typeof image !== "string" && typeof (image as Blob).arrayBuffer === "function") {
+            imageUrl = await UploadImage(image) as string;
+        } else if (typeof image === "string") {
+            imageUrl = image;
+        }
 
-        // Save testimonial in DB
+        let location: string[] = [];
+        if (typeof locationRaw === "string") {
+            try {
+                location = JSON.parse(locationRaw);
+            } catch {
+                location = [];
+            }
+        }
+
+        // Save plan in DB
         const newPlan = await PlanService.addPlan({
             name,
             description,
             price,
             image: imageUrl,
-            locationId,
-            features,
+            location,
+            nights,
+            days,
         });
 
         return NextResponse.json({

@@ -8,7 +8,9 @@ export interface Plan {
   description: string;
   price: number;
   image: string;
-  locationId: string;
+  location: string[];
+  nights: string;
+  days: string;
   features: string[];
   createdOn: string;
   updatedOn: string;
@@ -85,10 +87,15 @@ export const fetchPlanById = (id: string) => async (dispatch: Dispatch) => {
   }
 };
 
-export const addPlan = (plan: Plan) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
+export const addPlan = (plan: FormData) => async (dispatch: Dispatch) => {
   try {
-    const response = await axios.post("/api/routes/plans", plan);
+    const response = await axios.post("/api/routes/plans", plan,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     if (response.status === 200) {
       return response.data;
     } else {
@@ -100,10 +107,16 @@ export const addPlan = (plan: Plan) => async (dispatch: Dispatch) => {
   }
 };
 
-export const updatePlan = (plan: Plan, id: string) => async (dispatch: Dispatch) => {
+export const updatePlan = (plan: FormData, id: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.put(`/api/routes/plans/${id}`, plan);
+    const response = await axios.put(`/api/routes/plans/${id}`, plan,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     if (response.status === 200) {
       return response.data;
     } else {
@@ -116,7 +129,6 @@ export const updatePlan = (plan: Plan, id: string) => async (dispatch: Dispatch)
 };
 
 export const deletePlan = (id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.delete(`/api/routes/plans/${id}`);
     if (response.status === 200) {

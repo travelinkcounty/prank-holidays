@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Loader2, Plus, Edit, Trash2, Search, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -23,7 +24,7 @@ export default function PackagesPage() {
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editPackage, setEditPackage] = useState<Package | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: "", image: "", days: "", locationId: "" });
+  const [form, setForm] = useState({ name: "", description: "", price: "", image: "", nights: "", days: "", locationId: "" });
   const [deletePackage, setDeletePackage] = useState<Package | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -51,7 +52,7 @@ export default function PackagesPage() {
   // Handlers
   const openAddModal = () => {
     setEditPackage(null);
-    setForm({ name: "", description: "", price: "", image: "", days: "", locationId: "" });
+    setForm({ name: "", description: "", price: "", image: "", nights: "", days: "", locationId: "" });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -65,6 +66,7 @@ export default function PackagesPage() {
       price: pkg.price.toString(),
       image: pkg.image,
       days: pkg.days,
+      nights: pkg.nights,
       locationId: pkg.locationId
     });
     setImageFile(null);
@@ -103,11 +105,10 @@ export default function PackagesPage() {
     formData.append("description", form.description);
     formData.append("price", form.price);
     formData.append("days", form.days);
+    formData.append("nights", form.nights);
     formData.append("locationId", form.locationId);
     if (imageFile) {
       formData.append("image", imageFile);
-    } else if (form.image) {
-      formData.append("image", form.image);
     }
     try {
       if (editPackage) {
@@ -119,7 +120,7 @@ export default function PackagesPage() {
       }
       setModalOpen(false);
       setEditPackage(null);
-      setForm({ name: "", description: "", price: "", image: "", days: "", locationId: "" });
+      setForm({ name: "", description: "", price: "", image: "", nights: "", days: "", locationId: "" });
       setImageFile(null);
       setImagePreview(null);
     } catch (error) {
@@ -202,53 +203,78 @@ export default function PackagesPage() {
 
       {/* Add/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>{editPackage ? "Edit Package" : "Add Package"}</DialogTitle>
-            </DialogHeader>
-            <Input
-              placeholder="Name"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Description"
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Price"
-              type="text"
-              value={form.price}
-              onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Days in Format: 3N 2D"
-              value={form.days}
-              onChange={(e) => setForm((f) => ({ ...f, days: e.target.value }))}
-              required
-            />
-            <Select
-              value={form.locationId}
-              onValueChange={(value) => setForm((f) => ({ ...f, locationId: value }))}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Location" />
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map((location) => (
-                  <SelectItem key={location.id} value={location.id}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="flex flex-col gap-2">
+        <DialogContent className="overflow-y-auto max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>{editPackage ? "Edit Package" : "Add Package"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col col-span-1 md:col-span-2">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Name</label>
+              <Input
+                placeholder="Name"
+                value={form.name || ""}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col col-span-1 md:col-span-2">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Description</label>
+              <Textarea
+                placeholder="Description"
+                value={form.description || ""}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                required
+                rows={4}
+              />
+            </div>
+            <div className="flex flex-col col-span-1">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Price</label>
+              <Input
+                placeholder="Price"
+                type="text"
+                value={form.price || ""}
+                onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col col-span-1">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Days (e.g. 3D)</label>
+              <Input
+                placeholder="Days in Format: 3D"
+                value={form.days || ""}
+                onChange={(e) => setForm((f) => ({ ...f, days: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col col-span-1">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Nights (e.g. 3N)</label>
+              <Input
+                placeholder="Nights in Format: 3N"
+                value={form.nights || ""}
+                onChange={(e) => setForm((f) => ({ ...f, nights: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col col-span-1">
+              <label className="block mb-1 font-semibold text-[#1a4d8f]">Location</label>
+              <Select
+                value={form.locationId}
+                onValueChange={(value) => setForm((f) => ({ ...f, locationId: value }))}
+                required
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2 col-span-1 md:col-span-2">
               <label className="block text-sm font-medium">Image</label>
               {imagePreview ? (
                 <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg mb-2 border" />
@@ -261,7 +287,7 @@ export default function PackagesPage() {
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#e63946]/10 file:text-[#e63946]"
               />
             </div>
-            <DialogFooter>
+            <div className="col-span-1 md:col-span-2 flex justify-end gap-2 mt-4">
               <Button type="submit" disabled={isEditing} className="gap-2 cursor-pointer">
                 {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editPackage ? "Update" : "Add"}
@@ -271,7 +297,7 @@ export default function PackagesPage() {
                   Cancel
                 </Button>
               </DialogClose>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

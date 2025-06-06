@@ -26,16 +26,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const formData = await req.formData();
-    const title = formData.get("title");
-    const image = formData.get("image");
-
     try {
+        const { id } = await params;
+        const formData = await req.formData();
+        const title = formData.get("title");
+        const image = formData.get("image");
+
         const gallery = await GalleryService.getGalleryById(id);
         const oldImageUrl = gallery.image;
-        const imageUrl = await ReplaceImage(image, oldImageUrl);
+
+        let imageUrl = oldImageUrl;
+        if (image && typeof image !== 'string') {
+            imageUrl = await ReplaceImage(image, oldImageUrl);
+        }
+
         const updatedGallery = await GalleryService.updateGallery(id, { title, image: imageUrl });
+
         return NextResponse.json({
             statusCode: 200,
             message: "Gallery updated successfully",

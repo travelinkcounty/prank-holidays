@@ -8,6 +8,7 @@ export interface Package {
   description: string;
   price: number;
   image: string;
+  nights: string;
   days: string;
   locationId: string;
   createdOn: string;
@@ -39,6 +40,7 @@ const packageSlice = createSlice({
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
+      state.error = null;
     },
     setError: (state, action) => {
       state.error = action.payload;
@@ -46,9 +48,11 @@ const packageSlice = createSlice({
     },
     setSelectedPackage: (state, action) => {
       state.selectedPackage = action.payload;
+      state.error = null;
     },
     clearSelectedPackage: (state) => {
       state.selectedPackage = null;
+      state.error = null;
     },
   },
 });
