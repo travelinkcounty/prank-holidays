@@ -1,103 +1,96 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, Plus, Edit, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSelector, useDispatch } from "react-redux";
+import { selectUsers, selectIsLoading, selectError, fetchUsers, addUser, updateUser, deleteUserByUid } from "@/lib/redux/features/authSlice";
+import { AppDispatch } from "@/lib/redux/store";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  address: string;
-  phone: string;
-  image: string;
-};
-
-const initialUsers: User[] = [
-  { id: 1, name: "Nikhil Chaudhary", email: "nikhil@travelinkcounty.com", role: "Admin", address: "123 Main St, Anytown, USA", phone: "123-456-7890", image: "https://via.placeholder.com/150" },
-  { id: 2, name: "Amit Sharma", email: "amit@travelinkcounty.com", role: "Manager", address: "456 Oak Ave, Anytown, USA", phone: "123-456-7890", image: "https://via.placeholder.com/150" },
-  { id: 3, name: "Priya Singh", email: "priya@travelinkcounty.com", role: "User", address: "789 Pine St, Anytown, USA", phone: "123-456-7890", image: "https://via.placeholder.com/150" },
-];
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const dispatch = useDispatch<AppDispatch>()
+  const users = useSelector(selectUsers)
+  const isLoading = useSelector(selectIsLoading)
+  const error = useSelector(selectError)
+
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
-  const [editUser, setEditUser] = useState<User | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", role: "" });
+  const [editUser, setEditUser] = useState<any | null>(null);
+  const [form, setForm] = useState({ name: "", email: "", role: "", password: "", phone: "" });
+  const [deleteUserObj, setDeleteUserObj] = useState<any | null>(null);
 
-  // Delete confirmation state
-  const [deleteUser, setDeleteUser] = useState<User | null>(null);
-
-  const [roleFilter, setRoleFilter] = useState<string>("all");
+  useEffect(() => {
+    dispatch(fetchUsers())
+  }, [dispatch])
 
   // Filtered users
   const filteredUsers = useMemo(
     () =>
       users.filter(
-        (u) =>
-          (roleFilter === "all" || u.role.toLowerCase() === roleFilter) &&
-          (u.name.toLowerCase().includes(search.toLowerCase()) ||
-            u.email.toLowerCase().includes(search.toLowerCase()) ||
-            u.role.toLowerCase().includes(search.toLowerCase()))
+        (u: any) =>
+          (u.name?.toLowerCase().includes(search.toLowerCase()) ||
+            u.email?.toLowerCase().includes(search.toLowerCase()) ||
+            u.role?.toLowerCase().includes(search.toLowerCase()))
       ),
-    [users, search, roleFilter]
+    [users, search]
   );
 
   // Handlers
   const openAddModal = () => {
     setEditUser(null);
-    setForm({ name: "", email: "", role: "" });
+    setForm({ name: "", email: "", role: "", password: "", phone: "" });
     setModalOpen(true);
   };
 
-  const openEditModal = (user: User) => {
+  const openEditModal = (user: any) => {
     setEditUser(user);
-    setForm({ name: user.name, email: user.email, role: user.role });
+    setForm({ name: user.name || "", email: user.email || "", role: user.role || "", password: "", phone: user.phone || "" });
     setModalOpen(true);
   };
 
-  const handleDelete = () => {
-    if (!deleteUser) return;
+  const handleDelete = async () => {
+    if (!deleteUserObj) return;
     setLoading(true);
-    setTimeout(() => {
-      setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
-      setLoading(false);
-      setDeleteUser(null);
+    try {
+      await dispatch(deleteUserByUid(deleteUserObj.uid));
+      dispatch(fetchUsers());
       toast.success("User deleted!");
-    }, 800);
+    } catch (err) {
+      toast.error("Failed to delete user");
+    } finally {
+      setLoading(false);
+      setDeleteUserObj(null);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    try {
       if (editUser) {
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === editUser.id ? { ...u, ...form, address: "", phone: "", image: "" } : u
-          )
-        );
+        await dispatch(updateUser({ uid: editUser.uid, ...form }));
+        dispatch(fetchUsers());
         toast.success("User updated!");
       } else {
-        setUsers((prev) => [
-          ...prev,
-          { id: Date.now(), ...form, address: "", phone: "", image: "" },
-        ]);
+        await dispatch(addUser({ email: form.email, password: form.password, name: form.name, role: form.role, phone: form.phone }));
+        dispatch(fetchUsers());
         toast.success("User added!");
       }
       setModalOpen(false);
+    } catch (err) {
+      toast.error(editUser ? "Failed to update user" : "Failed to add user");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -116,17 +109,6 @@ export default function UsersPage() {
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Filter by role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="user">User</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <Button onClick={openAddModal} className="gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" /> Add User
@@ -154,8 +136,8 @@ export default function UsersPage() {
               </TableRow>
             ) : (
               filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.name}</TableCell>
+                <TableRow key={user.uid}>
+                  <TableCell>{user.name || user.email}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role}</TableCell>
                   <TableCell className="flex gap-2 justify-center">
@@ -171,7 +153,7 @@ export default function UsersPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => setDeleteUser(user)}
+                      onClick={() => setDeleteUserObj(user)}
                       aria-label="Delete"
                       disabled={loading}
                       className="text-destructive"
@@ -190,30 +172,68 @@ export default function UsersPage() {
       {/* Add/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <DialogHeader>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <DialogHeader className="col-span-1 md:col-span-2">
               <DialogTitle>{editUser ? "Edit User" : "Add User"}</DialogTitle>
             </DialogHeader>
-            <Input
-              placeholder="Name"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Role"
-              value={form.role}
-              onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
-              required
-            />
-            <DialogFooter>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Name</label>
+              <Input
+                placeholder="Name"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Email</label>
+              <Input
+                placeholder="Email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                required
+              />
+            </div>
+            {!editUser && (
+              <div className="flex flex-col">
+                <label className="mb-1 font-semibold text-[#1a4d8f]">Password</label>
+                <Input
+                  placeholder="Password"
+                  type="password"
+                  value={form.password || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  required
+                />
+              </div>
+            )}
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Phone</label>
+              <Input
+                placeholder="Phone"
+                type="tel"
+                value={form.phone || ""}
+                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Role</label>
+              <Select
+                value={form.role}
+                onValueChange={(value) => setForm((f) => ({ ...f, role: value }))}
+                required
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter className="col-span-1 md:col-span-2 flex justify-end gap-2 mt-4">
               <Button type="submit" disabled={loading} className="gap-2">
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editUser ? "Update" : "Add"}
@@ -229,12 +249,12 @@ export default function UsersPage() {
       </Dialog>
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={!!deleteUser} onOpenChange={(open) => !open && setDeleteUser(null)}>
+      <Dialog open={!!deleteUserObj} onOpenChange={(open) => !open && setDeleteUserObj(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
           </DialogHeader>
-          <div>Are you sure you want to delete <span className="font-semibold text-[#e63946]">{deleteUser?.name}</span>? This action cannot be undone.</div>
+          <div>Are you sure you want to delete <span className="font-semibold text-[#e63946]">{deleteUserObj?.name || deleteUserObj?.email}</span>? This action cannot be undone.</div>
           <DialogFooter>
             <Button
               variant="destructive"

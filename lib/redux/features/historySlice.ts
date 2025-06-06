@@ -2,38 +2,34 @@ import { createSlice, Dispatch } from "@reduxjs/toolkit";
 import axios from "axios";
 import { RootState } from "../store";
 
-export interface Membership {
+export interface History {
   id: string;
   userId: string;
-  planId: string;
-  totalDays: number;
-  totalNights: number;
-  usedDays: number;
-  usedNights: number;
+  packageId: string;
   createdOn: string;
   updatedOn: string;
   status: string;
 }
 
-export interface MembershipState {
-  data: Membership[];
+export interface HistoryState {
+  data: History[];
   loading: boolean;
   error: string | null;
-  selectedMembership: Membership | null;
+  selectedHistory: History | null;
 }
 
-const initialState: MembershipState = {
+const initialState: HistoryState = {
   data: [],
   loading: false,
   error: null,
-  selectedMembership: null,
+  selectedHistory: null,
 };
 
-const membershipSlice = createSlice({
-  name: "membership",
+const historySlice = createSlice({
+  name: "history",
   initialState,
   reducers: {
-    setMemberships: (state, action) => {
+    setHistories: (state, action) => {
       state.data = action.payload;
       state.loading = false;
       state.error = null;
@@ -46,25 +42,25 @@ const membershipSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
-    setSelectedMembership: (state, action) => {
-      state.selectedMembership = action.payload;
+    setSelectedHistory: (state, action) => {
+      state.selectedHistory = action.payload;
       state.error = null;
     },
-    clearSelectedMembership: (state) => {
-      state.selectedMembership = null;
+    clearSelectedHistory: (state) => {
+      state.selectedHistory = null;
       state.error = null;
     },
   },
 });
 
-export const { setMemberships, setLoading, setError, setSelectedMembership, clearSelectedMembership } = membershipSlice.actions;
+export const { setHistories, setLoading, setError, setSelectedHistory, clearSelectedHistory } = historySlice.actions;
 
-export const fetchMemberships = () => async (dispatch: Dispatch) => {
+export const fetchHistories = () => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.get("/api/routes/memberships");
+    const response = await axios.get("/api/routes/history");
     if (response.status === 200) {
-      dispatch(setMemberships(response.data.data));
+      dispatch(setHistories(response.data.data));
     } else {
       dispatch(setError(response.data.message));
     }
@@ -77,9 +73,9 @@ export const fetchMemberships = () => async (dispatch: Dispatch) => {
 export const fetchPackageById = (id: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.get(`/api/routes/memberships/${id}`);
+    const response = await axios.get(`/api/routes/history/${id}`);
     if (response.status === 200) {
-        dispatch(setSelectedMembership(response.data.data));
+        dispatch(setSelectedHistory(response.data.data));
     } else {
       dispatch(setError(response.data.message));
     }
@@ -89,10 +85,25 @@ export const fetchPackageById = (id: string) => async (dispatch: Dispatch) => {
   }
 };
 
-export const addMembership = (membershipData: any) => async (dispatch: Dispatch) => {
+export const fetchHistoryByUserId = (userId: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.post("/api/routes/memberships", membershipData);
+    const response = await axios.get(`/api/routes/history/${userId}`);
+    if (response.status === 200) {
+      dispatch(setHistories(response.data.data));
+    } else {
+      dispatch(setError(response.data.message));
+    }
+  } catch (error: unknown) {
+    const message = typeof error === "object" && error && "message" in error ? (error as { message?: string }).message : String(error);
+    dispatch(setError(message || "Unknown error"));
+  }
+};  
+
+export const addHistory = (historyData: any) => async (dispatch: Dispatch) => {
+  dispatch(setLoading(true));
+  try {
+    const response = await axios.post("/api/routes/history", historyData);
     if (response.status === 200) {
       return response.data;
     } else {
@@ -104,10 +115,10 @@ export const addMembership = (membershipData: any) => async (dispatch: Dispatch)
   }
 };
 
-export const updateMembership = (membershipData: any, id: string) => async (dispatch: Dispatch) => {
+export const updateHistory = (historyData: any, id: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.put(`/api/routes/memberships/${id}`, membershipData);
+    const response = await axios.put(`/api/routes/history/${id}`, historyData);
     if (response.status === 200) {
       return response.data;
     } else {
@@ -119,10 +130,10 @@ export const updateMembership = (membershipData: any, id: string) => async (disp
   }
 };
 
-export const deleteMembership = (id: string) => async (dispatch: Dispatch) => {
+export const deleteHistory = (id: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.delete(`/api/routes/memberships/${id}`);
+    const response = await axios.delete(`/api/routes/history/${id}`);
     if (response.status === 200) {
       return response.data;
     } else {
@@ -134,9 +145,9 @@ export const deleteMembership = (id: string) => async (dispatch: Dispatch) => {
   }
 };
 
-export const selectMemberships = (state: RootState) => state.membership.data;
-export const selectMembershipById = (state: RootState, id: string) => state.membership.data.find((mem: Membership) => mem.id === id);
-export const selectLoading = (state: RootState) => state.membership.loading;
-export const selectError = (state: RootState) => state.membership.error;
+export const selectHistories = (state: RootState) => state.history.data;
+export const selectHistoryById = (state: RootState, id: string) => state.history.data.find((hist: History) => hist.id === id);
+export const selectLoading = (state: RootState) => state.history.loading;
+export const selectError = (state: RootState) => state.history.error;
 
-export default membershipSlice.reducer;    
+export default historySlice.reducer;    

@@ -1,95 +1,67 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Loader2, Edit, Trash2, Search, RefreshCw } from "lucide-react";
+import { Loader2, Trash2, Search, RefreshCw, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/redux/store";
+import { fetchMemberships, selectMemberships, selectLoading, selectError, addMembership, updateMembership, deleteMembership } from "@/lib/redux/features/membershipSlice";
+import { selectUsers, fetchUsers } from "@/lib/redux/features/authSlice";
+import { fetchPlans, selectPlans } from "@/lib/redux/features/planSlice";
+import type { Membership } from "@/lib/redux/features/membershipSlice";
 
-// Mock data types
-interface User {
-  id: number;
-  name: string;
-}
-interface Plan {
-  id: number;
-  name: string;
-  days: number;
-  nights: number;
-}
-interface Membership {
-  id: number;
-  userId: number;
-  planId: number;
-  usedDays: number;
-  usedNights: number;
-}
-
-const users: User[] = [
-  { id: 1, name: "Amit Sharma" },
-  { id: 2, name: "Priya Singh" },
-  { id: 3, name: "Rahul Verma" },
-];
-
-const plans: Plan[] = [
-  { id: 1, name: "Goa 6D/4N", days: 6, nights: 4 },
-  { id: 2, name: "Manali 4D/3N", days: 4, nights: 3 },
-  { id: 3, name: "Jaipur 3D/2N", days: 3, nights: 2 },
-];
-
-const initialMemberships: Membership[] = [
-  {
-    id: 1,
-    userId: 1,
-    planId: 1,
-    usedDays: 3,
-    usedNights: 2,
-  },
-  {
-    id: 2,
-    userId: 2,
-    planId: 2,
-    usedDays: 1,
-    usedNights: 1,
-  },
-  {
-    id: 3,
-    userId: 3,
-    planId: 3,
-    usedDays: 0,
-    usedNights: 0,
-  },
-];
 
 export default function MembershipsPage() {
-  const [memberships, setMemberships] = useState<Membership[]>(initialMemberships);
+  const dispatch = useDispatch<AppDispatch>();
+  const memberships = useSelector(selectMemberships);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+  const users = useSelector(selectUsers);
+  const plans = useSelector(selectPlans);
+
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
-  const [loading, setLoading] = useState(false);
   const [editMembership, setEditMembership] = useState<Membership | null>(null);
   const [usageModal, setUsageModal] = useState<Membership | null>(null);
-  const [deleteMembership, setDeleteMembership] = useState<Membership | null>(null);
+  const [deleteMembershipModal, setDeleteMembershipModal] = useState<Membership | null>(null);
   const [usageForm, setUsageForm] = useState({ usedDays: 0, usedNights: 0 });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>("add");
+  const [form, setForm] = useState({
+    userId: '',
+    planId: '',
+    usedDays: 0,
+    usedNights: 0,
+    status: 'active',
+  });
+
+  React.useEffect(() => {
+    dispatch(fetchMemberships());
+    dispatch(fetchUsers());
+    dispatch(fetchPlans());
+  }, [dispatch]);
 
   // Helper to get user/plan by id
-  const getUser = (id: number) => users.find((u) => u.id === id);
-  const getPlan = (id: number) => plans.find((p) => p.id === id);
+  const getUser = (id: string) => users.find((u) => u.uid === id);
+  const getPlan = (id: string) => plans.find((p) => p.id === id);
 
   // Filtered memberships
-  const filteredMemberships = useMemo(() => {
+  const filteredMemberships = React.useMemo(() => {
     return memberships.filter((m) => {
       const user = getUser(m.userId);
       const plan = getPlan(m.planId);
       const matchesSearch =
-        user?.name.toLowerCase().includes(search.toLowerCase()) ||
-        plan?.name.toLowerCase().includes(search.toLowerCase());
-      const matchesPlan = planFilter === "all" || m.planId === Number(planFilter);
+        (user?.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
+        (plan?.name?.toLowerCase() || "").includes(search.toLowerCase());
+      const matchesPlan = planFilter === "all" || m.planId === planFilter;
       return matchesSearch && matchesPlan;
     });
-  }, [memberships, search, planFilter]);
+  }, [memberships, users, plans, search, planFilter]);
 
   // Handlers
   const openUsageModal = (membership: Membership) => {
@@ -100,30 +72,84 @@ export default function MembershipsPage() {
   const handleUpdateUsage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!usageModal) return;
-    setLoading(true);
-    setTimeout(() => {
-      setMemberships((prev) =>
-        prev.map((m) =>
-          m.id === usageModal.id
-            ? { ...m, usedDays: usageForm.usedDays, usedNights: usageForm.usedNights }
-            : m
-        )
-      );
-      setLoading(false);
-      setUsageModal(null);
-      toast.success("Usage updated!");
-    }, 800);
+    dispatch(updateMembership({
+      usedDays: usageForm.usedDays,
+      usedNights: usageForm.usedNights
+    }, usageModal.id));
+    setUsageModal(null);
+    toast.success("Usage updated!");
   };
 
   const handleDelete = () => {
-    if (!deleteMembership) return;
-    setLoading(true);
-    setTimeout(() => {
-      setMemberships((prev) => prev.filter((m) => m.id !== deleteMembership.id));
-      setLoading(false);
-      setDeleteMembership(null);
-      toast.success("Membership deleted!");
-    }, 800);
+    if (!deleteMembershipModal) return;
+    dispatch(deleteMembership(deleteMembershipModal.id));
+    setDeleteMembershipModal(null);
+    toast.success("Membership deleted!");
+  };
+
+  const openAddModal = () => {
+    setModalMode('add');
+    setForm({ userId: '', planId: '', usedDays: 0, usedNights: 0, status: 'active' });
+    setModalOpen(true);
+  };
+
+  const openEditModal = (membership: Membership) => {
+    setModalMode('edit');
+    setForm({
+      userId: membership.userId,
+      planId: membership.planId,
+      usedDays: membership.usedDays,
+      usedNights: membership.usedNights,
+      status: membership.status || 'active',
+    });
+    setEditMembership(membership);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditMembership(null);
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+  };
+
+  const handleFormNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: Number(value) }));
+  };
+
+  const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const plan = getPlan(form.planId);
+    const totalDays = plan?.days ? parseInt(plan.days, 10) : 0;
+    const totalNights = plan?.nights ? parseInt(plan.nights, 10) : 0;
+    if (modalMode === 'add') {
+      await dispatch(addMembership({
+        userId: form.userId,
+        planId: form.planId,
+        usedDays: form.usedDays,
+        usedNights: form.usedNights,
+        totalDays,
+        totalNights,
+        status: form.status,
+      }));
+      toast.success('Membership added!');
+    } else if (modalMode === 'edit' && editMembership) {
+      await dispatch(updateMembership({
+        userId: form.userId,
+        planId: form.planId,
+        usedDays: form.usedDays,
+        usedNights: form.usedNights,
+        totalDays,
+        totalNights,
+        status: form.status,
+      }, editMembership.id));
+      toast.success('Membership updated!');
+    }
+    closeModal();
   };
 
   return (
@@ -179,8 +205,8 @@ export default function MembershipsPage() {
               filteredMemberships.map((m) => {
                 const user = getUser(m.userId);
                 const plan = getPlan(m.planId);
-                const totalDays = plan?.days || 0;
-                const totalNights = plan?.nights || 0;
+                const totalDays = plan?.days ? parseInt(plan.days, 10) : 0;
+                const totalNights = plan?.nights ? parseInt(plan.nights, 10) : 0;
                 const usedDays = m.usedDays;
                 const usedNights = m.usedNights;
                 const remDays = Math.max(totalDays - usedDays, 0);
@@ -206,8 +232,11 @@ export default function MembershipsPage() {
                         <Button size="sm" variant="ghost" onClick={() => openUsageModal(m)} aria-label="Update Usage">
                           <RefreshCw className="w-4 h-4 mr-1" /> Update Usage
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setDeleteMembership(m)} aria-label="Delete" className="text-destructive">
+                        <Button size="sm" variant="ghost" onClick={() => setDeleteMembershipModal(m)} aria-label="Delete" className="text-destructive">
                           <Trash2 className="w-4 h-4 mr-1" /> Delete
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => openEditModal(m)} aria-label="Edit">
+                          <Edit className="w-4 h-4 mr-1" /> Edit
                         </Button>
                       </div>
                     </td>
@@ -232,7 +261,7 @@ export default function MembershipsPage() {
                 <Input
                   type="number"
                   min={0}
-                  max={usageModal ? getPlan(usageModal.planId)?.days : 0}
+                  max={usageModal ? getPlan(usageModal.planId || '')?.days : 0}
                   value={usageForm.usedDays}
                   onChange={e => setUsageForm(f => ({ ...f, usedDays: Number(e.target.value) }))}
                   required
@@ -243,7 +272,7 @@ export default function MembershipsPage() {
                 <Input
                   type="number"
                   min={0}
-                  max={usageModal ? getPlan(usageModal.planId)?.nights : 0}
+                  max={usageModal ? getPlan(usageModal.planId || '')?.nights : 0}
                   value={usageForm.usedNights}
                   onChange={e => setUsageForm(f => ({ ...f, usedNights: Number(e.target.value) }))}
                   required
@@ -265,7 +294,7 @@ export default function MembershipsPage() {
       </Dialog>
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={!!deleteMembership} onOpenChange={(open) => !open && setDeleteMembership(null)}>
+      <Dialog open={!!deleteMembershipModal} onOpenChange={(open) => !open && setDeleteMembershipModal(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Membership</DialogTitle>
@@ -288,6 +317,68 @@ export default function MembershipsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add/Edit Membership Modal */}
+      <Dialog open={modalOpen} onOpenChange={closeModal}>
+        <DialogContent>
+          <form onSubmit={handleModalSubmit} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>{modalMode === 'add' ? 'Add Membership' : 'Edit Membership'}</DialogTitle>
+            </DialogHeader>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">User</label>
+                <select name="userId" value={form.userId} onChange={handleFormChange} required className="w-full border rounded px-3 py-2">
+                  <option value="">Select user</option>
+                  {users.map((u) => (
+                    <option key={u.uid} value={u.uid}>{u.name || u.email}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">Plan</label>
+                <select name="planId" value={form.planId} onChange={handleFormChange} required className="w-full border rounded px-3 py-2">
+                  <option value="">Select plan</option>
+                  {plans.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">Used Days</label>
+                <Input type="number" name="usedDays" min={0} max={getPlan(String(form.planId || ''))?.days ? (getPlan(String(form.planId || ''))?.days, 10) : 0} value={form.usedDays} onChange={handleFormNumberChange} required />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">Used Nights</label>
+                <Input type="number" name="usedNights" min={0} max={getPlan(String(form.planId || ''))?.nights ? (getPlan(String(form.planId || ''))?.nights, 10) : 0} value={form.usedNights} onChange={handleFormNumberChange} required />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Status</label>
+              <Input name="status" value={form.status} onChange={handleFormChange} />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={loading} className="gap-2">
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />} {modalMode === 'add' ? 'Add' : 'Update'}
+              </Button>
+              <DialogClose asChild>
+                <Button type="button" variant="ghost">
+                  Cancel
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Membership Button */}
+      <div className="flex justify-end mb-2">
+        <Button onClick={openAddModal} className="bg-[#43aa8b] text-white font-bold">
+          + Add Membership
+        </Button>
+      </div>
     </div>
   );
 }

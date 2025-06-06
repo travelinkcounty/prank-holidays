@@ -2,22 +2,33 @@ import { createSlice, Dispatch } from "@reduxjs/toolkit";
 import axios from "axios";
 import { RootState } from "../store";
 
-interface Count {
-  id: string;
-  name: string;
-  value: number;
-  createdOn: string;
-  updatedOn: string;
-}
 
 interface CountState {
-  data: Count[];
+  data: {
+    users: number;
+    packages: number;
+    leads: number;
+    testimonials: number;
+    services: number;
+    locations: number;
+    plans: number;
+    memberships: number;
+  };
   loading: boolean;
   error: string | null;
 }
 
 const initialState: CountState = {
-  data: [],
+    data: {
+    users: 0,
+    packages: 0,
+    leads: 0,
+    testimonials: 0,
+    services: 0,
+    locations: 0,
+    plans: 0,
+    memberships: 0,
+  },
   loading: false,
   error: null,
 };
@@ -43,7 +54,7 @@ export const { setCounts, setLoading, setError } = countSlice.actions;
 export const fetchCounts = () => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.get("/api/routes/counts");
+    const response = await axios.get("/api/routes/count");
     if (response.status === 200) {
       dispatch(setCounts(response.data.data));
     } else {

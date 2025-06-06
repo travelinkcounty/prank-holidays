@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Eye, EyeOff, UserCircle2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +17,7 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -46,33 +50,37 @@ const LoginPage = () => {
     setError("");
     setSuccess(false);
     setLoading(true);
-    // Mock users
-    const users = [
-      { id: 1, email: "admin@gmail.com", password: "admin123", role: "admin" },
-      { id: 2, email: "user@gmail.com", password: "user123", role: "user" },
-    ];
-    setTimeout(() => {
-      const found = users.find(u => u.email === email && u.password === password);
-      if (found) {
-        setSuccess(true);
-        setError("");
-        // Save to localStorage
-        if (typeof window !== "undefined") {
-          localStorage.setItem("user", JSON.stringify({ id: found.id, email: found.email, role: found.role }));
-          // Save to cookie for middleware
-          document.cookie = `user=${encodeURIComponent(JSON.stringify({ id: found.id, email: found.email, role: found.role }))}; path=/`;
-        }
-        if (found.role === "admin") {
-          window.location.href = "/dashboard";
-        } else {
-          window.location.href = "/profile";
-        }
-      } else {
-        setError("Invalid email or password");
+    try {
+      // 1. Login with Firebase Client SDK
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      // 2. Fetch user details from backend
+      const res = await fetch(`/api/routes/auth?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (!res.ok || !data.data) {
+        setError("Could not fetch user details");
         setSuccess(false);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    }, 1200);
+      setSuccess(true);
+      setError("");
+      // Save to localStorage and cookie
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(data.data));
+        document.cookie = `user=${encodeURIComponent(JSON.stringify(data.data))}; path=/`;
+      }
+      // Redirect based on role
+      if (data.data.role === "admin") {
+        window.location.href = "/dashboard";
+      } else {
+        window.location.href = "/profile";
+      }
+    } catch (err: any) {
+      setError("Invalid email or password.");
+      setSuccess(false);
+    }
+    setLoading(false);
   };
 
   return (
@@ -136,9 +144,6 @@ const LoginPage = () => {
             )}
           </Button>
         </form>
-        <div className="mt-6 text-sm text-gray-500 text-center">
-          Don&apos;t have an account? <a href="#" className="text-[#e63946] font-semibold hover:underline">Sign up</a>
-        </div>
       </div>
     </div>
   );

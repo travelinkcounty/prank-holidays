@@ -3,18 +3,21 @@ import consoleManager from "../utils/consoleManager";
 
 class CountService {
   static counts: { [key: string]: number } = {
+    users: 0,
+    packages: 0,
     leads: 0,
-    portfolios: 0,
     testimonials: 0,
     services: 0,
-    brands: 0,
+    locations: 0,
+    plans: 0,
+    memberships: 0,
   };
   static isInitialized = false;
 
   static async initCounts() {
     if (this.isInitialized) return;
 
-    const collections = ["leads", "portfolios", "testimonials", "services", "brands"];
+    const collections = ["users", "packages", "leads", "testimonials", "services", "locations", "plans", "memberships"];
 
     for (let collectionName of collections) {
       try {

@@ -1,40 +1,74 @@
-import { db } from "../config/firebase";
-import jwt from "jsonwebtoken";
+import { db, auth } from "../config/firebase";
 import consoleManager from "../utils/consoleManager";
 
-const SECRET_KEY = "12"; // Change this to a proper secret key
-
 class AuthService {
-    static async loginUser(email: string, password: string) {
+    static async registerUser(email: string, password: string, extraData: any = {}) {
         try {
-            consoleManager.log("🔍 Checking user:", email);
-
-            // Fetch user from Firestore
-            const userSnapshot = await db.collection("users").where("email", "==", email).get();
-
-            if (userSnapshot.empty) {
-                throw new Error("User not found. Please check your email.");
-            }
-
-            const userDoc = userSnapshot.docs[0];
-            const userData = userDoc.data();
-
-            // Simple password comparison (NOT recommended for production)
-            if (password !== userData.password) {
-                throw new Error("Incorrect password. Please try again.");
-            }
-
-            // Generate JWT token
-            const token = jwt.sign({ uid: userDoc.id, email: userData.email }, SECRET_KEY, { expiresIn: "7d" });
-
-            consoleManager.log("✅ User logged in successfully:", userDoc.id);
-            return { token, uid: userDoc.id, email: userData.email };
-
+            // Create user in Firebase Auth (Admin SDK)
+            const userRecord = await auth.createUser({ email, password, ...extraData });
+            // Create user in Firestore users collection
+            await db.collection("users").doc(userRecord.uid).set({
+                email: userRecord.email,
+                uid: userRecord.uid,
+                ...extraData,
+                createdAt: new Date().toISOString(),
+            });
+            consoleManager.log("✅ User registered and added to Firestore:", userRecord.uid);
+            return { uid: userRecord.uid, email: userRecord.email };
         } catch (error: any) {
-            consoleManager.error("❌ Error logging in user:", error.message);
-            throw new Error("Login failed. Please check your credentials.");
+            consoleManager.error("❌ Error registering user:", error.message);
+            throw new Error(error.message || "Registration failed.");
+        }
+    }
+
+    static async loginUser(email: string, password: string) {
+        throw new Error("Server-side login is not supported. Use client SDK for login.");
+    }
+
+    static async deleteUserByUid(uid: string) {
+        try {
+            await auth.deleteUser(uid);
+            await db.collection("users").doc(uid).delete();
+            consoleManager.log("✅ User deleted from Auth and Firestore:", uid);
+            return { success: true };
+        } catch (error: any) {
+            consoleManager.error("❌ Error deleting user:", error.message);
+            throw new Error(error.message || "Delete failed.");
+        }
+    }
+
+    static async updateUser(uid: string, updateData: any) {
+        try {
+            const allowedFields: any = {};
+            if (updateData.email) allowedFields.email = updateData.email;
+            if (updateData.password) allowedFields.password = updateData.password;
+            if (updateData.displayName) allowedFields.displayName = updateData.displayName;
+            if (updateData.phoneNumber) allowedFields.phoneNumber = updateData.phoneNumber;
+            if (updateData.photoURL) allowedFields.photoURL = updateData.photoURL;
+            if (updateData.disabled !== undefined) allowedFields.disabled = updateData.disabled;
+            if (updateData.role) allowedFields.customClaims = { role: updateData.role };
+            if (Object.keys(allowedFields).length > 0) {
+                await auth.updateUser(uid, allowedFields);
+            }
+            consoleManager.log("✅ User updated in Auth:", uid);
+        } catch (error: any) {
+            consoleManager.error("❌ Error updating user in Auth:", error.message);
+            throw new Error("Failed to update user in Auth: " + error.message);
+        }
+    }
+
+    static async updateUserInFirestore(uid: string, updateData: any) {
+        try {
+            await db.collection("users").doc(uid).update({
+                ...updateData,
+                updatedOn: new Date().toISOString(),
+            });
+            consoleManager.log("✅ User updated in Firestore:", uid);
+        } catch (error: any) {
+            consoleManager.error("❌ Error updating user in Firestore:", error.message);
+            throw new Error("Failed to update user in Firestore: " + error.message);
         }
     }
 }
 
-    export default AuthService;
+export default AuthService;

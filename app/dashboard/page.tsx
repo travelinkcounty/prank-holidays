@@ -1,22 +1,38 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { Users, Package, FileText, MapPin, PlusCircle } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchCounts, selectCounts } from "@/lib/redux/features/countSlice";
+import { AppDispatch } from "@/lib/redux/store";
 
-const stats = [
-  { label: "Users", value: 128, icon: <Users className="w-7 h-7 text-[#457b9d]" /> },
-  { label: "Leads", value: 42, icon: <Users className="w-7 h-7 text-[#e63946]" /> },
-  { label: "Packages", value: 12, icon: <Package className="w-7 h-7 text-[#ffe066]" /> },
-  { label: "Plans", value: 7, icon: <FileText className="w-7 h-7 text-[#43aa8b]" /> },
-  { label: "Locations", value: 5, icon: <MapPin className="w-7 h-7 text-[#f3722c]" /> },
-];
+const statIcons: Record<string, React.ReactNode> = {
+  users: <Users className="w-8 h-8 text-[#e63946]" />,
+  packages: <Package className="w-8 h-8 text-[#457b9d]" />,
+  leads: <FileText className="w-8 h-8 text-[#ffe066]" />,
+  testimonials: <FileText className="w-8 h-8 text-[#43aa8b]" />,
+  services: <PlusCircle className="w-8 h-8 text-[#f3722c]" />,
+  locations: <MapPin className="w-8 h-8 text-[#1d3557]" />,
+  plans: <Package className="w-8 h-8 text-[#a8dadc]" />,
+  memberships: <Users className="w-8 h-8 text-[#b5179e]" />,
+};
 
 const DashboardPage = () => {
+    const dispatch = useDispatch<AppDispatch>();
+    const stats = useSelector(selectCounts);
+
+    useEffect(() => {
+        dispatch(fetchCounts());
+    }, [dispatch]);
+
+
   return (
     <div className="w-full mx-auto p-0 px-2 flex flex-col gap-8">
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
         <div className="flex-shrink-0 flex items-center justify-center">
-          <Image src="/logo-prank-holidays.png" alt="Prank Holidays Logo" width={180} height={80} priority className="rounded-xl" />
+          <Image src="/logo.jpeg" alt="Prank Holidays Logo" width={180} height={80} priority className="rounded-xl" />
         </div>
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#e63946] mb-2" style={{ fontFamily: 'var(--font-main)' }}>
@@ -30,11 +46,11 @@ const DashboardPage = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {stats.map(stat => (
-          <div key={stat.label} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center border border-gray-100 hover:shadow-xl transition-all">
-            <div className="mb-2">{stat.icon}</div>
-            <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-main)' }}>{stat.value}</div>
-            <div className="text-sm text-gray-500 mt-1">{stat.label}</div>
+        {Object.entries(stats).map(([key, value]) => (
+          <div key={key} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center border border-gray-100 hover:shadow-xl transition-all">
+            <div className="mb-2">{statIcons[key]}</div>
+            <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-main)' }}>{value}</div>
+            <div className="text-sm text-gray-500 mt-1">{key}</div>
           </div>
         ))}
       </div>

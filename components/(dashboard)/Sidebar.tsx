@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Users, Image, LogOut, MapPin, Package, Menu } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Image, LogOut, MapPin, Package, Menu, History } from "lucide-react";
 
 const links = [
   { name: "Dashboard", href: "/dashboard", icon: <LayoutDashboard /> },
@@ -13,6 +13,7 @@ const links = [
   { name: "Locations", href: "/dashboard/locations", icon: <MapPin /> },
   { name: "Gallery", href: "/dashboard/gallery", icon: <Image /> },
   { name: "Memberships", href: "/dashboard/memberships", icon: <Users /> },
+  { name: "History", href: "/dashboard/history", icon: <History /> },
   { name: "Logout", href: "/logout", icon: <LogOut /> },
 ];
 

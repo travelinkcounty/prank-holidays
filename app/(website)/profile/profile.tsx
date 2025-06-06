@@ -5,7 +5,7 @@ import { User, Users, BadgeCheck, Edit, LogOut, History as HistoryIcon, Link } f
 import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
-import { fetchUserById, selectSelectedUser } from "@/lib/redux/features/userSlice";
+import { fetchUserById, selectUser } from "@/lib/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 
 const user = {
@@ -42,16 +42,16 @@ const navLinks = [
 
 const Profile = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const userData = useSelector(selectSelectedUser);
+    const userData = useSelector(selectUser);
     const [active, setActive] = useState("profile");
     const router = useRouter();
 
     useEffect(() => {
-        const userId = JSON.parse(localStorage.getItem("user") || "null").id;
+        const userId = userData?.uid;
         if (userId) {
             dispatch(fetchUserById(userId));
         }
-    }, [dispatch]);
+    }, [dispatch, userData]);
 
     // Section renderers
     const renderSection = () => {

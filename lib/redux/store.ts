@@ -7,7 +7,8 @@ import testimonialReducer from "./features/testimonialSlice";
 import planReducer from "./features/planSlice";
 import authReducer from "./features/authSlice";
 import countReducer from "./features/countSlice";
-import userReducer from "./features/userSlice";
+import membershipReducer from "./features/membershipSlice";
+import historyReducer from "./features/historySlice";
 
 export const store = configureStore({
   reducer: {
@@ -19,7 +20,8 @@ export const store = configureStore({
     plan: planReducer,
     auth: authReducer,
     count: countReducer,
-    user: userReducer,
+    membership: membershipReducer,
+    history: historyReducer,
   },
 });
 
