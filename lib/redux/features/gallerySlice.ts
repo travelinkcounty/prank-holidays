@@ -85,7 +85,6 @@ export const fetchGalleryById = (id: string) => async (dispatch: Dispatch) => {
 };
 
 export const addGallery = (gallery: FormData) => async (dispatch: Dispatch) => {
-  dispatch(setIsLoading(true));
   try {
     const response = await axios.post("/api/routes/gallery", gallery,
       {
@@ -106,7 +105,6 @@ export const addGallery = (gallery: FormData) => async (dispatch: Dispatch) => {
 };  
 
 export const updateGallery = (gallery: FormData, id: string) => async (dispatch: Dispatch) => {
-  dispatch(setIsLoading(true));
   try {
     const response = await axios.put(`/api/routes/gallery/${id}`, gallery,
       {
@@ -127,7 +125,6 @@ export const updateGallery = (gallery: FormData, id: string) => async (dispatch:
 };  
 
 export const deleteGallery = (id: string) => async (dispatch: Dispatch) => {
-  dispatch(setIsLoading(true));
   try {
     const response = await axios.delete(`/api/routes/gallery/${id}`);
     if (response.status === 200) {

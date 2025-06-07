@@ -88,7 +88,12 @@ export default function LeadsPage() {
   };
 
   if(error) {
-    return <div>{error}</div>
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Leads</h2>
+        <p>Error loading leads. Please try again later.</p>
+      </div>
+    )
   }
 
   return (

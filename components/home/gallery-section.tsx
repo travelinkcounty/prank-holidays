@@ -1,22 +1,27 @@
-import React from "react";
+"use client";
 
-const galleryImages = [
-  { title: "Epic Beach", image: "/images/gallery1.jpg" },
-  { title: "Mountain Escape", image: "/images/gallery2.jpg" },
-  { title: "City Lights", image: "/images/gallery3.jpg" },
-  { title: "Jungle Adventure", image: "/images/gallery4.jpg" },
-  { title: "Desert Dream", image: "/images/gallery5.jpg" },
-  { title: "Snowy Peaks", image: "/images/gallery6.jpg" },
-];
+import React, { useEffect } from "react";
+import Image from "next/image";
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/redux/store";
+import { fetchGallery, selectGallery } from "@/lib/redux/features/gallerySlice";
 
-const GallerySection = () => (
-  <section className="py-16 bg-white">
-    <div className="max-w-7xl mx-auto px-4">
-      <h2 className="text-5xl font-extrabold text-center mb-10 text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>
+const GallerySection = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const gallery = useSelector(selectGallery);
+
+  useEffect(() => {
+    dispatch(fetchGallery());
+  }, [dispatch]);
+
+  return (
+    <section className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        <h2 className="text-5xl font-extrabold text-center mb-10 text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>
         Gallery
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-10">
-        {galleryImages.map((item, idx) => (
+        {gallery.map((item, idx) => (
           <div
             key={idx}
             className="group relative overflow-hidden rounded-2xl border-2 border-[#ffe066] bg-white shadow-md hover:shadow-xl transition hover:scale-105"
@@ -42,7 +47,8 @@ const GallerySection = () => (
         </a>
       </div>
     </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default GallerySection;

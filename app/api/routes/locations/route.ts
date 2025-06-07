@@ -6,18 +6,34 @@ import consoleManager from "../../utils/consoleManager";
 // Get all packages (GET)
 export async function GET(req: Request) {
     try {
+        const { searchParams } = new URL(req.url);
+        const featured = searchParams.get("featured");
 
-        // Fetch packages based on status filter
-        const locations = await LocationService.getAllLocations();
-        consoleManager.log("Fetched all locations:", locations.length);
+        if (featured == "true") {
+            // Return only featured locations
+            const featuredLocations = await LocationService.getFeaturedLocations();
+            consoleManager.log("Fetched featured locations:", featuredLocations.length);
 
-        return NextResponse.json({
-            statusCode: 200,
-            message: "Locations fetched successfully",
-            data: locations,
-            errorCode: "NO",
-            errorMessage: "",
-        }, { status: 200 });
+            return NextResponse.json({
+                statusCode: 200,
+                message: "Featured locations fetched successfully",
+                data: featuredLocations,
+                errorCode: "NO",
+                errorMessage: "",
+            }, { status: 200 });
+        } else {
+            // Return all locations
+            const locations = await LocationService.getAllLocations();
+            consoleManager.log("Fetched all locations:", locations.length);
+
+            return NextResponse.json({
+                statusCode: 200,
+                message: "Locations fetched successfully",
+                data: locations,
+                errorCode: "NO",
+                errorMessage: "",
+            }, { status: 200 });
+        }
     } catch (error: any) {
         consoleManager.error("❌ Error in GET /api/locations:", error);
         return NextResponse.json({
@@ -34,6 +50,8 @@ export async function POST(req: Request) {
         const formData = await req.formData();
         const name = formData.get("name");
         const type = formData.get("type");
+        const featured = formData.get("featured") === "true";
+
         const file = formData.get("image");
 
         if (!name || !file) {
@@ -53,6 +71,7 @@ export async function POST(req: Request) {
             name,
             type,
             image: imageUrl,
+            featured,
         });
 
         consoleManager.log("✅ Location created successfully:", newLocation);

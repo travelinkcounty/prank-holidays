@@ -11,7 +11,7 @@ class AuthService {
                 email: userRecord.email,
                 uid: userRecord.uid,
                 ...extraData,
-                createdAt: new Date().toISOString(),
+                createdOn: new Date().toISOString(),
             });
             consoleManager.log("✅ User registered and added to Firestore:", userRecord.uid);
             return { uid: userRecord.uid, email: userRecord.email };

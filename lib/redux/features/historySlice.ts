@@ -101,7 +101,6 @@ export const fetchHistoryByUserId = (userId: string) => async (dispatch: Dispatc
 };  
 
 export const addHistory = (historyData: any) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.post("/api/routes/history", historyData);
     if (response.status === 200) {
@@ -116,7 +115,6 @@ export const addHistory = (historyData: any) => async (dispatch: Dispatch) => {
 };
 
 export const updateHistory = (historyData: any, id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.put(`/api/routes/history/${id}`, historyData);
     if (response.status === 200) {
@@ -131,7 +129,6 @@ export const updateHistory = (historyData: any, id: string) => async (dispatch: 
 };
 
 export const deleteHistory = (id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.delete(`/api/routes/history/${id}`);
     if (response.status === 200) {

@@ -1,39 +1,25 @@
-import React from "react";
+'use client'
+
+import React, { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-
-const packages = [
-  {
-    image: "/images/goa.jpg",
-    name: "Goa Beach Escape",
-    price: "₹12,999",
-    days: "6D/4N",
-    desc: "Experience the vibrant beaches, nightlife, and culture of Goa.",
-  },
-  {
-    image: "/images/manali.jpg",
-    name: "Manali Adventure",
-    price: "₹9,499",
-    days: "4D/3N",
-    desc: "Enjoy snow-capped mountains, rivers, and adventure sports in Manali.",
-  },
-  {
-    image: "/images/jaipur.jpg",
-    name: "Jaipur Heritage",
-    price: "₹7,999",
-    days: "3D/2N",
-    desc: "Explore royal palaces, forts, and the rich history of Jaipur.",
-  },
-  {
-    image: "/images/kerala.jpg",
-    name: "Kerala Backwaters",
-    price: "₹14,499",
-    days: "5D/4N",
-    desc: "Cruise the tranquil backwaters and lush landscapes of Kerala.",
-  },
-];
+import { fetchPackages, selectPackages, selectLoading } from "@/lib/redux/features/packageSlice";
+import { fetchFeaturedLocations, selectLocations } from "@/lib/redux/features/locationSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@/lib/redux/store";
+import { Loader2 } from "lucide-react";
 
 const PackagesPage = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const packages = useSelector(selectPackages);
+  const isLoading = useSelector(selectLoading);
+  const locations = useSelector(selectLocations);
+
+  useEffect(() => {
+    dispatch(fetchPackages());
+    dispatch(fetchFeaturedLocations());
+  }, [dispatch]);
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'var(--font-main)' }}>
       {/* Hero Section */}
@@ -53,6 +39,11 @@ const PackagesPage = () => {
       {/* Packages Grid */}
       <section className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {isLoading && (
+            <div className="flex justify-center items-center h-screen">
+              <Loader2 className="w-10 h-10 animate-spin" />
+            </div>
+          )}
           {packages.map((pkg) => (
             <Card key={pkg.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
               <div className="relative w-full h-48">
@@ -65,7 +56,12 @@ const PackagesPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-[#1a4d8f] font-medium">{pkg.desc}</p>
+                <p className="text-[#1a4d8f] font-medium mb-2">{pkg.description}</p>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <span className="inline-block bg-[#ffc72c] text-[#1a4d8f] px-2 py-1 rounded text-xs font-bold">{pkg.days} Days</span>
+                  <span className="inline-block bg-[#1a4d8f] text-white px-2 py-1 rounded text-xs font-bold">{pkg.nights} Nights</span>
+                </div>
+                <div className="text-xs text-gray-500 font-semibold">Location {locations.find((loc) => loc.id === pkg.locationId)?.name || "Unknown"}</div>
               </CardContent>
             </Card>
           ))}

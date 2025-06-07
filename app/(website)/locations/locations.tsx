@@ -1,102 +1,13 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Image from "next/image";
+import { fetchFeaturedLocations, selectLocations, selectLoading, selectError } from "@/lib/redux/features/locationSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@/lib/redux/store";
+import { Loader2 } from "lucide-react";
 
-const locations = [
-  {
-    name: "New Delhi",
-    image: "/images/contact-banner.jpg",
-    description: "The heart of India, rich in history and culture.",
-    type: "domestic",
-  },
-  {
-    name: "Mumbai",
-    image: "/images/contact-banner.jpg",
-    description: "The city that never sleeps, home to Bollywood and beaches.",
-    type: "domestic",
-  },
-  {
-    name: "Goa",
-    image: "/images/contact-banner.jpg",
-    description: "Famous for its stunning beaches and vibrant nightlife.",
-    type: "domestic",
-  },
-  {
-    name: "Bangalore",
-    image: "/images/contact-banner.jpg",
-    description: "The Silicon Valley of India, known for its parks and cafes.",
-    type: "domestic",
-  },
-  {
-    name: "Chennai",
-    image: "/images/contact-banner.jpg",
-    description: "The capital of Tamil Nadu, known for its temples and beaches.",
-    type: "domestic",
-  },
-  {
-    name: "Hyderabad",
-    image: "/images/contact-banner.jpg",
-    description: "The city of pearls, known for its history and cuisine.",
-    type: "domestic",
-  },
-  {
-    name: "Kolkata",
-    image: "/images/contact-banner.jpg",
-    description: "The city of joy, known for its culture and cuisine.",
-    type: "domestic",
-  },
-  {
-    name: "Jaipur",
-    image: "/images/contact-banner.jpg",
-    description: "The pink city, known for its forts and palaces.",
-    type: "domestic",
-  },
-  {
-    name: "Lucknow",
-    image: "/images/contact-banner.jpg",
-    description: "The city of Nawabs, known for its cuisine and culture.",
-    type: "domestic",
-  },
-  {
-    name: "Ahmedabad",
-    image: "/images/contact-banner.jpg",
-    description: "The city of temples, known for its culture and cuisine.",
-    type: "domestic",
-  },
-  {
-    name: "Surat",
-    image: "/images/contact-banner.jpg",
-    description: "The city of temples, known for its culture and cuisine.",
-    type: "domestic",
-  },
-  // Example international locations
-  {
-    name: "Paris",
-    image: "/images/contact-banner.jpg",
-    description: "The city of lights, romance, and art.",
-    type: "international",
-  },
-  {
-    name: "London",
-    image: "/images/contact-banner.jpg",
-    description: "The capital of England, rich in history and culture.",
-    type: "international",
-  },
-  {
-    name: "Dubai",
-    image: "/images/contact-banner.jpg",
-    description: "The city of gold, luxury, and skyscrapers.",
-    type: "international",
-  },
-  {
-    name: "Singapore",
-    image: "/images/contact-banner.jpg",
-    description: "A global financial hub with stunning gardens and food.",
-    type: "international",
-  },
-];
 
 const tabOptions = [
   { label: "Domestic", value: "domestic" },
@@ -104,9 +15,26 @@ const tabOptions = [
 ];
 
 const Locations = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const locations = useSelector(selectLocations);
+  const isLoading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+
+  useEffect(() => {
+    dispatch(fetchFeaturedLocations());
+  }, [dispatch]);
+
   const [tab, setTab] = useState("domestic");
   const filteredLocations = locations.filter(loc => loc.type === tab);
 
+  if (error) {
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Locations</h2>
+        <p>Error loading locations. Please try again later.</p>
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'var(--font-main)' }}>
       {/* Hero Section */}
@@ -126,6 +54,11 @@ const Locations = () => {
       {/* Tabs Bar */}
       <div className="flex justify-center mb-10">
         <div className="inline-flex bg-[#f8fafc] rounded-full shadow border border-[#ffe066]/40 overflow-hidden">
+          {isLoading && (
+            <div className="flex justify-center items-center h-screen">
+              <Loader2 className="w-10 h-10 animate-spin" />
+            </div>
+          )}
           {tabOptions.map(option => (
             <button
               key={option.value}
@@ -142,6 +75,11 @@ const Locations = () => {
       {/* Locations Grid */}
       <section className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {isLoading && (
+            <div className="col-span-full text-center text-gray-400 py-12">
+              <Loader2 className="w-10 h-10 animate-spin" />
+            </div>
+          )}
           {filteredLocations.map((loc) => (
             <Card key={loc.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
               <div className="relative w-full h-48">

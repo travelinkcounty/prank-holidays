@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { Users, Globe, Lightbulb, ShieldCheck, Heart, CheckCircle } from "lucide-react";
+import { Globe, CheckCircle } from "lucide-react";
 import { Hotel, UserCheck, Cog, Plane, FileText, Car } from "lucide-react";
 import PackageSection from "@/components/home/package-section";
 
@@ -11,20 +11,6 @@ const features = [
   "Handpicked Hotels",
   "Latest Model Vehicles",
   "24/7 Service",
-];
-
-const values = [
-  { icon: <Users className="w-8 h-8 text-[#e63946]" />, text: "Customer-first approach" },
-  { icon: <ShieldCheck className="w-8 h-8 text-[#457b9d]" />, text: "Integrity and transparency" },
-  { icon: <Lightbulb className="w-8 h-8 text-[#ffe066]" />, text: "Innovation in travel experiences" },
-  { icon: <Globe className="w-8 h-8 text-[#457b9d]" />, text: "Commitment to quality and safety" },
-  { icon: <Heart className="w-8 h-8 text-[#e63946]" />, text: "Passion for exploration" },
-];
-
-const team = [
-  { name: "Nikhil Chaudhary", role: "Founder & CEO", image: "/images/user1.jpg" },
-  { name: "Priya Singh", role: "Travel Expert", image: "/images/user2.jpg" },
-  { name: "Rahul Verma", role: "Operations Head", image: "/images/user3.jpg" },
 ];
 
 const services = [

@@ -5,6 +5,20 @@ import consoleManager from "../../utils/consoleManager";
 // Get all memberships (GET)
 export async function GET(req: Request) {
     try {
+        const url = new URL(req.url);
+        const userId = url.searchParams.get("userId");
+        
+        if (userId) {
+            const memberships = await MembershipService.getMembershipByUserId(userId);
+            consoleManager.log("Fetched memberships for user ID:", userId, memberships.length);
+            return NextResponse.json({
+                statusCode: 200,
+                message: "Memberships fetched successfully",
+                data: memberships,
+                errorCode: "NO",
+                errorMessage: "",
+            }, { status: 200 });    
+        }
 
         // Fetch memberships based on status filter
         const memberships = await MembershipService.getAllMemberships();
@@ -33,7 +47,7 @@ export async function POST(req: Request) {
         const formData = await req.json();
         const { userId, planId, usedDays, usedNights, totalDays, totalNights } = formData;
         
-        if (!userId || !planId || !usedDays || !usedNights || !totalDays || !totalNights) {
+        if (!userId || !planId || !totalDays || !totalNights) {
             return NextResponse.json({
                 statusCode: 400,
                 errorCode: "BAD_REQUEST",

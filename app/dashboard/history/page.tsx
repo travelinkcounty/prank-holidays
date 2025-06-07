@@ -12,6 +12,7 @@ import { fetchHistories, selectHistories, selectLoading, selectError, addHistory
 import { selectUsers, fetchUsers } from "@/lib/redux/features/authSlice";
 import { selectPackages, fetchPackages } from "@/lib/redux/features/packageSlice";
 import type { History } from "@/lib/redux/features/historySlice";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 export default function HistoryPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -54,6 +55,17 @@ export default function HistoryPage() {
     });
   }, [histories, users, packages, search]);
 
+  // Helper to format Firestore Timestamp or string/Date
+  function formatFirestoreTimestamp(ts: any) {
+    if (!ts) return '';
+    if (ts instanceof Date) return ts.toLocaleString();
+    if (typeof ts === 'object' && '_seconds' in ts) {
+      return new Date(ts._seconds * 1000).toLocaleString();
+    }
+    if (typeof ts === 'string') return new Date(ts).toLocaleString();
+    return '';
+  }
+
   // Handlers
   const openAddModal = () => {
     setModalMode('add');
@@ -86,6 +98,7 @@ export default function HistoryPage() {
         packageId: form.packageId,
         status: form.status,
       }));
+      dispatch(fetchHistories());
       toast.success('History added!');
     } else if (modalMode === 'edit' && editHistory) {
       await dispatch(updateHistory({
@@ -93,6 +106,7 @@ export default function HistoryPage() {
         packageId: form.packageId,
         status: form.status,
       }, editHistory.id));
+      dispatch(fetchHistories());
       toast.success('History updated!');
     }
     closeModal();
@@ -103,6 +117,15 @@ export default function HistoryPage() {
     setDeleteHistoryModal(null);
     toast.success("History deleted!");
   };
+
+  if (error) {
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Histories</h2>
+        <p>Error loading histories. Please try again later.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto p-0 flex flex-col gap-8">
@@ -138,6 +161,13 @@ export default function HistoryPage() {
             </tr>
           </thead>
           <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={6} className="text-center text-gray-400 py-8">
+                  <Loader2 className="w-10 h-10 animate-spin" />
+                </td>
+              </tr>
+            )}
             {filteredHistories.length === 0 ? (
               <tr>
                 <td colSpan={6} className="text-center text-gray-400 py-8">No histories found.</td>
@@ -151,8 +181,8 @@ export default function HistoryPage() {
                     <td className="px-4 py-3 font-medium">{user?.name || user?.email}</td>
                     <td className="px-4 py-3">{pkg?.name}</td>
                     <td className="px-4 py-3 text-center">{h.status}</td>
-                    <td className="px-4 py-3 text-center">{h.createdOn ? new Date(h.createdOn).toLocaleString() : ''}</td>
-                    <td className="px-4 py-3 text-center">{h.updatedOn ? new Date(h.updatedOn).toLocaleString() : ''}</td>
+                    <td className="px-4 py-3 text-center">{formatFirestoreTimestamp(h.createdOn)}</td>
+                    <td className="px-4 py-3 text-center">{formatFirestoreTimestamp(h.updatedOn)}</td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex gap-2 justify-center">
                         <Button size="sm" variant="ghost" onClick={() => openEditModal(h)} aria-label="Edit">
@@ -204,21 +234,29 @@ export default function HistoryPage() {
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">User</label>
-                <select name="userId" value={form.userId} onChange={handleFormChange} required className="w-full border rounded px-3 py-2">
-                  <option value="">Select user</option>
-                  {users.map((u) => (
-                    <option key={u.uid} value={u.uid}>{u.name || u.email}</option>
-                  ))}
-                </select>
+                <Select name="userId" value={form.userId} onValueChange={(value: string) => setForm(f => ({ ...f, userId: value }))} required>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((u) => (
+                      <SelectItem key={u.uid} value={u.uid}>{u.name || u.email}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Package</label>
-                <select name="packageId" value={form.packageId} onChange={handleFormChange} required className="w-full border rounded px-3 py-2">
-                  <option value="">Select package</option>
-                  {packages.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
+                <Select name="packageId" value={form.packageId} onValueChange={(value: string) => setForm(f => ({ ...f, packageId: value }))} required>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select package" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {packages.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div>

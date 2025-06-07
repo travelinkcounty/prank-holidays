@@ -59,6 +59,7 @@ class HistoryService {
             const newHistoryRef = await db.collection("histories").add({
                 ...historyData,
                 createdOn: timestamp,
+                updatedOn: timestamp,
             });
 
             consoleManager.log("✅ New history added with ID:", newHistoryRef.id);

@@ -25,7 +25,7 @@ export default function UsersPage() {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<any | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", role: "", password: "", phone: "" });
+  const [form, setForm] = useState({ name: "", email: "", role: "", password: "", phone: "", address: "", status: "" });
   const [deleteUserObj, setDeleteUserObj] = useState<any | null>(null);
 
   useEffect(() => {
@@ -47,13 +47,13 @@ export default function UsersPage() {
   // Handlers
   const openAddModal = () => {
     setEditUser(null);
-    setForm({ name: "", email: "", role: "", password: "", phone: "" });
+    setForm({ name: "", email: "", role: "", password: "", phone: "", address: "", status: "" });
     setModalOpen(true);
   };
 
   const openEditModal = (user: any) => {
     setEditUser(user);
-    setForm({ name: user.name || "", email: user.email || "", role: user.role || "", password: "", phone: user.phone || "" });
+    setForm({ name: user.name || "", email: user.email || "", role: user.role || "", password: "", phone: user.phone || "", address: user.address || "", status: user.status || "" });
     setModalOpen(true);
   };
 
@@ -81,7 +81,7 @@ export default function UsersPage() {
         dispatch(fetchUsers());
         toast.success("User updated!");
       } else {
-        await dispatch(addUser({ email: form.email, password: form.password, name: form.name, role: form.role, phone: form.phone }));
+        await dispatch(addUser({ email: form.email, password: form.password, name: form.name, role: form.role, phone: form.phone, address: form.address, status: form.status }));
         dispatch(fetchUsers());
         toast.success("User added!");
       }
@@ -92,6 +92,16 @@ export default function UsersPage() {
       setLoading(false);
     }
   };
+
+  if (error) {
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Users</h2>
+        <p>Error loading users. Please try again later.</p>
+      </div>
+    )
+  }
+
 
   return (
     <div className="mx-auto p-0 flex flex-col gap-8">
@@ -128,6 +138,11 @@ export default function UsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {loading && (
+              <div className="col-span-full text-center text-gray-400 py-12">
+                <Loader2 className="w-10 h-10 animate-spin" />
+              </div>
+            )}
             {filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-gray-400">
@@ -140,6 +155,7 @@ export default function UsersPage() {
                   <TableCell>{user.name || user.email}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role}</TableCell>
+                  <TableCell>{user.status}</TableCell>
                   <TableCell className="flex gap-2 justify-center">
                     <Button
                       size="sm"
@@ -216,6 +232,31 @@ export default function UsersPage() {
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                 required
               />
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Address</label>
+              <Input
+                placeholder="Address"
+                value={form.address || ""}
+                onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Status</label>
+              <Select
+                value={form.status}
+                onValueChange={(value) => setForm((f) => ({ ...f, status: value }))}
+                required
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-[#1a4d8f]">Role</label>

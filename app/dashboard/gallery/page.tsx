@@ -110,6 +110,17 @@ export default function GalleryPage() {
     }, 1000);
   };
 
+  if (error) {
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Gallery</h2>
+        <div className="col-span-full text-center text-gray-400 py-12">
+          <p>Error loading gallery images. Please try again later.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto p-0 flex flex-col gap-8">
       {/* Gallery Heading and Controls */}
@@ -135,6 +146,11 @@ export default function GalleryPage() {
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {isLoading && (
+          <div className="col-span-full text-center text-gray-400 py-12">
+            <Loader2 className="w-10 h-10 animate-spin" />
+          </div>
+        )}
         {filteredImages.length === 0 ? (
           <div className="col-span-full text-center text-gray-400 py-12">No images found.</div>
         ) : (

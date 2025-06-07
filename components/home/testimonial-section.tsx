@@ -3,19 +3,34 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
   {
+    name: "Sarah Johnson",
+    text: "The attention to detail was incredible! Every aspect of our trip was perfectly planned.",
+    image: "https://randomuser.me/api/portraits/women/2.jpg",
+  },
+  {
+    name: "Michael Chen",
+    text: "Professional service from start to finish. Made our family vacation truly memorable.",
+    image: "https://randomuser.me/api/portraits/men/4.jpg",
+  },
+  {
+    name: "Emma Rodriguez",
+    text: "Their local expertise made all the difference. We discovered hidden gems we never would have found!",
+    image: "https://randomuser.me/api/portraits/women/3.jpg",
+  },
+  {
+    name: "David Kim",
+    text: "The personalized recommendations were spot on. Exactly what we were looking for!",
+    image: "https://randomuser.me/api/portraits/men/5.jpg",
+  },
+  {
+    name: "Lisa Patel",
+    text: "Outstanding customer service and competitive prices. Will definitely book again!",
+    image: "https://randomuser.me/api/portraits/women/4.jpg",
+  },
+  {
     name: "Amit Sharma",
     text: "Absolutely hilarious! My friends couldn't stop laughing. Highly recommend Prank Holiday!",
-    image: "/images/user1.jpg",
-  },
-  {
-    name: "Priya Singh",
-    text: "The best prank experience ever. Super easy and so much fun!",
-    image: "/images/user2.jpg",
-  },
-  {
-    name: "Rahul Verma",
-    text: "Loved the creativity and execution. Will use again for sure!",
-    image: "/images/user3.jpg",
+    image: "https://randomuser.me/api/portraits/men/3.jpg",
   },
 ];
 

@@ -74,7 +74,22 @@ export const fetchMemberships = () => async (dispatch: Dispatch) => {
   }
 };
 
-export const fetchPackageById = (id: string) => async (dispatch: Dispatch) => {
+export const fetchMembershipByUserId = (userId: string) => async (dispatch: Dispatch) => {
+  dispatch(setLoading(true));
+  try {
+    const response = await axios.get(`/api/routes/memberships?userId=${userId}`);
+    if (response.status === 200) {  
+      dispatch(setMemberships(response.data.data)); 
+    } else {
+      dispatch(setError(response.data.message));
+    }
+  } catch (error: unknown) {
+    const message = typeof error === "object" && error && "message" in error ? (error as { message?: string }).message : String(error);
+    dispatch(setError(message || "Unknown error"));
+  }
+};
+
+export const fetchMembershipById = (id: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
     const response = await axios.get(`/api/routes/memberships/${id}`);
@@ -90,7 +105,6 @@ export const fetchPackageById = (id: string) => async (dispatch: Dispatch) => {
 };
 
 export const addMembership = (membershipData: any) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.post("/api/routes/memberships", membershipData);
     if (response.status === 200) {
@@ -105,7 +119,6 @@ export const addMembership = (membershipData: any) => async (dispatch: Dispatch)
 };
 
 export const updateMembership = (membershipData: any, id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.put(`/api/routes/memberships/${id}`, membershipData);
     if (response.status === 200) {
@@ -120,7 +133,6 @@ export const updateMembership = (membershipData: any, id: string) => async (disp
 };
 
 export const deleteMembership = (id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.delete(`/api/routes/memberships/${id}`);
     if (response.status === 200) {

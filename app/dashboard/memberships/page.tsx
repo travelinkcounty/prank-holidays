@@ -15,7 +15,6 @@ import { selectUsers, fetchUsers } from "@/lib/redux/features/authSlice";
 import { fetchPlans, selectPlans } from "@/lib/redux/features/planSlice";
 import type { Membership } from "@/lib/redux/features/membershipSlice";
 
-
 export default function MembershipsPage() {
   const dispatch = useDispatch<AppDispatch>();
   const memberships = useSelector(selectMemberships);
@@ -136,6 +135,7 @@ export default function MembershipsPage() {
         totalNights,
         status: form.status,
       }));
+      dispatch(fetchMemberships());
       toast.success('Membership added!');
     } else if (modalMode === 'edit' && editMembership) {
       await dispatch(updateMembership({
@@ -147,11 +147,20 @@ export default function MembershipsPage() {
         totalNights,
         status: form.status,
       }, editMembership.id));
+      dispatch(fetchMemberships());
       toast.success('Membership updated!');
     }
     closeModal();
   };
 
+  if (error) {
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Memberships</h2>
+        <p>Error loading memberships. Please try again later.</p>
+      </div>
+    )
+  }
   return (
     <div className="mx-auto p-0 flex flex-col gap-8">
       {/* Heading and Controls */}
@@ -179,6 +188,7 @@ export default function MembershipsPage() {
                 ))}
               </SelectContent>
             </Select>
+            <Button onClick={openAddModal} className="bg-[#43aa8b] text-white font-bold"> + Add Membership </Button>
           </div>
         </div>
       </div>
@@ -197,6 +207,13 @@ export default function MembershipsPage() {
             </tr>
           </thead>
           <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={6} className="text-center text-gray-400 py-8">
+                  <Loader2 className="w-10 h-10 animate-spin" />
+                </td>
+              </tr>
+            )}
             {filteredMemberships.length === 0 ? (
               <tr>
                 <td colSpan={6} className="text-center text-gray-400 py-8">No memberships found.</td>
@@ -328,21 +345,29 @@ export default function MembershipsPage() {
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">User</label>
-                <select name="userId" value={form.userId} onChange={handleFormChange} required className="w-full border rounded px-3 py-2">
-                  <option value="">Select user</option>
-                  {users.map((u) => (
-                    <option key={u.uid} value={u.uid}>{u.name || u.email}</option>
-                  ))}
-                </select>
+                <Select name="userId" value={form.userId} onValueChange={(value: string) => setForm(f => ({ ...f, userId: value }))} required>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((u) => (
+                      <SelectItem key={u.uid} value={u.uid}>{u.name || u.email}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Plan</label>
-                <select name="planId" value={form.planId} onChange={handleFormChange} required className="w-full border rounded px-3 py-2">
-                  <option value="">Select plan</option>
-                  {plans.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
+                <Select name="planId" value={form.planId} onValueChange={(value: string) => setForm(f => ({ ...f, planId: value }))} required>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {plans.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex gap-4">
@@ -357,7 +382,15 @@ export default function MembershipsPage() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Status</label>
-              <Input name="status" value={form.status} onChange={handleFormChange} />
+              <Select name="status" value={form.status} onValueChange={value => setForm(f => ({ ...f, status: value }))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <DialogFooter>
               <Button type="submit" disabled={loading} className="gap-2">
@@ -372,13 +405,6 @@ export default function MembershipsPage() {
           </form>
         </DialogContent>
       </Dialog>
-
-      {/* Add Membership Button */}
-      <div className="flex justify-end mb-2">
-        <Button onClick={openAddModal} className="bg-[#43aa8b] text-white font-bold">
-          + Add Membership
-        </Button>
-      </div>
     </div>
   );
 }

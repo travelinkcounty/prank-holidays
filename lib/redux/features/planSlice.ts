@@ -3,7 +3,7 @@ import axios from "axios";
 import { RootState } from "../store";
 
 export interface Plan {
-  id?: string;
+  id: string;
   name: string;
   description: string;
   price: number;
@@ -108,7 +108,6 @@ export const addPlan = (plan: FormData) => async (dispatch: Dispatch) => {
 };
 
 export const updatePlan = (plan: FormData, id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.put(`/api/routes/plans/${id}`, plan,
       {

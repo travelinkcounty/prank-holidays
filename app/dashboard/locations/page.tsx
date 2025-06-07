@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLocations, selectLocations, selectError, selectLoading, updateLocation, deleteLocation as deleteLocationAction, addLocation, Location} from "@/lib/redux/features/locationSlice";
 import { AppDispatch } from "@/lib/redux/store";
+import { Switch } from "@/components/ui/switch";
+
 
 export default function LocationsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -20,7 +22,7 @@ export default function LocationsPage() {
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editLocation, setEditLocation] = useState<Location | null>(null);
-  const [form, setForm] = useState({ name: "", type: "domestic", image: "" });
+  const [form, setForm] = useState({ name: "", type: "domestic", image: "", featured: false });
   const [deleteLocation, setDeleteLocation] = useState<Location | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -48,7 +50,7 @@ export default function LocationsPage() {
   // Handlers
   const openAddModal = () => {
     setEditLocation(null);
-    setForm({ name: "", type: "domestic", image: "" });
+    setForm({ name: "", type: "domestic", image: "", featured: false });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -56,7 +58,7 @@ export default function LocationsPage() {
 
   const openEditModal = (location: Location) => {
     setEditLocation(location);
-    setForm({ ...location });
+    setForm({ ...location, featured: location.featured || false });
     setImageFile(null);
     setImagePreview(location.image || null);
     setModalOpen(true);
@@ -90,6 +92,7 @@ export default function LocationsPage() {
     setIsEditing(true);
     const formData = new FormData();
     formData.append("name", form.name);
+    formData.append("featured", form.featured.toString());
     formData.append("type", form.type);
     if (imageFile) {
       formData.append("image", imageFile);  
@@ -114,6 +117,14 @@ export default function LocationsPage() {
     }
   };
 
+  if (error) {
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Locations</h2>
+        <p>Error loading locations. Please try again later.</p>
+      </div>
+    )
+  }
   return (
     <div className="mx-auto p-0 flex flex-col gap-8">
       {/* Location List Heading and Controls */}
@@ -149,14 +160,19 @@ export default function LocationsPage() {
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {loading && (
+          <div className="col-span-full text-center text-gray-400 py-12">
+            <Loader2 className="w-10 h-10 animate-spin" />
+          </div>
+        )}
         {filteredLocations.length === 0 ? (
           <div className="col-span-full text-center text-gray-400 py-12">No locations found.</div>
         ) : (
           filteredLocations.map((location) => (
             <div key={location.id} className="bg-white rounded-2xl shadow-md border border-gray-100 flex flex-col overflow-hidden">
-              <div className="flex items-center justify-center h-32 bg-gray-100">
+              <div className="flex items-center justify-center h-48 bg-gray-100">
                 {location.image ? (
-                  <img src={location.image} alt={location.name} className="w-full h-32 object-cover rounded-lg" />
+                  <img src={location.image} alt={location.name} className="w-full h-48 object-cover rounded-lg" />
                 ) : (
                   <MapPin className="w-12 h-12 text-[#457b9d]" />
                 )}
@@ -202,12 +218,22 @@ export default function LocationsPage() {
             <DialogHeader>
               <DialogTitle>{editLocation ? "Edit Location" : "Add Location"}</DialogTitle>
             </DialogHeader>
-            <Input
-              placeholder="Name"
-              value={form.name}
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium">Name</label>
+              <Input
+                placeholder="Name"
+                value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               required
             />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium">Featured</label>
+              <Switch
+                checked={form.featured}
+                onCheckedChange={(checked) => setForm((f) => ({ ...f, featured: checked }))}
+              />
+            </div>
             <Select value={form.type} defaultValue="Domestic" onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Location Type" />

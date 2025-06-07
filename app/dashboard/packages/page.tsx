@@ -131,6 +131,14 @@ export default function PackagesPage() {
     }
   };
 
+  if (error) {
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Packages</h2>
+        <p>Error loading packages. Please try again later.</p>
+      </div>
+    )
+  }
   return (
     <div className="mx-auto p-0 flex flex-col gap-8">
       {/* Package List Heading and Controls */}
@@ -156,48 +164,61 @@ export default function PackagesPage() {
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {loading && (
+          <div className="col-span-full text-center text-gray-400 py-12">
+            <Loader2 className="w-10 h-10 animate-spin" />
+          </div>
+        )}
         {filteredPackages.length === 0 ? (
           <div className="col-span-full text-center text-gray-400 py-12">No packages found.</div>
         ) : (
-          filteredPackages.map((pkg) => (
-            <div key={pkg.id} className="bg-white rounded-2xl shadow-md border border-gray-100 flex flex-col overflow-hidden">
-              <div className="relative w-full h-48 bg-gray-100 flex items-center justify-center">
-                {pkg.image ? (
-                  <Image src={pkg.image} alt={pkg.name} fill className="object-cover" />
-                ) : (
-                  <ImageIcon className="w-16 h-16 text-gray-300" />
-                )}
-              </div>
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{pkg.name}</div>
+          filteredPackages.map((pkg) => {
+            const locationObj = locations.find((l) => l.id === pkg.locationId);
+            return (
+              <div key={pkg.id} className="bg-white rounded-2xl shadow-md border border-gray-100 flex flex-col overflow-hidden">
+                <div className="relative w-full h-48 bg-gray-100 flex items-center justify-center">
+                  {pkg.image ? (
+                    <Image src={pkg.image} alt={pkg.name} fill className="object-cover" />
+                  ) : (
+                    <ImageIcon className="w-16 h-16 text-gray-300" />
+                  )}
                 </div>
-                <div className="flex gap-2 mt-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => openEditModal(pkg)}
-                    aria-label="Edit"
-                    className="cursor-pointer"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setDeletePackage(pkg)}
-                    aria-label="Delete"
-                    disabled={isDeleting}
-                    className="text-destructive cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Delete
-                  </Button>
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{pkg.name}</div>
+                    <div className="flex gap-2 mb-2">
+                      <span className="inline-block bg-[#ffc72c] text-[#1a4d8f] px-2 py-1 rounded text-xs font-bold">{pkg.days} Days</span>
+                      <span className="inline-block bg-[#1a4d8f] text-white px-2 py-1 rounded text-xs font-bold">{pkg.nights} Nights</span>
+                    </div>
+                    <div className="text-xs text-gray-500 font-semibold mb-1">Location: {locationObj ? locationObj.name : pkg.locationId}</div>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => openEditModal(pkg)}
+                      aria-label="Edit"
+                      className="cursor-pointer"
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setDeletePackage(pkg)}
+                      aria-label="Delete"
+                      disabled={isDeleting}
+                      className="text-destructive cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

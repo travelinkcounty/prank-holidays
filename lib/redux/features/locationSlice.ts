@@ -8,6 +8,7 @@ export interface Location {
   image: string;
   description: string;
   type: string;
+  featured: boolean;
   createdOn: string;
   updatedOn: string;
 }
@@ -67,6 +68,21 @@ export const fetchLocations = () => async (dispatch: Dispatch) => {
   }
 };  
 
+export const fetchFeaturedLocations = () => async (dispatch: Dispatch) => {
+  dispatch(setLoading(true));
+  try {
+    const response = await axios.get("/api/routes/locations?featured=true");
+    if (response.status === 200) {
+      dispatch(setLocations(response.data.data));
+    } else {
+      dispatch(setError(response.data.message));
+    }
+  } catch (error: unknown) {
+    const message = typeof error === "object" && error && "message" in error ? (error as { message?: string }).message : String(error);
+    dispatch(setError(message || "Unknown error"));
+  }
+};    
+
 export const fetchLocationById = (id: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
@@ -83,7 +99,6 @@ export const fetchLocationById = (id: string) => async (dispatch: Dispatch) => {
 };  
 
 export const addLocation = (location: FormData) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.post("/api/routes/locations", location,
         {
@@ -104,7 +119,6 @@ export const addLocation = (location: FormData) => async (dispatch: Dispatch) =>
 };  
 
 export const updateLocation = (location: FormData, id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.put(`/api/routes/locations/${id}`, location,
         {
@@ -125,7 +139,6 @@ export const updateLocation = (location: FormData, id: string) => async (dispatc
 };            
 
 export const deleteLocation = (id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.delete(`/api/routes/locations/${id}`);
     if (response.status === 200) {

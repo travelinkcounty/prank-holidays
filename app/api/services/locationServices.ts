@@ -34,6 +34,18 @@ class LocationService {
         return this.locations;
     }
 
+    // Get all featured locations
+    static async getFeaturedLocations() {
+        try {
+            const snapshot = await db.collection("locations").where("featured", "==", true).get();
+            consoleManager.log("🔥 Fetched featured locations:", snapshot.docs.length);
+            return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            consoleManager.error("❌ Error fetching featured locations:", error);
+            throw new Error("Failed to fetch featured locations");
+        }
+    }   
+
     // Add a new location with createdOn timestamp
     static async addLocation(locationData: any) {
         try {

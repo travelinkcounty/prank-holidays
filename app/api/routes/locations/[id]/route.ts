@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import LocationService from "../../../services/locationServices";
 import consoleManager from "../../../utils/consoleManager";
 import { ReplaceImage } from "../../../controller/imageController";
+
+
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
 
@@ -30,14 +32,23 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const name = formData.get("name");
     const image = formData.get("image");
     const type = formData.get("type");
+    const featured = formData.get("featured") === "true";
+    
 
-    const location = await LocationService.getLocationById(id);
-    const oldImageUrl = location.image;
+    let imageUrl: string | undefined;
 
-    const imageUrl = await ReplaceImage(image, oldImageUrl);
+    if (image) {
+        const location = await LocationService.getLocationById(id);
+        const oldImageUrl = location.image;
+        await ReplaceImage(image, oldImageUrl);
+    } else {
+        // No new image, keep the old one
+        const location = await LocationService.getLocationById(id);
+        imageUrl = location.image;
+    }
 
     try {
-        const updatedLocation = await LocationService.updateLocation(id, { name, image: imageUrl, type });
+        const updatedLocation = await LocationService.updateLocation(id, { name, image: imageUrl, type, featured });
         return NextResponse.json({
             statusCode: 200,
             message: "Location updated successfully",

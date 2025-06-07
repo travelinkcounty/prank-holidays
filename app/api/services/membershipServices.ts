@@ -34,6 +34,16 @@ class MembershipService {
         return this.memberships;
     }
 
+    static async getMembershipByUserId(userId: string) {
+        try {   
+            const snapshot = await db.collection("memberships").where("userId", "==", userId).get();
+            return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            consoleManager.error("❌ Error fetching membership by user ID:", error);
+            throw new Error("Failed to fetch membership by user ID");
+        }
+    }       
+
     // Add a new membership with createdOn timestamp
     static async addMembership(membershipData: any) {
         try {

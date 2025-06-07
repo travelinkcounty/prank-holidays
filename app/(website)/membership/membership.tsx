@@ -1,47 +1,36 @@
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+'use client'
 
-const memberships = [
-  {
-    name: "Silver",
-    price: "₹2,999/year",
-    features: [
-      "Access to basic packages",
-      "Priority email support",
-      "Exclusive member newsletter",
-    ],
-  },
-  {
-    name: "Gold",
-    price: "₹5,999/year",
-    features: [
-      "All Silver benefits",
-      "Early access to new packages",
-      "Dedicated travel consultant",
-    ],
-  },
-  {
-    name: "Platinum",
-    price: "₹9,999/year",
-    features: [
-      "All Gold benefits",
-      "Complimentary airport transfers",
-      "Special event invites",
-    ],
-  },
-  {
-    name: "Diamond",
-    price: "₹14,999/year",
-    features: [
-      "All Platinum benefits",
-      "Personalized itinerary planning",
-      "24/7 VIP support",
-    ],
-  },
-];
+import React, { useEffect } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { fetchPlans, selectPlans, selectLoading, selectError } from "@/lib/redux/features/planSlice";
+import { fetchLocations, selectLocations, selectError as selectLocationError } from "@/lib/redux/features/locationSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@/lib/redux/store";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
 
 const Membership = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const plans = useSelector(selectPlans);
+  const isLoading = useSelector(selectLoading);
+  const locations = useSelector(selectLocations);
+  const error = useSelector(selectError);
+  const locationError = useSelector(selectLocationError);
+
+  useEffect(() => {
+    dispatch(fetchPlans());
+    dispatch(fetchLocations());
+  }, [dispatch]);
+
+  if (error || locationError) {
+    return (
+      <div className="mx-auto p-0 flex flex-col gap-8">
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Plans</h2>
+        <p>Error loading plans. Please try again later.</p>
+      </div>  
+    )
+  }
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'var(--font-main)' }}>
       {/* Hero Section */}
@@ -60,29 +49,38 @@ const Membership = () => {
 
       {/* Memberships Grid */}
       <section className="container mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {memberships.map((m) => (
-            <Card key={m.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-[#e30613] text-center">{m.name}</CardTitle>
-                <div className="text-[#1a4d8f] text-xl font-extrabold text-center mt-2">{m.price}</div>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-neutral-700 font-medium space-y-2 mb-4">
-                  {m.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2">
-                      <span className="text-[#ffc72c] text-lg">•</span> {f}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter className="flex justify-center">
-                <Button className="bg-[#e30613] text-white font-bold px-6 py-2 rounded-full shadow hover:bg-[#ffc72c] hover:text-[#e30613] transition-colors border-2 border-[#e30613] hover:scale-105 active:scale-100 text-base">
-                  Join Now
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {isLoading && (
+            <div className="col-span-full justify-center items-center text-center text-gray-400 py-12">
+              <Loader2 className="w-10 h-10 animate-spin" />
+            </div>
+          )}
+          {plans.map((plan) => {
+            const location = locations.find(loc => loc.id === plan.location[0]);
+            return (
+              <Card key={plan.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
+                <div className="relative w-full h-48">
+                  <Image src={plan.image || ""} alt={plan.name} fill className="object-cover" />
+                </div>
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold text-[#e30613] flex flex-col gap-1">
+                    {plan.name}
+                    <span className="text-lg font-extrabold text-[#1a4d8f]">{plan.price}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-[#1a4d8f] font-medium mb-2">{plan.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <span className="inline-block bg-[#ffc72c] text-[#1a4d8f] px-2 py-1 rounded text-xs font-bold">{plan.days} Days</span>
+                    <span className="inline-block bg-[#1a4d8f] text-white px-2 py-1 rounded text-xs font-bold">{plan.nights} Nights</span>
+                  </div>
+                  <div>
+                    Location: {location ? location.name : "Unknown"}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
     </div>

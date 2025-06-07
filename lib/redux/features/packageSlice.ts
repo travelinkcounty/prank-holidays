@@ -90,7 +90,6 @@ export const fetchPackageById = (id: string) => async (dispatch: Dispatch) => {
 };
 
 export const addPackage = (packageData: FormData) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.post("/api/routes/packages", packageData,
         {
@@ -111,7 +110,6 @@ export const addPackage = (packageData: FormData) => async (dispatch: Dispatch) 
 };
 
 export const updatePackage = (packageData: FormData, id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.put(`/api/routes/packages/${id}`, packageData,
         {
@@ -132,7 +130,6 @@ export const updatePackage = (packageData: FormData, id: string) => async (dispa
 };
 
 export const deletePackage = (id: string) => async (dispatch: Dispatch) => {
-  dispatch(setLoading(true));
   try {
     const response = await axios.delete(`/api/routes/packages/${id}`);
     if (response.status === 200) {
