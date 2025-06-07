@@ -2,49 +2,26 @@ import { NextResponse } from "next/server";
 import HistoryService from "../../../services/historyService";
 import consoleManager from "../../../utils/consoleManager";
 
-// Combined GET handler
+// GET a single history by ID
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
-        const { searchParams } = new URL(req.url);
-
-        if (searchParams.get("user") === "true") {
-            // Get all histories by user ID
-            const histories = await HistoryService.getHistoriesByUserId(id);
-            if (!histories) {
-                return NextResponse.json({
-                    statusCode: 404,
-                    errorCode: "NOT_FOUND",
-                    errorMessage: "History not found",
-                }, { status: 404 });
-            }
-            consoleManager.log("Fetched histories:", id);
+        const history = await HistoryService.getHistoryById(id);
+        if (!history) {
             return NextResponse.json({
-                statusCode: 200,
-                message: "Histories fetched successfully",
-                data: histories,
-                errorCode: "NO",
-                errorMessage: "",
-            }, { status: 200 });
-        } else {
-            // Get a single history by ID
-            const history = await HistoryService.getHistoryById(id);
-            if (!history) {
-                return NextResponse.json({
-                    statusCode: 404,
-                    errorCode: "NOT_FOUND",
-                    errorMessage: "History not found",
-                }, { status: 404 });
-            }
-            consoleManager.log("Fetched history:", id);
-            return NextResponse.json({
-                statusCode: 200,
-                message: "History fetched successfully",
-                data: history,
-                errorCode: "NO",
-                errorMessage: "",
-            }, { status: 200 });
+                statusCode: 404,
+                errorCode: "NOT_FOUND",
+                errorMessage: "History not found",
+            }, { status: 404 });
         }
+        consoleManager.log("Fetched history:", id);
+        return NextResponse.json({
+            statusCode: 200,
+            message: "History fetched successfully",
+            data: history,
+            errorCode: "NO",
+            errorMessage: "",
+        }, { status: 200 });
     } catch (error: any) {
         consoleManager.error("Error in GET /api/histories/[id]:", error);
         return NextResponse.json({

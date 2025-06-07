@@ -5,10 +5,19 @@ import consoleManager from "../../utils/consoleManager";
 // Get all histories (GET)
 export async function GET(req: Request) {
     try {
+        const { searchParams } = new URL(req.url);
+        const userId = searchParams.get("userId");
 
-        // Fetch histories based on status filter
-        const histories = await HistoryService.getAllHistories();
-        consoleManager.log("Fetched all histories:", histories.length);
+        let histories;
+        if (userId) {
+            // Fetch histories for a specific user
+            histories = await HistoryService.getHistoriesByUserId(userId);
+            consoleManager.log("Fetched histories for user:", userId, histories.length);
+        } else {
+            // Fetch all histories
+            histories = await HistoryService.getAllHistories();
+            consoleManager.log("Fetched all histories:", histories.length);
+        }
 
         return NextResponse.json({
             statusCode: 200,

@@ -1,15 +1,20 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { User, Users, BadgeCheck, Edit, LogOut, History as HistoryIcon, Link } from "lucide-react";
+import { User, Users, BadgeCheck, Edit, LogOut, History as HistoryIcon, Link, Loader2 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { useRouter } from "next/navigation";
 import { fetchPlans, selectPlans } from "@/lib/redux/features/planSlice";
+import { fetchPackages, selectPackages } from "@/lib/redux/features/packageSlice";
 import { fetchLocations, selectLocations } from "@/lib/redux/features/locationSlice";
 import { fetchHistoryByUserId, selectHistories } from "@/lib/redux/features/historySlice";
 import { fetchMembershipByUserId, selectMemberships } from "@/lib/redux/features/membershipSlice";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { updateUser } from "@/lib/redux/features/authSlice";
+
+
 const navLinks = [
     { label: "Profile", icon: <User className="w-5 h-5 mr-2" />, key: "profile" },
     { label: "Membership", icon: <BadgeCheck className="w-5 h-5 mr-2" />, key: "membership" },
@@ -22,10 +27,14 @@ const Profile = () => {
     const history = useSelector(selectHistories);
     const membership = useSelector(selectMemberships);
     const plans = useSelector(selectPlans);
+    const packages = useSelector(selectPackages);
     const location = useSelector(selectLocations);
     const [active, setActive] = useState("profile");
     const router = useRouter();
     const [userData, setUserData] = useState<any>({});
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editForm, setEditForm] = useState({ name: "", address: "", phone: "" });
+    const [editLoading, setEditLoading] = useState(false);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -45,6 +54,7 @@ const Profile = () => {
     useEffect(() => {
         dispatch(fetchLocations());
         dispatch(fetchPlans());
+        dispatch(fetchPackages());
     }, [dispatch]);
 
 
@@ -52,6 +62,22 @@ const Profile = () => {
         const plan = plans?.find((plan: any) => plan.id === planId);
         return plan?.name || "Unknown Plan";
     }
+
+    const getPackageName = (packageId: string) => {
+        const pkg = packages?.find((pkg: any) => pkg.id === packageId);
+        return pkg?.name || "Unknown Package";
+    }
+
+    const openEditModal = () => {
+      setEditForm({
+        name: userData?.name || "",
+        address: userData?.address || "",
+        phone: userData?.phone || "",
+      });
+      setEditModalOpen(true);
+    };
+
+
 
     // Section renderers
     const renderSection = () => {
@@ -72,7 +98,7 @@ const Profile = () => {
                                 <span className="text-gray-600 text-base">{userData?.email}</span>
                             </div>
                         </div>
-                        <button className="p-2 rounded-full hover:bg-gray-100"><Edit className="w-5 h-5 text-gray-400" /></button>
+                        <button className="p-2 rounded-full hover:bg-gray-100" onClick={openEditModal}><Edit className="w-5 h-5 text-gray-400" /></button>
                     </div>
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-2 text-gray-600 text-base">
@@ -141,20 +167,15 @@ const Profile = () => {
                             <table className="min-w-full text-left border-separate border-spacing-y-2">
                                 <thead>
                                     <tr className="text-[#1a4d8f] text-lg">
-                                        <th className="pr-8">Type</th>
-                                        <th className="pr-8">Start</th>
-                                        <th className="pr-8">End</th>
-                                        <th>Status</th>
+                                        <th className="pr-8">Package</th>
+                                        <th className="pr-8">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {history.map((item, idx) => (
                                         <tr key={idx} className="bg-[#f8fafc] rounded-xl">
-                                            <td className="font-bold text-[#e30613] pr-8 py-2">{item.userId}</td>
-                                            <td className="pr-8 py-2">{item.createdOn}</td>
-                                            <td className="pr-8 py-2">{item.updatedOn}</td>
-
-                                            <td className="py-2">
+                                            <td className="font-bold text-[#e30613] pr-8 py-2">{getPackageName(item.packageId)}</td>
+                                            <td className="pr-8 py-2">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${item.status === 'Expired' ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'}`}>{item.status}</span>
                                             </td>
                                         </tr>
@@ -220,6 +241,63 @@ const Profile = () => {
                     {renderSection()}
                 </div>
             </main>
+
+            {/* Edit Profile Modal */}
+            <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+              <DialogContent>
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setEditLoading(true);
+                    await dispatch(updateUser({ uid: userData.uid, ...editForm }));
+                    setEditLoading(false);
+                    setEditModalOpen(false);
+                  }}
+                  className="space-y-4"
+                >
+                  <DialogHeader>
+                    <DialogTitle>Edit Profile</DialogTitle>
+                  </DialogHeader>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Name</label>
+                    <Input
+                      value={editForm.name}
+                      onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Address</label>
+                    <Input
+                      value={editForm.address}
+                      onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Phone</label>
+                    <Input
+                      value={editForm.phone}
+                      onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <DialogFooter>
+                    <button
+                      type="submit"
+                      className="bg-[#e30613] text-white px-4 py-2 rounded font-bold flex items-center gap-2"
+                      disabled={editLoading}
+                    >
+                      {editLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                      Save
+                    </button>
+                    <DialogClose asChild>
+                      <button type="button" className="px-4 py-2 rounded font-bold">Cancel</button>
+                    </DialogClose>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
         </div>
     );
 };

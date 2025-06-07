@@ -42,7 +42,7 @@ class HistoryService {
             }
             
             const histories = await this.getAllHistories();
-            const userHistories = histories.filter((history: any) => history.userId === userId);
+            const userHistories = histories.filter((history: any) => history.userId == userId);
             
             consoleManager.log(`✅ Fetched ${userHistories.length} histories for user:`, userId);
             return userHistories;

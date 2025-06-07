@@ -88,7 +88,7 @@ export const fetchPackageById = (id: string) => async (dispatch: Dispatch) => {
 export const fetchHistoryByUserId = (userId: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.get(`/api/routes/history/${userId}`);
+    const response = await axios.get(`/api/routes/history/?userId=${userId}`);
     if (response.status === 200) {
       dispatch(setHistories(response.data.data));
     } else {
