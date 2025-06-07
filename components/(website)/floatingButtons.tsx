@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import { Phone, HelpCircle, MessageCircle, MessageCircleHeart } from "lucide-react";
 
 const actions = [
-  { icon: <MessageCircle />, label: "WhatsApp", color: "bg-[var(--primary-green)]" },
-  { icon: <Phone />, label: "Call", color: "bg-[var(--primary-yellow)] text-black" },
-  { icon: <HelpCircle />, label: "Help", color: "bg-[var(--primary-red)]" },
+  { icon: <MessageCircle />, label: "WhatsApp", color: "bg-[var(--primary-green)]" , href: "https://wa.me/919717308208"},
+  { icon: <Phone />, label: "Call", color: "bg-[var(--primary-yellow)] text-black" , href: "tel:+919717308208"},
+  { icon: <HelpCircle />, label: "Help", color: "bg-[var(--primary-red)]" , href: "/contact"},
 ];
 
 const FloatingButtons = () => {
@@ -32,7 +32,12 @@ const FloatingButtons = () => {
             className={`flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white font-semibold text-base transition-transform hover:scale-105 hover:shadow-xl focus:outline-none ${action.color}`}
             aria-label={action.label}
             style={{ transitionDelay: `${open ? i * 60 : 0}ms` }}
-          >
+            onClick={() => {
+              if (action.href) {
+                window.open(action.href, "_blank");
+              }
+            }}
+          > 
             {action.icon}
           </button>
         ))}

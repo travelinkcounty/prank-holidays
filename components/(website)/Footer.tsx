@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube, Linkedin } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Youtube, MessageCircle } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -41,11 +41,9 @@ const Footer = () => {
             </li>
           </ul>
           <div className="flex gap-3">
-            <a href="#" className="p-2 rounded-full bg-white/10 hover:bg-[#e63946] transition"><Facebook className="w-5 h-5" /></a>
-            <a href="#" className="p-2 rounded-full bg-white/10 hover:bg-[#e63946] transition"><Instagram className="w-5 h-5" /></a>
-            <a href="#" className="p-2 rounded-full bg-white/10 hover:bg-[#e63946] transition"><Twitter className="w-5 h-5" /></a>
-            <a href="#" className="p-2 rounded-full bg-white/10 hover:bg-[#e63946] transition"><Youtube className="w-5 h-5" /></a>
-            <a href="#" className="p-2 rounded-full bg-white/10 hover:bg-[#e63946] transition"><Linkedin className="w-5 h-5" /></a>
+            <a href="https://wa.me/919717308208" className="p-2 rounded-full bg-white/10 hover:bg-[#e63946] transition"><MessageCircle className="w-5 h-5" /></a>
+            <a href="https://www.instagram.com/travelink_county/" className="p-2 rounded-full bg-white/10 hover:bg-[#e63946] transition"><Instagram className="w-5 h-5" /></a>
+            <a href="https://www.youtube.com/@TravelinkCounty-y2o/shorts" className="p-2 rounded-full bg-white/10 hover:bg-[#e63946] transition"><Youtube className="w-5 h-5" /></a>
           </div>
         </div>
         {/* Quick Links */}

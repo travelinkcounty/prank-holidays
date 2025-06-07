@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from "react";
-import { Mail, Phone, MapPin, Facebook, Instagram, Youtube } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle, Instagram, Youtube } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,19 +13,19 @@ import { AppDispatch } from "@/lib/redux/store";
 
 const socialLinks = [
     {
-        icon: Facebook,
-        label: "Facebook",
-        href: "https://facebook.com/prankholidays",
+        icon: MessageCircle,
+        label: "Whatsapp",
+        href: "https://wa.me/919717308208",
     },
     {
         icon: Instagram,
         label: "Instagram",
-        href: "https://instagram.com/prankholidays",
+        href: "https://instagram.com/travelinkcounty",
     },
     {
         icon: Youtube,
         label: "Youtube",
-        href: "https://youtube.com/@prankholidays",
+        href: "https://youtube.com/@travelinkcounty",
     },
 ];
 
