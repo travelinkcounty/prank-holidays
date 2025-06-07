@@ -125,13 +125,15 @@ export async function DELETE(req: Request) {
 export async function PATCH(req: Request) {
     try {
         const body = await req.json();
-        const { uid, ...updateData } = body;
+        const { uid, password, email, phoneNumber, ...updateData } = body;
         if (!uid) {
             return NextResponse.json({ statusCode: 400, errorMessage: "User ID is required." }, { status: 400 });
         }
-        // Update in Auth (email/password/role)
-        await AuthService.updateUser(uid, updateData);
-        // Update in Firestore
+        // Only update Auth if Auth fields are present
+        if (password || email || phoneNumber) {
+            await AuthService.updateUser(uid, { ...(password && { password }), ...(email && { email }), ...(phoneNumber && { phoneNumber }) });
+        }
+        // Always update Firestore (profile fields)
         await AuthService.updateUserInFirestore(uid, updateData);
         return NextResponse.json({ statusCode: 200, message: "User updated successfully" }, { status: 200 });
     } catch (error: any) {

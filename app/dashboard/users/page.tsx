@@ -77,7 +77,9 @@ export default function UsersPage() {
     setLoading(true);
     try {
       if (editUser) {
-        await dispatch(updateUser({ uid: editUser.uid, ...form }));
+        const payload: any = { uid: editUser.uid, ...form };
+        if (!form.password) delete payload.password;
+        await dispatch(updateUser(payload));
         dispatch(fetchUsers());
         toast.success("User updated!");
       } else {
@@ -211,18 +213,16 @@ export default function UsersPage() {
                 required
               />
             </div>
-            {!editUser && (
-              <div className="flex flex-col">
-                <label className="mb-1 font-semibold text-[#1a4d8f]">Password</label>
-                <Input
-                  placeholder="Password"
-                  type="password"
-                  value={form.password || ""}
-                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                  required
-                />
-              </div>
-            )}
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Password{editUser ? " (leave blank to keep unchanged)" : ""}</label>
+              <Input
+                placeholder="Password"
+                type="password"
+                value={form.password || ""}
+                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                required={!editUser}
+              />
+            </div>
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-[#1a4d8f]">Phone</label>
               <Input

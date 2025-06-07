@@ -13,7 +13,7 @@ import { fetchMembershipByUserId, selectMemberships } from "@/lib/redux/features
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { updateUser } from "@/lib/redux/features/authSlice";
-
+import { fetchUserById, selectUser } from "@/lib/redux/features/authSlice";
 
 const navLinks = [
     { label: "Profile", icon: <User className="w-5 h-5 mr-2" />, key: "profile" },
@@ -29,17 +29,19 @@ const Profile = () => {
     const plans = useSelector(selectPlans);
     const packages = useSelector(selectPackages);
     const location = useSelector(selectLocations);
+    const userData = useSelector(selectUser);
     const [active, setActive] = useState("profile");
     const router = useRouter();
-    const [userData, setUserData] = useState<any>({});
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const [editForm, setEditForm] = useState({ name: "", address: "", phone: "" });
+    const [editForm, setEditForm] = useState({ name: "", address: "", phone: "", password: "" });
     const [editLoading, setEditLoading] = useState(false);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
             const stored = localStorage.getItem("user");
-            setUserData(stored ? JSON.parse(stored) : {});
+            if (stored) {
+                dispatch(fetchUserById(JSON.parse(stored).uid));
+            }
         }
     }, []);
 
@@ -73,6 +75,7 @@ const Profile = () => {
         name: userData?.name || "",
         address: userData?.address || "",
         phone: userData?.phone || "",
+        password: ""
       });
       setEditModalOpen(true);
     };
@@ -249,7 +252,18 @@ const Profile = () => {
                   onSubmit={async (e) => {
                     e.preventDefault();
                     setEditLoading(true);
-                    await dispatch(updateUser({ uid: userData.uid, ...editForm }));
+                    if (!userData || !userData.uid) {
+                      setEditLoading(false);
+                      return;
+                    }
+                    const payload: { uid: string; name: string; address: string; phone: string; password?: string } = {
+                      uid: userData.uid,
+                      name: editForm.name,
+                      address: editForm.address,
+                      phone: editForm.phone,
+                    };
+                    if (editForm.password) payload.password = editForm.password;
+                    await dispatch(updateUser(payload));
                     setEditLoading(false);
                     setEditModalOpen(false);
                   }}
@@ -280,6 +294,15 @@ const Profile = () => {
                       value={editForm.phone}
                       onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
                       required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Password (leave blank to keep unchanged)</label>
+                    <Input
+                      type="password"
+                      value={editForm.password}
+                      onChange={e => setEditForm(f => ({ ...f, password: e.target.value }))}
+                      placeholder="••••••••"
                     />
                   </div>
                   <DialogFooter>

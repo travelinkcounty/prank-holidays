@@ -42,11 +42,14 @@ class AuthService {
             const allowedFields: any = {};
             if (updateData.email) allowedFields.email = updateData.email;
             if (updateData.password) allowedFields.password = updateData.password;
-            if (updateData.displayName) allowedFields.displayName = updateData.displayName;
-            if (updateData.phoneNumber) allowedFields.phoneNumber = updateData.phoneNumber;
-            if (updateData.photoURL) allowedFields.photoURL = updateData.photoURL;
+            if (updateData.name) allowedFields.name = updateData.name;
+            if (updateData.phone) allowedFields.phone = updateData.phone;
+            if (updateData.address) allowedFields.address = updateData.address;
+            if (updateData.image) allowedFields.image = updateData.image;
+            if (updateData.status) allowedFields.status = updateData.status;
             if (updateData.disabled !== undefined) allowedFields.disabled = updateData.disabled;
             if (updateData.role) allowedFields.customClaims = { role: updateData.role };
+
             if (Object.keys(allowedFields).length > 0) {
                 await auth.updateUser(uid, allowedFields);
             }
