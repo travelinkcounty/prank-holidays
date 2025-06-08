@@ -5,6 +5,7 @@ import { RootState } from "../store";
 // Define a type for gallery items
 export interface GalleryItem {
   id: string;
+  uid: string;
   title: string;
   image: string;
   createdOn: string;

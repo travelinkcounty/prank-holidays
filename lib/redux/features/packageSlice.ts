@@ -4,6 +4,7 @@ import { RootState } from "../store";
 
 export interface Package {
   id: string;
+  uid: string;
   name: string;
   description: string;
   price: number;

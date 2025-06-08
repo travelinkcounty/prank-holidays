@@ -4,6 +4,7 @@ import { RootState } from "../store";
 
 interface Lead {
   id?: string;
+  uid?: string;
   name: string;
   email: string;
   phone: string;

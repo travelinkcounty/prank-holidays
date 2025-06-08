@@ -4,6 +4,7 @@ import { RootState } from "../store";
 
 export interface Location {
   id: string;
+  uid: string;
   name: string;
   image: string;
   description: string;

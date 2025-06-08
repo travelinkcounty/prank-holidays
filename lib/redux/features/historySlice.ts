@@ -4,6 +4,7 @@ import { RootState } from "../store";
 
 export interface History {
   id: string;
+  uid: string;
   userId: string;
   packageId: string;
   createdOn: string;

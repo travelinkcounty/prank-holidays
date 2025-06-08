@@ -4,6 +4,7 @@ import { RootState } from "../store";
 
 export interface Membership {
   id: string;
+  uid: string;
   userId: string;
   planId: string;
   totalDays: number;

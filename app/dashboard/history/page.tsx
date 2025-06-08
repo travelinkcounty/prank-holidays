@@ -41,7 +41,7 @@ export default function HistoryPage() {
 
   // Helpers
   const getUser = (id: string) => users.find((u) => u.uid === id);
-  const getPackage = (id: string) => packages.find((p) => p.id === id);
+  const getPackage = (id: string) => packages.find((p) => p.uid === id);
 
   // Filtered histories
   const filteredHistories = React.useMemo(() => {
@@ -253,7 +253,7 @@ export default function HistoryPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {packages.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      <SelectItem key={p.uid} value={p.uid}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

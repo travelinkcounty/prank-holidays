@@ -47,7 +47,7 @@ export default function MembershipsPage() {
 
   // Helper to get user/plan by id
   const getUser = (id: string) => users.find((u) => u.uid === id);
-  const getPlan = (id: string) => plans.find((p) => p.id === id);
+  const getPlan = (id: string) => plans.find((p) => p.uid === id);
 
   // Filtered memberships
   const filteredMemberships = React.useMemo(() => {
@@ -108,11 +108,6 @@ export default function MembershipsPage() {
   const closeModal = () => {
     setModalOpen(false);
     setEditMembership(null);
-  };
-
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
   };
 
   const handleFormNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -364,7 +359,7 @@ export default function MembershipsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {plans.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      <SelectItem key={p.id} value={p.uid}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

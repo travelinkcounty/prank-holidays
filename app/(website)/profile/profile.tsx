@@ -61,12 +61,12 @@ const Profile = () => {
 
 
     const getPlanName = (planId: string) => {
-        const plan = plans?.find((plan: any) => plan.id === planId);
+        const plan = plans?.find((plan: any) => plan.uid === planId);
         return plan?.name || "Unknown Plan";
     }
 
     const getPackageName = (packageId: string) => {
-        const pkg = packages?.find((pkg: any) => pkg.id === packageId);
+        const pkg = packages?.find((pkg: any) => pkg.uid === packageId);
         return pkg?.name || "Unknown Package";
     }
 
