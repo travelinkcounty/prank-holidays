@@ -261,7 +261,15 @@ export default function HistoryPage() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Status</label>
-              <Input name="status" value={form.status} onChange={handleFormChange} />
+              <Select name="status" value={form.status} onValueChange={(value: string) => setForm(f => ({ ...f, status: value }))} required>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <DialogFooter>
               <Button type="submit" disabled={loading} className="gap-2">

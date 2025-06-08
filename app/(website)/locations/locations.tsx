@@ -7,7 +7,8 @@ import { fetchFeaturedLocations, selectLocations, selectLoading, selectError } f
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { Loader2 } from "lucide-react";
-
+import PackageSection from "@/components/home/package-section";
+import TestimonialSection from "@/components/home/testimonial-section";
 
 const tabOptions = [
   { label: "Domestic", value: "domestic" },
@@ -95,6 +96,8 @@ const Locations = () => {
           ))}
         </div>
       </section>
+      <PackageSection />
+      <TestimonialSection />
     </div>
   );
 };

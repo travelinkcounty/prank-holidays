@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { UploadImage } from "../../controller/imageController";
 import LocationService from "../../services/locationServices";
 import consoleManager from "../../utils/consoleManager";
-
+import { v4 as uuidv4 } from 'uuid';
 // Get all packages (GET)
 export async function GET(req: Request) {
     try {
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         const name = formData.get("name");
         const type = formData.get("type");
         const featured = formData.get("featured") === "true";
-
+        const uid = uuidv4();
         const file = formData.get("image");
 
         if (!name || !file) {
@@ -68,6 +68,7 @@ export async function POST(req: Request) {
 
         // Save location data in Firestore
         const newLocation = await LocationService.addLocation({
+            uid,
             name,
             type,
             image: imageUrl,

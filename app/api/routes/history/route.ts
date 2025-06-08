@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import HistoryService from "../../services/historyService";
 import consoleManager from "../../utils/consoleManager";
+import { v4 as uuidv4 } from 'uuid';
 
 // Get all histories (GET)
 export async function GET(req: Request) {
@@ -41,7 +42,8 @@ export async function POST(req: Request) {
     try {
         const formData = await req.json();
         const { userId, packageId } = formData;
-        
+        const uid = uuidv4();
+
         if (!userId || !packageId) {
             return NextResponse.json({
                 statusCode: 400,
@@ -52,6 +54,7 @@ export async function POST(req: Request) {
 
         // Save history data in Firestore
         const newHistory = await HistoryService.addHistory({
+            uid,
             userId,
             packageId,
             status: "active",

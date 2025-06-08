@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import MembershipService from "../../services/membershipServices";
 import consoleManager from "../../utils/consoleManager";
-
+import { v4 as uuidv4 } from 'uuid';
 // Get all memberships (GET)
 export async function GET(req: Request) {
     try {
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     try {
         const formData = await req.json();
         const { userId, planId, usedDays, usedNights, totalDays, totalNights } = formData;
-        
+        const uid = uuidv4();
         if (!userId || !planId || !totalDays || !totalNights) {
             return NextResponse.json({
                 statusCode: 400,
@@ -57,6 +57,7 @@ export async function POST(req: Request) {
 
         // Save membership data in Firestore
         const newMembership = await MembershipService.addMembership({
+            uid,
             userId,
             planId,
             usedDays,

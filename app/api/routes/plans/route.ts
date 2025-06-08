@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import PlanService from "../../services/planServices";
 import consoleManager from "../../utils/consoleManager";
 import { UploadImage } from "../../controller/imageController";
+import { v4 as uuidv4 } from 'uuid';
 
 // Get all testimonials (GET)
 export async function GET(req: Request) {
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
         const locationRaw = formData.get("location");
         const nights = formData.get("nights");
         const days = formData.get("days");
-
+        const uid = uuidv4();
         if (!name || !description || !price || !image) {
             return NextResponse.json({
                 statusCode: 400,

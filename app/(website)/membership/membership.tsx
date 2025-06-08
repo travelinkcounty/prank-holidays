@@ -8,6 +8,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import DestinationSection from "@/components/home/destination-section";
+import TestimonialSection from "@/components/home/testimonial-section";
 
 const Membership = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -83,6 +85,8 @@ const Membership = () => {
           })}
         </div>
       </section>
+      <DestinationSection />
+      <TestimonialSection />
     </div>
   );
 };

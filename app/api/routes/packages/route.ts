@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { UploadImage } from "../../controller/imageController";
 import PackageService from "../../services/packageServices";
 import consoleManager from "../../utils/consoleManager";
+import { v4 as uuidv4 } from 'uuid';
 
 // Get all packages (GET)
 export async function GET(req: Request) {
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
         const locationId = formData.get("locationId");
         const days = formData.get("days");
         const nights = formData.get("nights");
+        const uid = uuidv4();
         
         if (!name || !file) {
             return NextResponse.json({

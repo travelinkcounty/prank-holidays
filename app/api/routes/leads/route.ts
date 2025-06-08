@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import LeadService from "../../services/leadServices";
 import consoleManager from "../../utils/consoleManager";
+import { v4 as uuidv4 } from 'uuid';
 
 // Get all leads (GET)
 export async function GET() {
@@ -28,7 +29,8 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const newLead = await LeadService.addLead(body);
+        const uid = uuidv4();
+        const newLead = await LeadService.addLead({ ...body, uid });
         consoleManager.log("Lead created successfully:", newLead);
         return NextResponse.json({
             statusCode: 201,

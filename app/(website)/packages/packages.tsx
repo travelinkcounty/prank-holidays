@@ -8,6 +8,8 @@ import { fetchFeaturedLocations, selectLocations } from "@/lib/redux/features/lo
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { Loader2 } from "lucide-react";
+import DestinationSection from "@/components/home/destination-section";
+import ServiceSection from "@/components/home/service-section";
 
 const PackagesPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -67,6 +69,8 @@ const PackagesPage = () => {
           ))}
         </div>
       </section>
+      <ServiceSection />
+      <DestinationSection />
     </div>
   );
 };

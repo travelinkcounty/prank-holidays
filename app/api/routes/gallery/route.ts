@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { UploadImage } from "../../controller/imageController";
 import GalleryService from "../../services/galleryServices";
 import consoleManager from "../../utils/consoleManager";
+import { v4 as uuidv4 } from 'uuid';
 
 // Get all packages (GET)
 export async function GET(req: Request) {
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
         const formData = await req.formData();
         const title = formData.get("title");
         const file = formData.get("image");
-
+        const uid = uuidv4();
         if (!title || !file) {
             return NextResponse.json({
                 statusCode: 400,
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
 
         // Save gallery data in Firestore
         const newGallery = await GalleryService.addGallery({
+            uid,
             title,
             image: imageUrl,
         });
