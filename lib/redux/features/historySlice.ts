@@ -6,7 +6,7 @@ export interface History {
   id: string;
   uid: string;
   userId: string;
-  packageId: string;
+  package_ref: string;
   createdOn: string;
   updatedOn: string;
   status: string;

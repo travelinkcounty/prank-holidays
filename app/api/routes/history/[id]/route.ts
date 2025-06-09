@@ -41,11 +41,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
         let updateData: any = {};
         const userId = formData.userId;
-        const packageId = formData.packageId;
+        const package_ref = formData.package_ref;
         const status = formData.status;
 
         if (userId) updateData.userId = userId;
-        if (packageId) updateData.packageId = packageId;
+        if (package_ref) updateData.package_ref = package_ref;
         if (status) updateData.status = status;
 
         // Update history in database

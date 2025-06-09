@@ -45,9 +45,9 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const formData = await req.json();
-        const { userId, planId, usedDays, usedNights, totalDays, totalNights } = formData;
+        const { userId, plan_ref, usedDays, usedNights, totalDays, totalNights } = formData;
         const uid = uuidv4();
-        if (!userId || !planId || !totalDays || !totalNights) {
+        if (!userId || !plan_ref || !totalDays || !totalNights) {
             return NextResponse.json({
                 statusCode: 400,
                 errorCode: "BAD_REQUEST",
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         const newMembership = await MembershipService.addMembership({
             uid,
             userId,
-            planId,
+            plan_ref,
             usedDays,
             usedNights,
             totalDays,
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
             statusCode: 201,
             message: "Membership added successfully",
             data: newMembership,
-            errorCode: "NO",
+            errorCode: "NO",    
             errorMessage: "",
         }, { status: 201 });
 

@@ -56,8 +56,13 @@ class HistoryService {
     static async addHistory(historyData: any) {
         try {
             const timestamp = admin.firestore.FieldValue.serverTimestamp();
+            
+            // Create a reference to the package document
+            const packageRef = db.collection("packages").doc(historyData.package_ref);
+            
             const newHistoryRef = await db.collection("histories").add({
                 ...historyData,
+                package_ref: packageRef, // Store as reference instead of string
                 createdOn: timestamp,
                 updatedOn: timestamp,
             });

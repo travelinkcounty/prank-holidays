@@ -60,13 +60,13 @@ const Profile = () => {
     }, [dispatch]);
 
 
-    const getPlanName = (planId: string) => {
-        const plan = plans?.find((plan: any) => plan.uid === planId);
+    const getPlanName = (plan_ref: string) => {
+        const plan = plans?.find((plan: any) => plan.uid === plan_ref);
         return plan?.name || "Unknown Plan";
     }
 
-    const getPackageName = (packageId: string) => {
-        const pkg = packages?.find((pkg: any) => pkg.uid === packageId);
+    const getPackageName = (package_ref: string) => {
+        const pkg = packages?.find((pkg: any) => pkg.uid === package_ref);
         return pkg?.name || "Unknown Package";
     }
 
@@ -132,7 +132,7 @@ const Profile = () => {
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-center gap-2 text-xl">
                                         <span className="font-bold text-[#e30613]">Plan:</span>
-                                        <span className="text-[#23272b]">{getPlanName(item.planId)}</span>
+                                        <span className="text-[#23272b]">{getPlanName(item.plan_ref)}</span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -177,7 +177,7 @@ const Profile = () => {
                                 <tbody>
                                     {history.map((item, idx) => (
                                         <tr key={idx} className="bg-[#f8fafc] rounded-xl">
-                                            <td className="font-bold text-[#e30613] pr-8 py-2">{getPackageName(item.packageId)}</td>
+                                            <td className="font-bold text-[#e30613] pr-8 py-2">{getPackageName(item.package_ref)}</td>
                                             <td className="pr-8 py-2">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${item.status === 'Expired' ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'}`}>{item.status}</span>
                                             </td>

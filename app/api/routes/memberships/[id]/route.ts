@@ -43,14 +43,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
         let updateData: any = {};
         const userId = formData.userId;
-        const planId = formData.planId;
+        const plan_ref = formData.plan_ref;
         const usedDays = formData.usedDays;
         const usedNights = formData.usedNights;
         const totalDays = formData.totalDays;
         const totalNights = formData.totalNights;
 
         if (userId) updateData.userId = userId;
-        if (planId) updateData.planId = planId;
+        if (plan_ref) updateData.plan_ref = plan_ref;
         if (usedDays) updateData.usedDays = usedDays;
         if (usedNights) updateData.usedNights = usedNights;
         if (totalDays) updateData.totalDays = totalDays;

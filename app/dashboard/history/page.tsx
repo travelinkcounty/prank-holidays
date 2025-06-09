@@ -29,7 +29,7 @@ export default function HistoryPage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>("add");
   const [form, setForm] = useState({
     userId: '',
-    packageId: '',
+    package_ref: '',
     status: 'active',
   });
 
@@ -47,7 +47,7 @@ export default function HistoryPage() {
   const filteredHistories = React.useMemo(() => {
     return histories.filter((h) => {
       const user = getUser(h.userId);
-      const pkg = getPackage(h.packageId);
+      const pkg = getPackage(h.package_ref);
       const matchesSearch =
         (user?.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
         (pkg?.name?.toLowerCase() || "").includes(search.toLowerCase());
@@ -69,14 +69,14 @@ export default function HistoryPage() {
   // Handlers
   const openAddModal = () => {
     setModalMode('add');
-    setForm({ userId: '', packageId: '', status: 'active' });
+    setForm({ userId: '', package_ref: '', status: 'active' });
     setModalOpen(true);
   };
   const openEditModal = (history: History) => {
     setModalMode('edit');
     setForm({
       userId: history.userId,
-      packageId: history.packageId,
+      package_ref: history.package_ref,
       status: history.status || 'active',
     });
     setEditHistory(history);
@@ -97,7 +97,7 @@ export default function HistoryPage() {
     if (modalMode === 'add') {
       await dispatch(addHistory({
         userId: form.userId,
-        packageId: form.packageId,
+        package_ref: form.package_ref,
         status: form.status,
       }));
       dispatch(fetchHistories());
@@ -105,7 +105,7 @@ export default function HistoryPage() {
     } else if (modalMode === 'edit' && editHistory) {
       await dispatch(updateHistory({
         userId: form.userId,
-        packageId: form.packageId,
+        package_ref: form.package_ref,
         status: form.status,
       }, editHistory.id));
       dispatch(fetchHistories());
@@ -177,7 +177,7 @@ export default function HistoryPage() {
             ) : (
               filteredHistories.map((h) => {
                 const user = getUser(h.userId);
-                const pkg = getPackage(h.packageId);
+                const pkg = getPackage(h.package_ref);
                 return (
                   <tr key={h.id} className="border-b last:border-none hover:bg-[#f1f3f5]">
                     <td className="px-4 py-3 font-medium">{user?.name || user?.email}</td>
@@ -249,7 +249,7 @@ export default function HistoryPage() {
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Package</label>
-                <Select name="packageId" value={form.packageId} onValueChange={(value: string) => setForm(f => ({ ...f, packageId: value }))} required>
+                <Select name="package_ref" value={form.package_ref} onValueChange={(value: string) => setForm(f => ({ ...f, package_ref: value }))} required>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select package" />
                   </SelectTrigger>

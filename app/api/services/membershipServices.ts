@@ -48,9 +48,15 @@ class MembershipService {
     static async addMembership(membershipData: any) {
         try {
             const timestamp = admin.firestore.FieldValue.serverTimestamp();
+            
+            // Create a reference to the plan document
+            const planRef = db.collection("plans").doc(membershipData.plan_ref);
+            
             const newMembershipRef = await db.collection("memberships").add({
                 ...membershipData,
+                plan_ref: planRef, // Store as reference instead of string
                 createdOn: timestamp,
+                updatedOn: timestamp,
             });
 
             consoleManager.log("✅ New membership added with ID:", newMembershipRef.id);

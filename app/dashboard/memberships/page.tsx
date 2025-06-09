@@ -33,7 +33,7 @@ export default function MembershipsPage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>("add");
   const [form, setForm] = useState({
     userId: '',
-    planId: '',
+    plan_ref: '',
     usedDays: 0,
     usedNights: 0,
     status: 'active',
@@ -53,11 +53,11 @@ export default function MembershipsPage() {
   const filteredMemberships = React.useMemo(() => {
     return memberships.filter((m) => {
       const user = getUser(m.userId);
-      const plan = getPlan(m.planId);
+      const plan = getPlan(m.plan_ref);
       const matchesSearch =
         (user?.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
         (plan?.name?.toLowerCase() || "").includes(search.toLowerCase());
-      const matchesPlan = planFilter === "all" || m.planId === planFilter;
+      const matchesPlan = planFilter === "all" || m.plan_ref === planFilter;
       return matchesSearch && matchesPlan;
     });
   }, [memberships, users, plans, search, planFilter]);
@@ -88,7 +88,7 @@ export default function MembershipsPage() {
 
   const openAddModal = () => {
     setModalMode('add');
-    setForm({ userId: '', planId: '', usedDays: 0, usedNights: 0, status: 'active' });
+    setForm({ userId: '', plan_ref: '', usedDays: 0, usedNights: 0, status: 'active' });
     setModalOpen(true);
   };
 
@@ -96,7 +96,7 @@ export default function MembershipsPage() {
     setModalMode('edit');
     setForm({
       userId: membership.userId,
-      planId: membership.planId,
+      plan_ref: membership.plan_ref,
       usedDays: membership.usedDays,
       usedNights: membership.usedNights,
       status: membership.status || 'active',
@@ -117,13 +117,13 @@ export default function MembershipsPage() {
 
   const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const plan = getPlan(form.planId);
+    const plan = getPlan(form.plan_ref);
     const totalDays = plan?.days ? parseInt(plan.days, 10) : 0;
     const totalNights = plan?.nights ? parseInt(plan.nights, 10) : 0;
     if (modalMode === 'add') {
       await dispatch(addMembership({
         userId: form.userId,
-        planId: form.planId,
+        plan_ref: form.plan_ref,
         usedDays: form.usedDays,
         usedNights: form.usedNights,
         totalDays,
@@ -135,7 +135,7 @@ export default function MembershipsPage() {
     } else if (modalMode === 'edit' && editMembership) {
       await dispatch(updateMembership({
         userId: form.userId,
-        planId: form.planId,
+        plan_ref: form.plan_ref,
         usedDays: form.usedDays,
         usedNights: form.usedNights,
         totalDays,
@@ -216,7 +216,7 @@ export default function MembershipsPage() {
             ) : (
               filteredMemberships.map((m) => {
                 const user = getUser(m.userId);
-                const plan = getPlan(m.planId);
+                const plan = getPlan(m.plan_ref);
                 const totalDays = plan?.days ? parseInt(plan.days, 10) : 0;
                 const totalNights = plan?.nights ? parseInt(plan.nights, 10) : 0;
                 const usedDays = m.usedDays;
@@ -273,7 +273,7 @@ export default function MembershipsPage() {
                 <Input
                   type="number"
                   min={0}
-                  max={usageModal ? getPlan(usageModal.planId || '')?.days : 0}
+                  max={usageModal ? getPlan(usageModal.plan_ref || '')?.days : 0}
                   value={usageForm.usedDays}
                   onChange={e => setUsageForm(f => ({ ...f, usedDays: Number(e.target.value) }))}
                   required
@@ -284,7 +284,7 @@ export default function MembershipsPage() {
                 <Input
                   type="number"
                   min={0}
-                  max={usageModal ? getPlan(usageModal.planId || '')?.nights : 0}
+                  max={usageModal ? getPlan(usageModal.plan_ref || '')?.nights : 0}
                   value={usageForm.usedNights}
                   onChange={e => setUsageForm(f => ({ ...f, usedNights: Number(e.target.value) }))}
                   required
@@ -353,7 +353,7 @@ export default function MembershipsPage() {
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Plan</label>
-                <Select name="planId" value={form.planId} onValueChange={(value: string) => setForm(f => ({ ...f, planId: value }))} required>
+                <Select name="plan_ref" value={form.plan_ref} onValueChange={(value: string) => setForm(f => ({ ...f, plan_ref: value }))} required>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select plan" />
                   </SelectTrigger>
@@ -368,11 +368,11 @@ export default function MembershipsPage() {
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Used Days</label>
-                <Input type="number" name="usedDays" min={0} max={getPlan(String(form.planId || ''))?.days ? (getPlan(String(form.planId || ''))?.days, 10) : 0} value={form.usedDays} onChange={handleFormNumberChange} required />
+                <Input type="number" name="usedDays" min={0} max={getPlan(String(form.plan_ref || ''))?.days ? (getPlan(String(form.plan_ref || ''))?.days, 10) : 0} value={form.usedDays} onChange={handleFormNumberChange} required />
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Used Nights</label>
-                <Input type="number" name="usedNights" min={0} max={getPlan(String(form.planId || ''))?.nights ? (getPlan(String(form.planId || ''))?.nights, 10) : 0} value={form.usedNights} onChange={handleFormNumberChange} required />
+                <Input type="number" name="usedNights" min={0} max={getPlan(String(form.plan_ref || ''))?.nights ? (getPlan(String(form.plan_ref || ''))?.nights, 10) : 0} value={form.usedNights} onChange={handleFormNumberChange} required />
               </div>
             </div>
             <div>

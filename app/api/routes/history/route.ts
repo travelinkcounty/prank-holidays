@@ -41,10 +41,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const formData = await req.json();
-        const { userId, packageId } = formData;
+        const { userId, package_ref } = formData;
         const uid = uuidv4();
 
-        if (!userId || !packageId) {
+        if (!userId || !package_ref) {
             return NextResponse.json({
                 statusCode: 400,
                 errorCode: "BAD_REQUEST",
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         const newHistory = await HistoryService.addHistory({
             uid,
             userId,
-            packageId,
+            package_ref,
             status: "active",
             createdOn: new Date().toISOString(),
             updatedOn: new Date().toISOString(),

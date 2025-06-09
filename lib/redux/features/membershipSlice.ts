@@ -6,7 +6,7 @@ export interface Membership {
   id: string;
   uid: string;
   userId: string;
-  planId: string;
+  plan_ref: string;
   totalDays: number;
   totalNights: number;
   usedDays: number;
