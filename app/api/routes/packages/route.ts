@@ -58,6 +58,7 @@ export async function POST(req: Request) {
         // Save package data in Firestore
         const newPackage = await PackageService.addPackage({
             name,
+            uid,
             image: imageUrl,
             description,
             price,

@@ -39,6 +39,7 @@ export async function POST(req: Request) {
         const nights = formData.get("nights");
         const days = formData.get("days");
         const uid = uuidv4();
+
         if (!name || !description || !price || !image) {
             return NextResponse.json({
                 statusCode: 400,
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
             location,
             nights,
             days,
+            uid,
         });
 
         return NextResponse.json({

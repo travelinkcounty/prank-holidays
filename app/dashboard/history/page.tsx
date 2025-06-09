@@ -86,10 +86,12 @@ export default function HistoryPage() {
     setModalOpen(false);
     setEditHistory(null);
   };
+  
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   };
+
   const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (modalMode === 'add') {
