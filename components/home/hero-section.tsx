@@ -8,7 +8,7 @@ export default function Home() {
       {/* Video Background */}
       <video
         className="absolute inset-0 w-full h-full object-cover z-0"
-        src="/videos/hero.mp4"
+        src="https://firebasestorage.googleapis.com/v0/b/prank-holidays.firebasestorage.app/o/hero.mp4?alt=media&token=1113bbd7-51e7-4b03-953a-20505b144c93"
         autoPlay
         loop
         muted
