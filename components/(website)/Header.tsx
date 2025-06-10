@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -18,6 +19,7 @@ const navLinks = [
 const Header = () => {
   const pathname = usePathname();
   const [user, setUser] = useState<{ email: string; role: string } | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -52,6 +54,7 @@ const Header = () => {
             <Image src="/logo.jpeg" alt="Travelink County Logo" width={150} height={67} className="mr-2 rounded-md" />
           </Link>
         </div>
+        {/* Desktop Nav */}
         <nav className="hidden md:flex gap-5 items-center text-base font-bold" style={{ fontFamily: 'var(--font-main)' }}>
           {navLinks.map(link => {
             const isActive = pathname === link.href;
@@ -86,7 +89,63 @@ const Header = () => {
             </Link>
           )}
         </nav>
+        {/* Mobile Hamburger Icon */}
+        <button
+          className="md:hidden p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#e30613]"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open menu"
+        >
+          <Menu className="w-7 h-7 text-[#e30613]" />
+        </button>
       </div>
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex justify-end md:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <div className="bg-white w-64 h-full shadow-lg flex flex-col p-6 relative animate-slide-in" onClick={e => e.stopPropagation()}>
+            <button
+              className="absolute top-4 right-4 p-2 rounded focus:outline-none"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <X className="w-6 h-6 text-[#e30613]" />
+            </button>
+            <nav className="flex flex-col gap-4 mt-10 text-lg font-bold" style={{ fontFamily: 'var(--font-main)' }}>
+              {navLinks.map(link => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={
+                    `px-2 py-1 rounded-md transition-colors cursor-pointer ` +
+                    (pathname === link.href
+                      ? "text-yellow-500 font-bold"
+                      : "text-[#1a4d8f] hover:text-[#ffc72c] hover:bg-[#fff1e6]")
+                  }
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
+              {user ? (
+                <Link
+                  href={profileHref}
+                  className="mt-4 bg-[#e30613] text-white font-bold px-6 py-2 rounded-full shadow-lg hover:bg-[#ffc72c] hover:text-[#e30613] transition-colors border-2 border-[#e30613] text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {profileLabel}
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="mt-4 bg-[#e30613] text-white font-bold px-6 py-2 rounded-full shadow-lg hover:bg-[#ffc72c] hover:text-[#e30613] transition-colors border-2 border-[#e30613] text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

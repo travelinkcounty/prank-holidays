@@ -31,7 +31,7 @@ export default function Home() {
           Unforgettable trips, best deals, and memories for a lifetime.
         </p>
         <a
-          href="#"
+          href="/packages"
           className="inline-block bg-[var(--primary-yellow)] text-black font-bold px-8 py-3 rounded-full shadow-lg hover:bg-[var(--primary-orange)] transition-colors text-lg animate-fade-in-up delay-200"
           style={{ fontFamily: 'var(--font-main)' }}
         >
