@@ -8,11 +8,10 @@ export default function Home() {
       {/* Video Background */}
       <video
         className="absolute inset-0 w-full h-full object-cover z-0"
-        src="https://firebasestorage.googleapis.com/v0/b/prank-holidays.firebasestorage.app/o/hero.mp4?alt=media&token=1113bbd7-51e7-4b03-953a-20505b144c93"
+        src="/videos/hero1.mp4"
         autoPlay
         loop
         muted
-        poster="/videos/hero-poster.jpg"
       />
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-[#457b9d]/40 to-black/60 z-10" />

@@ -14,6 +14,7 @@ const links = [
   { name: "Gallery", href: "/dashboard/gallery", icon: <Image /> },
   { name: "Memberships", href: "/dashboard/memberships", icon: <Users /> },
   { name: "History", href: "/dashboard/history", icon: <History /> },
+  { name: "Join Us", href: "/dashboard/join-us", icon: <Users /> },
   { name: "Logout", href: "/logout", icon: <LogOut /> },
 ];
 

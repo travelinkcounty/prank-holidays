@@ -9,6 +9,7 @@ import authReducer from "./features/authSlice";
 import countReducer from "./features/countSlice";
 import membershipReducer from "./features/membershipSlice";
 import historyReducer from "./features/historySlice";
+import joinReducer from "./features/joinSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     count: countReducer,
     membership: membershipReducer,
     history: historyReducer,
+    join: joinReducer,
   },
 });
 
