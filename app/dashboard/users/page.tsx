@@ -106,7 +106,7 @@ export default function UsersPage() {
 
 
   return (
-    <div className="mx-auto p-0 flex flex-col gap-8">
+    <div className="mx-auto p-0 gap-8">
       {/* User List Heading and Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-2 mb-1 flex-wrap">
         <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>User List</h2>
@@ -141,9 +141,11 @@ export default function UsersPage() {
           </TableHeader>
           <TableBody>
             {loading && (
-              <div className="col-span-full text-center text-gray-400 py-12">
-                <Loader2 className="w-10 h-10 animate-spin" />
-              </div>
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-gray-400 py-12">
+                  <Loader2 className="w-10 h-10 animate-spin" />
+                </TableCell>
+              </TableRow>
             )}
             {filteredUsers.length === 0 ? (
               <TableRow>
@@ -211,6 +213,7 @@ export default function UsersPage() {
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 required
+                disabled
               />
             </div>
             <div className="flex flex-col">

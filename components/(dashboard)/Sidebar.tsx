@@ -68,10 +68,10 @@ const Sidebar = () => {
   );
 
   return (
-    <div className="flex flex-col h-screen sticky top-0">
+    <div className="flex flex-col h-screen sticky top-0 z-[9999]">
       {/* Hamburger for mobile */}
       <button
-        className="fixed top-4 left-4 z-40 md:hidden bg-white rounded-full p-2 shadow border border-gray-200 cursor-pointer"
+        className="absolute top-4 left-4 md:hidden bg-white rounded-full p-2 shadow border border-gray-200 cursor-pointer"
         onClick={() => setOpen(true)}
         aria-label="Open sidebar"
       >
@@ -81,7 +81,7 @@ const Sidebar = () => {
       {/* Overlay for mobile drawer */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 md:hidden animate-fade-in"
+          className="fixed inset-0 bg-black/30 md:hidden animate-fade-in"
           onClick={() => setOpen(false)}
         />
       )}
