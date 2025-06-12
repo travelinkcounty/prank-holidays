@@ -3,6 +3,7 @@ import { adminStorage } from "../config/firebase";
 
 const UploadImage = async (file: any) => {
   try {
+    // Removed file size limit check
     const arrayBuffer = await file.arrayBuffer(); // Convert Blob to ArrayBuffer
     const buffer = Buffer.from(arrayBuffer); // Convert to Buffer
 
@@ -10,8 +11,10 @@ const UploadImage = async (file: any) => {
     const filePath = `travelink/${Date.now()}_${file.name}`; // Generate unique file path
     const firebaseFile = bucket.file(filePath);
 
-    // Resize image using sharp
+    // Compress and resize image using sharp
     const resizedBuffer = await sharp(buffer)
+      .resize({ width: 1200, withoutEnlargement: true }) // Resize to max width 1200px
+      .jpeg({ quality: 80 }) // Compress to JPEG with quality 80
       .toBuffer();
 
     const blobStream = firebaseFile.createWriteStream({
