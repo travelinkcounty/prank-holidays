@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { UploadImage } from "../../controller/imageController";
+import { UploadMultipleImages } from "../../controller/imageController";
 import LocationService from "../../services/locationServices";
 import consoleManager from "../../utils/consoleManager";
 import { v4 as uuidv4 } from 'uuid';
+
+
 // Get all packages (GET)
 export async function GET(req: Request) {
     try {
@@ -52,26 +54,33 @@ export async function POST(req: Request) {
         const type = formData.get("type");
         const featured = formData.get("featured") === "true";
         const uid = uuidv4();
-        const file = formData.get("image");
+        const files = formData.getAll("image").slice(0, 5);
 
-        if (!name || !file) {
+        if (!name || !files || files.length === 0) {
             return NextResponse.json({
                 statusCode: 400,
                 errorCode: "BAD_REQUEST",
-                errorMessage: "Name, and image are required",
+                errorMessage: "Name, and at least one image are required",
+            }, { status: 400 });
+        }
+        if (files.length > 5) {
+            return NextResponse.json({
+                statusCode: 400,
+                errorCode: "TOO_MANY_IMAGES",
+                errorMessage: "Maximum 5 images allowed.",
             }, { status: 400 });
         }
 
-        // Upload image to Firebase Storage (800x600 for locations)
-        const imageUrl = await UploadImage(file);
-        consoleManager.log("✅ Location image uploaded:", imageUrl);
+        // Upload images to Firebase Storage
+        const imageUrls = await UploadMultipleImages(files);
+        consoleManager.log("✅ Location images uploaded:", imageUrls);
 
         // Save location data in Firestore
         const newLocation = await LocationService.addLocation({
             uid,
             name,
             type,
-            image: imageUrl,
+            image: imageUrls, // Store as array
             featured,
         });
 

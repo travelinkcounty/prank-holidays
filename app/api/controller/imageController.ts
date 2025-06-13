@@ -34,6 +34,17 @@ const UploadImage = async (file: any) => {
   }
 };
 
+const UploadMultipleImages = async (files: any[]) => {
+  try {
+    // Only upload up to 5 images
+    const limitedFiles = files.slice(0, 5);
+    const uploadPromises = limitedFiles.map(file => UploadImage(file));
+    return await Promise.all(uploadPromises);
+  } catch (error: any) {
+    throw new Error("Error uploading multiple images: " + error.message);
+  }
+};
+
 const ReplaceImage = async (file: any, oldImageUrl: string) => {
   try {
     const bucket = adminStorage.bucket();
@@ -78,4 +89,4 @@ const ReplaceImage = async (file: any, oldImageUrl: string) => {
   }
 };
 
-export { UploadImage, ReplaceImage };
+export { UploadImage, UploadMultipleImages, ReplaceImage };

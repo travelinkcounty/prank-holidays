@@ -3,33 +3,28 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Sarah Johnson",
-    text: "The attention to detail was incredible! Every aspect of our trip was perfectly planned.",
+    name: "Mohan Singh",
+    text: "They offer high-quality services at a fair price. Prank Holiday ensures a pleasant and stress-free travel experience. Customer Service is quite helpful, and the workforce is equally cooperative.",
     image: "https://randomuser.me/api/portraits/women/2.jpg",
   },
   {
-    name: "Michael Chen",
-    text: "Professional service from start to finish. Made our family vacation truly memorable.",
+    name: "Ridhima Tandon",
+    text: "Travelink County provide excellent service when it comes to providing luxury travel accommodations. It is a highly recommended spot to stay. They provide high-quality services at a reasonable cost. They make sure to cater to your needs efficiently and without burning a hole in your pocket.",
     image: "https://randomuser.me/api/portraits/men/4.jpg",
   },
   {
-    name: "Emma Rodriguez",
-    text: "Their local expertise made all the difference. We discovered hidden gems we never would have found!",
+    name: "Alok Verma",
+    text: "Travelink County provides you luxury and  budget packages and deals. Service  is good, it has facilities of  game and  activities. Staff is very courteous and generous. It is a great place and I would recommend it. It is worthy. I would love to come back to this place.",
     image: "https://randomuser.me/api/portraits/women/3.jpg",
   },
   {
-    name: "David Kim",
-    text: "The personalized recommendations were spot on. Exactly what we were looking for!",
+    name: "Sapna Kumari",
+    text: "Travelink County is best option to go for if your planning your vacations anytime soon. I had an amazing experience. They provide quality services at reasonable price. Travelink County provides a very smooth and hassle-free travel experience. The Customer Care is so supportive and the team is also co-operative.",
     image: "https://randomuser.me/api/portraits/men/5.jpg",
   },
   {
-    name: "Lisa Patel",
-    text: "Outstanding customer service and competitive prices. Will definitely book again!",
-    image: "https://randomuser.me/api/portraits/women/4.jpg",
-  },
-  {
     name: "Amit Sharma",
-    text: "Absolutely hilarious! My friends couldn't stop laughing. Highly recommend Prank Holiday!",
+    text: "I had a great experience with Travelink County. The staff was friendly and helpful, and the facilities were clean and modern. I would definitely recommend this place to others.",
     image: "https://randomuser.me/api/portraits/men/3.jpg",
   },
 ];
