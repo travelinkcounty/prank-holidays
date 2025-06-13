@@ -6,7 +6,7 @@ import { Mail, Phone, MapPin, Instagram, Youtube, MessageCircle } from "lucide-r
 const Footer = () => {
   return (
     <footer className="bg-[#181929] text-white pt-12 pb-4 mt-8 border-t-4 border-[#ffe066]" style={{ fontFamily: 'var(--font-main)' }}>
-      <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
         {/* Logo, Name, Description */}
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-3 mb-3">
@@ -47,7 +47,7 @@ const Footer = () => {
           </div>
         </div>
         {/* Quick Links */}
-        <div>
+        <div className="sm:col-span-2 md:col-span-1">
           <h3 className="text-xl font-extrabold mb-4 text-[#e63946]">Quick Links</h3>
           <ul className="space-y-2 text-white/90">
             <li><a href="/home" className="hover:text-[#ffe066] transition">Home</a></li>
@@ -63,9 +63,12 @@ const Footer = () => {
         <div>
           &copy; {new Date().getFullYear()} <span className="font-bold text-white">Travelink County</span>. All Rights Reserved.
         </div>
-        <div className="flex gap-4">
-          <a href="/privacy-policy" className="hover:text-[#ffe066]">Privacy Policy</a> |
+        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-center w-full md:w-auto">
+          <a href="/privacy-policy" className="hover:text-[#ffe066]">Privacy Policy</a>
+          <span className="hidden md:inline mx-2">|</span>
           <a href="/terms" className="hover:text-[#ffe066]">Terms & Conditions</a>
+          <span className="hidden md:inline mx-2">|</span>
+          <a href="/refund-policy" className="hover:text-[#ffe066]">Refund Policy</a>
         </div>
       </div>
     </footer>

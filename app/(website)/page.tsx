@@ -6,6 +6,7 @@ import PackageSection from "@/components/home/package-section";
 import GallerySection from "@/components/home/gallery-section";
 import TestimonialSection from "@/components/home/testimonial-section";
 import ServiceSection from "@/components/home/service-section";
+import HotelSection from "@/components/home/hotel-section";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <DestinationSection />
       <PackageSection />
       <ProcessSection />
+      <HotelSection />
       <GallerySection />
       <TestimonialSection />
     </div>

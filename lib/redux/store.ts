@@ -10,6 +10,7 @@ import countReducer from "./features/countSlice";
 import membershipReducer from "./features/membershipSlice";
 import historyReducer from "./features/historySlice";
 import joinReducer from "./features/joinSlice";
+import hotelReducer from "./features/hotelSlice";
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     membership: membershipReducer,
     history: historyReducer,
     join: joinReducer,
+    hotel: hotelReducer,
   },
 });
 
