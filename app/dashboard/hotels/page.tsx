@@ -280,7 +280,7 @@ export default function HotelsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {locations.map((location) => (
-                    <SelectItem key={location.uid} value={location.name}>{location.name}</SelectItem>
+                    <SelectItem key={location.uid} value={location.uid}>{location.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
