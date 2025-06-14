@@ -110,6 +110,10 @@ const ContactPage = () => {
                                 +91 - 9220413324
                             </li>
                             <li className="flex items-center gap-4">
+                                <Phone className="w-6 h-6 text-[#e30613]" />
+                                Toll Free: 1800 890 5660
+                            </li>
+                            <li className="flex items-center gap-4">
                                 <Mail className="w-6 h-6 text-[#e30613]" />
                                 <span>info@travelinkcounty.com</span>
                             </li>

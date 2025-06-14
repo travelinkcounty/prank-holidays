@@ -34,6 +34,8 @@ const Footer = () => {
               <Phone className="w-4 h-4 text-[#e63946]" />
               <span>+91 - 9717308208<br />
               +91 - 9220413324</span>
+              <br />
+              Toll Free: 1800 890 5660
             </li>
             <li className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#e63946]" />
