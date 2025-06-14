@@ -41,19 +41,19 @@ const ImageSlider = ({ images }: { images: string[] }) => {
       <img
         src={images[0]}
         alt="Slide 1"
-        className="w-full h-48 object-cover"
+        className="w-full h-62 object-cover"
       />
     );
   }
   return (
-    <div className="relative w-full h-48">
-      <div ref={sliderRef} className="keen-slider w-full h-48 rounded-t-2xl">
+    <div className="relative w-full h-62">
+      <div ref={sliderRef} className="keen-slider w-full h-62 rounded-t-2xl">
         {images.map((src, i) => (
           <div className="keen-slider__slide" key={i}>
             <img
               src={src}
               alt={`Slide ${i + 1}`}
-              className="w-full h-48 object-cover"
+              className="w-full h-62 object-cover"
             />
           </div>
         ))}
@@ -139,7 +139,7 @@ const Locations = () => {
           )}
           {filteredLocations.map((loc) => (
             <Card key={loc.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
-              <div className="relative w-full h-48">
+              <div className="relative w-full h-62">
                 <ImageSlider images={Array.isArray(loc.image) ? loc.image.filter(Boolean) : loc.image ? [loc.image] : []} />
               </div>
               <CardHeader>

@@ -125,6 +125,16 @@ const Header = () => {
                   {link.name}
                 </Link>
               ))}
+              {/* Hotels link only for mobile menu */}
+              <Link
+                href="/hotels"
+                className={
+                  `px-2 py-1 rounded-md transition-colors cursor-pointer text-[#1a4d8f] hover:text-[#ffc72c] hover:bg-[#fff1e6]`
+                }
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Hotels
+              </Link>
               {user ? (
                 <Link
                   href={profileHref}

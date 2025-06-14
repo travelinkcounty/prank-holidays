@@ -34,8 +34,10 @@ const Footer = () => {
               <Phone className="w-4 h-4 text-[#e63946]" />
               <span>+91 - 9717308208<br />
               +91 - 9220413324</span>
-              <br />
-              Toll Free: 1800 890 5660
+            </li>
+            <li className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-[#e63946]" />
+              <span>Toll Free: 1800 890 5660</span>
             </li>
             <li className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#e63946]" />
@@ -55,6 +57,7 @@ const Footer = () => {
             <li><a href="/home" className="hover:text-[#ffe066] transition">Home</a></li>
             <li><a href="/packages" className="hover:text-[#ffe066] transition">Packages</a></li>
             <li><a href="/membership" className="hover:text-[#ffe066] transition">Membership</a></li>
+            <li><a href="/hotels" className="hover:text-[#ffe066] transition">Hotels</a></li>
             <li><a href="/contact" className="hover:text-[#ffe066] transition">Contact Us</a></li>
             <li><a href="/about" className="hover:text-[#ffe066] transition">About Us</a></li>
           </ul>

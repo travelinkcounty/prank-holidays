@@ -1,14 +1,15 @@
 'use client'
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import Image from "next/image";
 import { fetchHotels, selectHotels, selectLoading } from "@/lib/redux/features/hotelSlice";
 import { fetchLocations, selectLocations } from "@/lib/redux/features/locationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { Loader2 } from "lucide-react";
 import ServiceSection from "@/components/home/service-section";
+import { useKeenSlider } from "keen-slider/react";
+import "keen-slider/keen-slider.min.css";
 
 const PackagesPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -20,6 +21,62 @@ const PackagesPage = () => {
     dispatch(fetchHotels());
     dispatch(fetchLocations());
   }, [dispatch]);
+
+  
+  const ImageSlider = ({ images }: { images: string[] }) => {
+    const [current, setCurrent] = useState(0);
+    const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
+      loop: true,
+      slides: { perView: 1 },
+      drag: true,
+      created: (s) => s.moveToIdx(0),
+      slideChanged: (s) => setCurrent(s.track.details.rel),
+    });
+    // Autoplay effect
+    useEffect(() => {
+      if (!instanceRef.current) return;
+      if (images.length <= 1) return;
+      const interval = setInterval(() => {
+        instanceRef.current?.next();
+      }, 2500);
+      return () => clearInterval(interval);
+    }, [instanceRef, images.length]);
+  
+    if (!images.length) return null;
+    if (images.length === 1) {
+      return (
+        <img
+          src={images[0]}
+          alt="Slide 1"
+          className="w-full h-62 object-cover"
+        />
+      );
+    }
+    return (
+      <div className="relative w-full h-62">
+        <div ref={sliderRef} className="keen-slider w-full h-62 rounded-t-2xl">
+          {images.map((src, i) => (
+            <div className="keen-slider__slide" key={i}>
+              <img
+                src={src}
+                alt={`Slide ${i + 1}`}
+                className="w-full h-62 object-cover"
+              />
+            </div>
+          ))}
+        </div>
+        {/* Dots */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {images.map((_, i) => (
+            <span
+              key={i}
+              className={`w-2 h-2 rounded-full transition-all duration-200 ${current === i ? "bg-[#e63946] opacity-90" : "bg-[#e63946] opacity-40"}`}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'var(--font-main)' }}>
@@ -47,8 +104,8 @@ const PackagesPage = () => {
           )}
           {hotels.map((hotel) => (
             <Card key={hotel.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
-              <div className="relative w-full h-48">
-                <Image src={hotel.image || ""} alt={hotel.name} fill className="object-cover" />
+              <div className="relative w-full h-62">
+                <ImageSlider images={Array.isArray(hotel.image) ? hotel.image.filter(Boolean) : hotel.image ? [hotel.image] : []} />
               </div>
               <CardHeader>
                 <CardTitle className="text-xl font-bold text-[#e30613] flex flex-col gap-1">
