@@ -27,11 +27,11 @@ const Sidebar = () => {
   const sidebarContent = (
     <>
       {/* Logo at the top, centered */}
-      <div className="flex flex-col items-center mb-4 border-b border-gray-200 pb-4">
+      <div className="flex flex-col items-center mb-4 border-b border-gray-200 pb-4 sticky top-0 z-10 bg-white">
         <h1 className="text-2xl font-bold text-black">Travelink County</h1>
         <div className="w-24 h-1 rounded-full mt-2" style={{ background: 'linear-gradient(90deg, #e63946 0%, #ffe066 50%, #457b9d 100%)' }} />
       </div>
-      <nav className="flex flex-col gap-2 mt-0">
+      <nav className="flex flex-col gap-2 mt-0 overflow-y-auto flex-1 min-h-0">
         {links.map(link => {
           const isActive = pathname === link.href;
           return (
@@ -91,6 +91,7 @@ const Sidebar = () => {
       <aside
         className={`
           fixed top-0 left-0 z-50 h-full w-64 bg-white shadow-xl border-r border-gray-200 py-8 px-4 flex flex-col gap-6 transition-transform duration-300
+          overflow-y-auto min-h-0
           ${open ? "translate-x-0" : "-translate-x-full"}
           md:static md:translate-x-0 md:min-h-screen md:block
         `}

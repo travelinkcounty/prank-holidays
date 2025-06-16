@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import AuthService from "../../services/authServices";
 import consoleManager from "../../utils/consoleManager";
 import { db } from "../../config/firebase";
+import { UploadImage } from "../../controller/imageController";
 
 // LOGIN
 export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { email, password } = body;
+        
 
         // Validate input
         if (!email || !password) {

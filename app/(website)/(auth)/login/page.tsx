@@ -89,7 +89,7 @@ const LoginPage = () => {
         <div className="mb-6 flex flex-col items-center">
           <UserCircle2 className="w-20 h-20 text-[#e63946] drop-shadow-lg animate-bounce" />
           <h2 className="text-2xl font-bold mt-2 mb-1 text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Welcome Back!</h2>
-          <p className="text-gray-500 text-sm">Sign in to your Prank Holidays account</p>
+          <p className="text-gray-500 text-sm">Sign in to your Travelink County account</p>
         </div>
         <form className="w-full space-y-5" onSubmit={handleSubmit} autoComplete="off">
           <div>

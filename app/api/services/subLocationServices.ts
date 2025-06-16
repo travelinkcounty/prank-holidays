@@ -2,7 +2,7 @@ import { db } from "../config/firebase";
 import consoleManager from "../utils/consoleManager";
 import admin from "firebase-admin";
 
-class LocationService {
+class SubLocationService {
     static locations: any[] = [];
     static isInitialized = false;
 
@@ -11,7 +11,7 @@ class LocationService {
         if (this.isInitialized) return;
 
         consoleManager.log("Initializing Firestore listener for locations...");
-        const locationsCollection = db.collection("locations");
+        const locationsCollection = db.collection("subLocations");
 
         locationsCollection.onSnapshot((snapshot: any) => {
             this.locations = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
@@ -25,7 +25,7 @@ class LocationService {
     static async getAllLocations(forceRefresh = false) {
         if (forceRefresh || !this.isInitialized) {
             consoleManager.log("Force refreshing locations from Firestore...");
-            const snapshot = await db.collection("locations").orderBy("createdOn", "desc").get();
+            const snapshot = await db.collection("subLocations").orderBy("createdOn", "desc").get();
             this.locations = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
             this.isInitialized = true;
         } else {
@@ -35,9 +35,9 @@ class LocationService {
     }
 
     // Get all featured locations
-    static async getFeaturedLocations() {
+    static async getFeaturedLocations(locationId: string) {
         try {
-            const snapshot = await db.collection("locations").where("featured", "==", true).get();
+            const snapshot = await db.collection("subLocations").where("locationId", "==", locationId).get();
             consoleManager.log("🔥 Fetched featured locations:", snapshot.docs.length);
             return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
         } catch (error) {
@@ -50,7 +50,7 @@ class LocationService {
     static async addLocation(locationData: any) {
         try {
             const timestamp = admin.firestore.FieldValue.serverTimestamp();
-            const newLocationRef = await db.collection("locations").add({
+            const newLocationRef = await db.collection("subLocations").add({
                 ...locationData,
                 createdOn: timestamp,
             });
@@ -71,21 +71,23 @@ class LocationService {
     static async getLocationById(locationId: string) {
         try {
             // Check if location exists in cache
-            const cachedLocation = this.locations.find((l: any) => l.name === locationId);
+            const cachedLocation = this.locations.find((l: any) => l.uid === locationId);
             if (cachedLocation) {
                 consoleManager.log("✅ Location fetched from cache:", locationId);
                 return cachedLocation;
             }
 
             // Fetch from Firestore if not in cache
-            const snapshot = await db.collection("locations").where("name", "==", locationId).get();
-            const doc = snapshot.docs[0];
-
+            const snapshot = await db.collection("subLocations").where("uid", "==", locationId).get();
+            
             if (snapshot.empty) {
                 consoleManager.warn("⚠️ Location not found:", locationId);
                 return null;
             }
 
+            console.log("snapshot", snapshot.docs);
+            const doc = snapshot.docs[0];
+            console.log("doc", doc.data()); 
             consoleManager.log("✅ Location fetched from Firestore:", locationId);
             return { id: doc.id, ...doc.data() };
         } catch (error) {
@@ -98,7 +100,7 @@ class LocationService {
     static async updateLocation(locationId: string, updatedData: any) {
         try {
             const timestamp = admin.firestore.FieldValue.serverTimestamp();
-            const locationRef = db.collection("locations").doc(locationId);
+            const locationRef = db.collection("subLocations").doc(locationId);
             await locationRef.update({
                 ...updatedData,
                 updatedOn: timestamp,
@@ -119,7 +121,7 @@ class LocationService {
     // Delete location
     static async deleteLocation(locationId: string) {
         try {
-            await db.collection("locations").doc(locationId).delete();
+            await db.collection("subLocations").doc(locationId).delete();
             consoleManager.log("✅ Location deleted:", locationId);
 
             // Force refresh the cache after deleting a location
@@ -133,4 +135,4 @@ class LocationService {
     }
 }
 
-export default LocationService;
+export default SubLocationService;

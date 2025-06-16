@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Mail, Phone, MapPin, Instagram, Youtube, MessageCircle } from "lucide-react";
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -9,11 +10,9 @@ const Footer = () => {
       <div className="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
         {/* Logo, Name, Description */}
         <div className="flex flex-col items-start">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-full bg-[#ffe066] flex items-center justify-center text-[#e63946] text-2xl font-extrabold shadow">
-              T
-            </div>
-            <span className="text-2xl font-extrabold text-white">Travelink County</span>
+          <div className="flex items-center justify-center gap-8 mb-3">
+              <Image src="/favicon.png" alt="Travelink County" width={100} height={100} className="h-auto w-auto" />
+              <h1 className="text-2xl text-white/80 font-bold">Travelink <br /> County</h1>
           </div>
           <p className="text-white/80 max-w-xs">
             Your trusted partner for travel, events, and unforgettable experiences. Explore the world with us!
@@ -37,7 +36,10 @@ const Footer = () => {
             </li>
             <li className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-[#e63946]" />
-              <span>Toll Free: 1800 890 5660</span>
+              <div className="flex flex-col">
+                <span>Toll Free: 1800 890 5660</span>
+                <span>Landline: +91-45725977</span>
+              </div>
             </li>
             <li className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#e63946]" />

@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import galleryReducer from "./features/gallerySlice";
 import leadReducer from "./features/leadSlice";
 import locationReducer from "./features/locationSlice";
+import subLocationReducer from "./features/subLocationSlice";
 import packageReducer from "./features/packageSlice";
 import testimonialReducer from "./features/testimonialSlice";
 import planReducer from "./features/planSlice";
@@ -17,6 +18,7 @@ export const store = configureStore({
     gallery: galleryReducer,
     lead: leadReducer,
     location: locationReducer,
+    subLocation: subLocationReducer,
     package: packageReducer,
     testimonial: testimonialReducer,
     plan: planReducer,

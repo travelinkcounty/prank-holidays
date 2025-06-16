@@ -2,7 +2,7 @@ import { createSlice, Dispatch } from "@reduxjs/toolkit";
 import axios from "axios";
 import { RootState } from "../store";
 
-export interface Location {
+export interface SubLocation {
   id: string;
   uid: string;
   name: string;
@@ -10,26 +10,27 @@ export interface Location {
   description: string;
   type: string;
   featured: boolean;
+  locationId: string;
   createdOn: string;
   updatedOn: string;
 }
 
-export interface LocationState {
-  data: Location[];
+export interface SubLocationState {
+   data: SubLocation[];
   loading: boolean;
   error: string | null;
-  selectedLocation: Location | null;
+  selectedSubLocation: SubLocation | null;
 }
 
-const initialState: LocationState = {
+const initialState: SubLocationState = {
   data: [],
   loading: false,
   error: null,
-  selectedLocation: null,
+  selectedSubLocation: null,
 };
 
-const locationSlice = createSlice({
-  name: "location",
+const subLocationSlice = createSlice({
+  name: "subLocation",
   initialState,
   reducers: {
     setLocations: (state, action) => {
@@ -43,21 +44,21 @@ const locationSlice = createSlice({
     setError: (state, action) => {
       state.error = action.payload;
     },
-    setSelectedLocation: (state, action) => {
-      state.selectedLocation = action.payload;
+    setSelectedSubLocation: (state, action) => {
+      state.selectedSubLocation = action.payload;
     },
-    clearSelectedLocation: (state) => {
-      state.selectedLocation = null;
+    clearSelectedSubLocation: (state) => {
+      state.selectedSubLocation = null;
     },
   },
 });
 
-export const { setLocations, setLoading, setError, setSelectedLocation, clearSelectedLocation } = locationSlice.actions;
+export const { setLocations, setLoading, setError, setSelectedSubLocation, clearSelectedSubLocation } = subLocationSlice.actions;
 
-export const fetchLocations = () => async (dispatch: Dispatch) => {
+export const fetchSubLocations = () => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.get("/api/routes/locations");
+    const response = await axios.get("/api/routes/sub-locations");
     if (response.status === 200) {
       dispatch(setLocations(response.data.data));
     } else {
@@ -69,10 +70,10 @@ export const fetchLocations = () => async (dispatch: Dispatch) => {
   }
 };  
 
-export const fetchFeaturedLocations = () => async (dispatch: Dispatch) => {
+export const fetchFeaturedSubLocations = (locationId: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.get("/api/routes/locations?featured=true");
+    const response = await axios.get(`/api/routes/sub-locations?locationId=${locationId}`);
     if (response.status === 200) {
       dispatch(setLocations(response.data.data));
     } else {
@@ -84,12 +85,12 @@ export const fetchFeaturedLocations = () => async (dispatch: Dispatch) => {
   }
 };    
 
-export const fetchLocationById = (id: string) => async (dispatch: Dispatch) => {
+export const fetchSubLocationById = (id: string) => async (dispatch: Dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.get(`/api/routes/locations/${id}`);
+    const response = await axios.get(`/api/routes/sub-locations/${id}`);
     if (response.status === 200) {
-      dispatch(setSelectedLocation(response.data.data));
+      dispatch(setSelectedSubLocation(response.data.data));
     } else {
       dispatch(setError(response.data.message));
     }
@@ -99,9 +100,9 @@ export const fetchLocationById = (id: string) => async (dispatch: Dispatch) => {
   }
 };  
 
-export const addLocation = (location: FormData) => async (dispatch: Dispatch) => {
+export const addSubLocation = (location: FormData) => async (dispatch: Dispatch) => {
   try {
-    const response = await axios.post("/api/routes/locations", location,
+    const response = await axios.post("/api/routes/sub-locations", location,
         {
             headers: {
                 "Content-Type": "multipart/form-data",
@@ -119,9 +120,9 @@ export const addLocation = (location: FormData) => async (dispatch: Dispatch) =>
   }
 };  
 
-export const updateLocation = (location: FormData, id: string) => async (dispatch: Dispatch) => {
+export const updateSubLocation = (location: FormData, id: string) => async (dispatch: Dispatch) => {
   try {
-    const response = await axios.put(`/api/routes/locations/${id}`, location,
+    const response = await axios.put(`/api/routes/sub-locations/${id}`, location,
         {
             headers: {
                 "Content-Type": "multipart/form-data",
@@ -139,9 +140,9 @@ export const updateLocation = (location: FormData, id: string) => async (dispatc
   }
 };            
 
-export const deleteLocation = (id: string) => async (dispatch: Dispatch) => {
+export const deleteSubLocation = (id: string) => async (dispatch: Dispatch) => {
   try {
-    const response = await axios.delete(`/api/routes/locations/${id}`);
+    const response = await axios.delete(`/api/routes/sub-locations/${id}`);
     if (response.status === 200) {
       return response.data;
     } else {
@@ -153,9 +154,9 @@ export const deleteLocation = (id: string) => async (dispatch: Dispatch) => {
   }
   };
 
-export const selectLocations = (state: RootState) => state.location.data;
-export const selectSelectedLocation = (state: RootState) => state.location.selectedLocation;
-export const selectLoading = (state: RootState) => state.location.loading;
-export const selectError = (state: RootState) => state.location.error;
+export const selectSubLocations = (state: RootState) => state.subLocation.data;
+export const selectSubLocationById = (state: RootState, id: string) => state.subLocation.data.find((subLocation: SubLocation) => subLocation.id === id);
+export const selectSubLoading = (state: RootState) => state.subLocation.loading;
+export const selectSubError = (state: RootState) => state.subLocation.error;
 
-export default locationSlice.reducer;
+export default subLocationSlice.reducer;

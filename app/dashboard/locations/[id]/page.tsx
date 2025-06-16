@@ -4,22 +4,26 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Loader2, Plus, Edit, Trash2, Search, MapPin, ArrowRight } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Search, MapPin } from "lucide-react";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchLocations, selectLocations, selectError, selectLoading, updateLocation, deleteLocation as deleteLocationAction, addLocation, Location} from "@/lib/redux/features/locationSlice";
+import { fetchLocationById, selectSelectedLocation, Location} from "@/lib/redux/features/locationSlice";
 import { AppDispatch } from "@/lib/redux/store";
 import { Switch } from "@/components/ui/switch";
-import Link from "next/link";
-
+import { fetchFeaturedSubLocations, selectSubLocations, selectSubError, selectSubLoading, deleteSubLocation, updateSubLocation, addSubLocation} from "@/lib/redux/features/subLocationSlice";
+import { useParams } from "next/navigation";
 
 export default function LocationsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const locations = useSelector(selectLocations);
-  const error = useSelector(selectError);
-  const loading = useSelector(selectLoading);
-  
+  const location = useSelector(selectSelectedLocation);
+  const subLocations = useSelector(selectSubLocations);
+  const subError = useSelector(selectSubError);
+  const subLoading = useSelector(selectSubLoading);
+
+  const { id } = useParams();
+
+  const locationId = id as string;
+
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editLocation, setEditLocation] = useState<Location | null>(null);
@@ -33,19 +37,24 @@ export default function LocationsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchLocations());
-  }, [dispatch]);
+    if (locationId) {
+      dispatch(fetchLocationById(locationId as string));
+      if (location) {
+        dispatch(fetchFeaturedSubLocations(location.uid));
+      }
+    }
+  }, [dispatch, locationId]);
 
   // Filtered locations
   const filteredLocations = useMemo(
     () =>
-      locations.filter(
+      subLocations.filter(
         (l) =>
           (typeFilter === "all" || l.type.toLowerCase() === typeFilter) &&
           (l.name.toLowerCase().includes(search.toLowerCase()) ||
             l.type.toLowerCase().includes(search.toLowerCase()))
       ),
-    [locations, search, typeFilter]
+    [subLocations, search, typeFilter]
   );
 
   // Handlers
@@ -73,14 +82,14 @@ export default function LocationsPage() {
     if (!deleteLocation) return;
     setIsDeleting(true);
     try {
-      await dispatch(deleteLocationAction(deleteLocation.id));
+      await dispatch(deleteSubLocation(deleteLocation.id));
       setDeleteLocation(null);
       toast.success("Location deleted!");
     } catch (error) {
       toast.error("Failed to delete location");
     } finally {
       setIsDeleting(false);
-      dispatch(fetchLocations());
+      dispatch(fetchFeaturedSubLocations(locationId as string));
     }
   };
 
@@ -108,7 +117,8 @@ export default function LocationsPage() {
     const formData = new FormData();
     formData.append("name", form.name);
     formData.append("featured", form.featured.toString());
-    formData.append("type", form.type);
+    formData.append("type", location?.type || "");
+    formData.append("locationId", location?.uid || "");
     // Add existing image URLs that are still in previews (for edit)
     if (editLocation) {
       imagePreviews
@@ -119,10 +129,10 @@ export default function LocationsPage() {
     imageFiles.forEach(file => formData.append("image", file));
     try {
       if (editLocation) {
-        await dispatch(updateLocation(formData, editLocation.id));
+        await dispatch(updateSubLocation(formData, editLocation.id));
         toast.success("Location updated!");
       } else {
-        await dispatch(addLocation(formData));
+        await dispatch(addSubLocation(formData));
         toast.success("Location added!");
       }
       setModalOpen(false);
@@ -132,11 +142,11 @@ export default function LocationsPage() {
       toast.error(editLocation ? "Failed to update location" : "Failed to add location");
     } finally {
       setIsEditing(false);
-      dispatch(fetchLocations());
+      dispatch(fetchFeaturedSubLocations(locationId as string));
     }
   };
 
-  if (error) {
+  if (subError) {
     return (
       <div className="mx-auto p-0 flex flex-col gap-8">
         <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Locations</h2>
@@ -148,38 +158,28 @@ export default function LocationsPage() {
     <div className="mx-auto p-0 flex flex-col gap-8">
       {/* Location List Heading and Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-2 mb-1 flex-wrap">
-        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Locations</h2>
+        <h2 className="text-xl font-bold text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>Sub Locations</h2>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-stretch sm:items-center justify-end">
           <div className="flex gap-2 w-full sm:w-auto">
             <div className="relative w-full sm:w-72">
               <Input
-                placeholder="Search locations..."
+                placeholder="Search sub locations..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="domestic">Domestic</SelectItem>
-                <SelectItem value="international">International</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
-          <Button onClick={openAddModal} className="gap-2 w-full sm:w-auto cursor-pointer">
-            <Plus className="w-4 h-4" /> Add Location
+          <Button onClick={openAddModal} className="gap-2 w-full sm:w-auto cursor-pointer" disabled={!location}>
+            <Plus className="w-4 h-4" /> New Location
           </Button>
         </div>
       </div>
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {loading && (
+        {subLoading && (
           <div className="col-span-full text-center text-gray-400 py-12">
             <Loader2 className="w-10 h-10 animate-spin" />
           </div>
@@ -193,7 +193,7 @@ export default function LocationsPage() {
               ? location.image.filter(Boolean)
               : location.image ? [location.image] : [];
             return (
-              <Link key={location.uid} href={`/dashboard/locations/${location.name}`} className="bg-white rounded-2xl shadow-md border border-gray-100 flex flex-col overflow-hidden hover:shadow-lg transition group relative">
+              <div key={location.id} className="bg-white rounded-2xl shadow-md border border-gray-100 flex flex-col overflow-hidden">
                 <div className="flex items-center justify-center h-48 bg-gray-100">
                   {validImages.length > 0 ? (
                     <img src={validImages[0]} alt={location.name} className="w-full h-48 object-cover rounded-lg" />
@@ -202,23 +202,18 @@ export default function LocationsPage() {
                   )}
                 </div>
                 <div className="p-4 flex-1 flex flex-col justify-between">
-                  <div className="flex items-center justify-between">
-                      <div>
-                      <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{location.name}</div>
-                      <div className="text-xs text-gray-500 mb-2">{location.type}</div>
-                    </div>
-                    <div className="flex flex-row items-center gap-2 group-hover:translate-x-1 transition-transform">
-                      <span className="text-sm text-gray-500">View More</span>
-                      <ArrowRight className="w-4 h-4 text-[#e63946]" />
-                    </div>
+                  <div>
+                    <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-main)' }}>{location.name}</div>
+                    <div className="text-xs text-gray-500 mb-2">{location.type}</div>
                   </div>
                   <div className="flex gap-2 mt-2">
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={e => { e.preventDefault(); openEditModal(location); }}
+                      onClick={() => openEditModal(location)}
                       aria-label="Edit"
                       className="cursor-pointer"
+                      disabled={!location}
                     >
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
@@ -226,9 +221,9 @@ export default function LocationsPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={e => { e.preventDefault(); setDeleteLocation(location); }}
+                      onClick={() => setDeleteLocation(location)}
                       aria-label="Delete"
-                      disabled={loading}
+                      disabled={subLoading}
                       className="text-destructive cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4 mr-1" />
@@ -236,7 +231,7 @@ export default function LocationsPage() {
                     </Button>
                   </div>
                 </div>
-              </Link>
+              </div>
             );
           })
         )}
@@ -245,79 +240,76 @@ export default function LocationsPage() {
       {/* Add/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="max-w-3xl w-full">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>{editLocation ? "Edit Location" : "Add Location"}</DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col gap-2">
-              <label className="block text-sm font-medium">Name</label>
-              <Input
-                placeholder="Name"
-                value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              required
-            />
+          { !location ? (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <Loader2 className="w-8 h-8 animate-spin text-[#e63946]" />
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="block text-sm font-medium">Featured</label>
-              <Switch
-                checked={form.featured}
-                onCheckedChange={(checked) => setForm((f) => ({ ...f, featured: checked }))}
-              />
-            </div>
-            <Select value={form.type} defaultValue="Domestic" onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Location Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="domestic">Domestic</SelectItem>
-                <SelectItem value="international">International</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex flex-col gap-2">
-              <label className="block text-sm font-medium">Images (max 5)</label>
-              {imagePreviews.length > 0 && (
-                <div className="flex gap-2 flex-wrap mb-2">
-                  {imagePreviews.filter(Boolean).map((src, idx) => (
-                    <div key={idx} className="relative group w-24 h-24 border rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">
-                      <img src={src} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 bg-white/80 rounded-full p-1 text-xs opacity-80 group-hover:opacity-100"
-                        onClick={() => handleRemoveImage(idx)}
-                        title="Remove"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                onChange={handleImageChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#e63946]/10 file:text-[#e63946] cursor-pointer"
-                disabled={imagePreviews.length >= 5}
-              />
-              {imagePreviews.length >= 5 && (
-                <span className="text-xs text-red-500">Maximum 5 images allowed.</span>
-              )}
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={isEditing} className="gap-2 cursor-pointer">
-                {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
-                {editLocation ? "Update" : "Add"}
-              </Button>
-              <DialogClose asChild>
-                <Button type="button" variant="ghost">
-                  Cancel
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <DialogHeader>
+                <DialogTitle>{editLocation ? "Edit Location" : "Add Location"}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col gap-2">
+                <label className="block text-sm font-medium">Name</label>
+                <Input
+                  placeholder="Name"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="block text-sm font-medium">Featured</label>
+                <Switch
+                  checked={form.featured}
+                  onCheckedChange={(checked) => setForm((f) => ({ ...f, featured: checked }))}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="block text-sm font-medium">Images (max 5)</label>
+                {imagePreviews.length > 0 && (
+                  <div className="flex gap-2 flex-wrap mb-2">
+                    {imagePreviews.filter(Boolean).map((src, idx) => (
+                      <div key={idx} className="relative group w-24 h-24 border rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">
+                        <img src={src} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          className="absolute top-1 right-1 bg-white/80 rounded-full p-1 text-xs opacity-80 group-hover:opacity-100"
+                          onClick={() => handleRemoveImage(idx)}
+                          title="Remove"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#e63946]/10 file:text-[#e63946] cursor-pointer"
+                  disabled={imagePreviews.length >= 5}
+                />
+                {imagePreviews.length >= 5 && (
+                  <span className="text-xs text-red-500">Maximum 5 images allowed.</span>
+                )}
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={isEditing} className="gap-2 cursor-pointer">
+                  {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {editLocation ? "Update" : "Add"}
                 </Button>
-              </DialogClose>
-            </DialogFooter>
-          </form>
+                <DialogClose asChild>
+                  <Button type="button" variant="ghost">
+                    Cancel
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -332,13 +324,13 @@ export default function LocationsPage() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={subLoading}
               className="gap-2 cursor-pointer"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />} Delete
+              {subLoading && <Loader2 className="w-4 h-4 animate-spin" />} Delete
             </Button>
             <DialogClose asChild>
-              <Button type="button" variant="ghost" disabled={loading}>
+              <Button type="button" variant="ghost" disabled={subLoading}>
                 Cancel
               </Button>
             </DialogClose>

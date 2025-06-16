@@ -48,7 +48,7 @@ const ContactPage = () => {
         e.preventDefault();
         setLoading(true);
         setSuccess(false);
-        
+
         const lead = {
             ...form,
             status: "new",
@@ -111,7 +111,10 @@ const ContactPage = () => {
                             </li>
                             <li className="flex items-center gap-4">
                                 <Phone className="w-6 h-6 text-[#e30613]" />
-                                Toll Free: 1800 890 5660
+                                <div className="flex flex-col">
+                                    <span>Toll Free: 1800 890 5660</span>
+                                    <span>Landline: +91-45725977</span>
+                                </div>
                             </li>
                             <li className="flex items-center gap-4">
                                 <Mail className="w-6 h-6 text-[#e30613]" />
@@ -141,11 +144,11 @@ const ContactPage = () => {
                     </CardHeader>
                     <CardContent>
                         {success && (
-                          <div className="col-span-1 md:col-span-2 mb-6">
-                            <div className="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-md text-center font-semibold">
-                              Your message has been sent successfully!<br/>We will connect with you soon.
+                            <div className="col-span-1 md:col-span-2 mb-6">
+                                <div className="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-md text-center font-semibold">
+                                    Your message has been sent successfully!<br />We will connect with you soon.
+                                </div>
                             </div>
-                          </div>
                         )}
                         <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
                             <div className="flex flex-col col-span-1 md:col-span-1">

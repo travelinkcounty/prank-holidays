@@ -36,6 +36,7 @@ export async function POST(req: Request) {
         const title = formData.get("title");
         const file = formData.get("image");
         const uid = uuidv4();
+
         if (!title || !file) {
             return NextResponse.json({
                 statusCode: 400,

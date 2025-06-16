@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { fetchFeaturedLocations, selectLocations, selectLoading, selectError } from "@/lib/redux/features/locationSlice";
+import { fetchFeaturedSubLocations, selectSubLocations, selectSubLoading, selectSubError } from "@/lib/redux/features/subLocationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import PackageSection from "@/components/home/package-section";
 import TestimonialSection from "@/components/home/testimonial-section";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 const tabOptions = [
   { label: "Domestic", value: "domestic" },
@@ -74,16 +75,20 @@ const ImageSlider = ({ images }: { images: string[] }) => {
 
 const Locations = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const locations = useSelector(selectLocations);
-  const isLoading = useSelector(selectLoading);
-  const error = useSelector(selectError);
+  const subLocations = useSelector(selectSubLocations);
+  const isLoading = useSelector(selectSubLoading);
+  const error = useSelector(selectSubError);
+
+  const { id } = useParams();
+
+  const locationId = id as string;
 
   useEffect(() => {
-    dispatch(fetchFeaturedLocations());
-  }, [dispatch]);
+    dispatch(fetchFeaturedSubLocations(locationId));
+  }, [dispatch, locationId]);
 
   const [tab, setTab] = useState("domestic");
-  const filteredLocations = locations.filter(loc => loc.type === tab);
+  const filteredLocations = subLocations.filter(loc => loc.type === tab);
 
   if (error) {
     return (
@@ -128,6 +133,11 @@ const Locations = () => {
       {/* Locations Grid */}
       <section className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {subLocations.length === 0 && (
+            <div className="col-span-full text-center text-gray-400 py-12">
+              <p>No locations found.</p>
+            </div>
+          )}
           {isLoading && (
             <div className="col-span-full text-center text-gray-400 py-12">
               <Loader2 className="w-10 h-10 animate-spin" />
@@ -137,17 +147,14 @@ const Locations = () => {
             <Link key={loc.name} href={`/locations/${loc.name}`} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
               <Card key={loc.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
                 <div className="relative w-full h-62">
-                  <ImageSlider images={Array.isArray(loc.image) ? loc.image.filter(Boolean) : loc.image ? [loc.image] : []} />
-                </div>
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold text-[#e30613] flex justify-between items-center">
-                    {loc.name}
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">View More</p>
-                      <ArrowRight className="w-6 h-6" />
-                    </div>
-                  </CardTitle>
-                </CardHeader>
+                <ImageSlider images={Array.isArray(loc.image) ? loc.image.filter(Boolean) : loc.image ? [loc.image] : []} />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-[#e30613]">{loc.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-[#1a4d8f] font-medium">{loc.description}</p>
+                </CardContent>
               </Card>
             </Link>
           ))}
