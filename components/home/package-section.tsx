@@ -39,7 +39,7 @@ const PackageSection = () => {
             viewport={{ once: true }}
           >
             <Card className="rounded-2xl shadow-lg border-0 bg-white/90 hover:scale-105 hover:shadow-2xl transition-transform duration-300 cursor-pointer flex flex-col h-full p-0">
-              <div className="relative w-full h-40 rounded-t-2xl overflow-hidden" style={{marginTop: 0}}>
+              <div className="relative w-full h-56 rounded-t-2xl overflow-hidden" style={{marginTop: 0}}>
                 <Image src={pkg.image} alt={pkg.name} fill className="object-cover w-full h-full rounded-t-2xl" />
                 <span className="absolute top-2 right-2 bg-[#e63946] text-white text-xs font-bold px-3 py-1 rounded-full shadow">{pkg.days} / {pkg.nights}</span>
               </div>
@@ -61,7 +61,7 @@ const PackageSection = () => {
       </div>
       <div className="flex justify-center mt-8">
         <a
-          href="#"
+          href="/packages"
           className="inline-block bg-[#ffe066] text-[#e63946] font-bold px-8 py-3 rounded-full shadow-md hover:bg-[#e63946] hover:text-white transition-colors text-lg"
           style={{ fontFamily: 'var(--font-main)' }}
         >
