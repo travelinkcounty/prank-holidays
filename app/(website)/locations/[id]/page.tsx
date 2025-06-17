@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { fetchFeaturedSubLocations, selectSubLocations, selectSubLoading, selectSubError } from "@/lib/redux/features/subLocationSlice";
+import { fetchLocationById, selectSelectedLocation } from "@/lib/redux/features/locationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { Loader2 } from "lucide-react";
@@ -78,13 +79,17 @@ const Locations = () => {
   const subLocations = useSelector(selectSubLocations);
   const isLoading = useSelector(selectSubLoading);
   const error = useSelector(selectSubError);
+  const location = useSelector(selectSelectedLocation);
 
   const { id } = useParams();
 
   const locationId = id as string;
 
   useEffect(() => {
-    dispatch(fetchFeaturedSubLocations(locationId));
+      dispatch(fetchLocationById(locationId));
+    if (location) {
+      dispatch(fetchFeaturedSubLocations(location?.uid || ""));
+    }
   }, [dispatch, locationId]);
 
   const [tab, setTab] = useState("domestic");
@@ -144,8 +149,8 @@ const Locations = () => {
             </div>
           )}
           {filteredLocations.map((loc) => (
-            <Link key={loc.name} href={`/locations/${loc.name}`} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
-              <Card key={loc.name} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
+            <Link key={loc.id} href={`/locations/${loc.name}`} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
+              <Card className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
                 <div className="relative w-full h-62">
                 <ImageSlider images={Array.isArray(loc.image) ? loc.image.filter(Boolean) : loc.image ? [loc.image] : []} />
               </div>

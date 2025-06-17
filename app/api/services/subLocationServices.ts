@@ -71,14 +71,14 @@ class SubLocationService {
     static async getLocationById(locationId: string) {
         try {
             // Check if location exists in cache
-            const cachedLocation = this.locations.find((l: any) => l.uid === locationId);
+            const cachedLocation = this.locations.find((l: any) => l.name === locationId);
             if (cachedLocation) {
                 consoleManager.log("✅ Location fetched from cache:", locationId);
                 return cachedLocation;
             }
 
             // Fetch from Firestore if not in cache
-            const snapshot = await db.collection("subLocations").where("uid", "==", locationId).get();
+            const snapshot = await db.collection("subLocations").where("name", "==", locationId).get();
             
             if (snapshot.empty) {
                 consoleManager.warn("⚠️ Location not found:", locationId);
