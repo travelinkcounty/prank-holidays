@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { fetchHotels, selectHotels } from "@/lib/redux/features/hotelSlice";
+import { fetchLocations, selectLocations } from "@/lib/redux/features/locationSlice";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 
@@ -65,11 +66,17 @@ const ImageSlider = ({ images }: { images: string[] }) => {
 const HotelSection = () => {
   const dispatch = useDispatch<AppDispatch>();
   const hotels = useSelector(selectHotels);
+  const locations = useSelector(selectLocations);
 
   useEffect(() => {
     dispatch(fetchHotels());
+    dispatch(fetchLocations());
   }, [dispatch]);
 
+  const getLocationName = (locationId: string) => {
+    const location = locations.find((l) => l.uid === locationId);
+    return location ? location.name : locationId;
+  }
 
   return (
     <section className="py-20 bg-gradient-to-b from-[#f8fafc] to-[#fffbe6]">
@@ -99,7 +106,7 @@ const HotelSection = () => {
                         {hotel.name}
                       </h3>
                       {hotel.location && (
-                        <div className="text-sm text-[#1a4d8f] font-semibold mb-1">{hotel.location}</div>
+                        <div className="text-sm text-[#1a4d8f] font-semibold mb-1">{getLocationName(hotel.location)}</div>
                       )}
                       {hotel.description && (
                         <p className="text-gray-600 text-center text-base mb-2 line-clamp-2">{hotel.description}</p>

@@ -22,6 +22,11 @@ const PackagesPage = () => {
     dispatch(fetchLocations());
   }, [dispatch]);
 
+  const getLocationName = (locationId: string) => {
+    const location = locations.find((l) => l.uid === locationId);
+    return location ? location.name : locationId;
+  }
+
   
   const ImageSlider = ({ images }: { images: string[] }) => {
     const [current, setCurrent] = useState(0);
@@ -52,6 +57,7 @@ const PackagesPage = () => {
         />
       );
     }
+
     return (
       <div className="relative w-full h-62">
         <div ref={sliderRef} className="keen-slider w-full h-62 rounded-t-2xl">
@@ -117,7 +123,7 @@ const PackagesPage = () => {
                 <div className="flex flex-wrap gap-2 mb-2">
                   <span className="inline-block bg-[#ffc72c] text-[#1a4d8f] px-2 py-1 rounded text-xs font-bold">{hotel.address}</span>
                 </div>
-                <div className="text-xs text-gray-500 font-semibold">Location {locations.find((loc) => loc.id === hotel.location)?.name || "Unknown"}</div>
+                <div className="text-xs text-gray-500 font-semibold">Location {getLocationName(hotel.location)}</div>
               </CardContent>
             </Card>
           ))}

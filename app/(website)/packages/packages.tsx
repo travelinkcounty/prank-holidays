@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { fetchPackages, selectPackages, selectLoading } from "@/lib/redux/features/packageSlice";
-import { fetchFeaturedLocations, selectLocations } from "@/lib/redux/features/locationSlice";
+import { fetchLocations, selectLocations } from "@/lib/redux/features/locationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { Loader2 } from "lucide-react";
@@ -19,8 +19,14 @@ const PackagesPage = () => {
 
   useEffect(() => {
     dispatch(fetchPackages());
-    dispatch(fetchFeaturedLocations());
+    dispatch(fetchLocations());
   }, [dispatch]);
+
+
+  const getLocationName = (locationId: string) => {
+    const location = locations.find((l) => l.id === locationId);
+    return location ? location.name : locationId;
+  }
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'var(--font-main)' }}>
@@ -63,7 +69,7 @@ const PackagesPage = () => {
                   <span className="inline-block bg-[#ffc72c] text-[#1a4d8f] px-2 py-1 rounded text-xs font-bold">{pkg.days} Days</span>
                   <span className="inline-block bg-[#1a4d8f] text-white px-2 py-1 rounded text-xs font-bold">{pkg.nights} Nights</span>
                 </div>
-                <div className="text-xs text-gray-500 font-semibold">Location {locations.find((loc) => loc.id === pkg.locationId)?.name || "Unknown"}</div>
+                <div className="text-xs text-gray-500 font-semibold">Location {getLocationName(pkg.locationId)}</div>
               </CardContent>
             </Card>
           ))}
