@@ -11,8 +11,7 @@ const Footer = () => {
         {/* Logo, Name, Description */}
         <div className="flex flex-col items-start">
           <div className="flex items-center justify-center gap-8 mb-3">
-              <Image src="/favicon.png" alt="Travelink County" width={100} height={100} className="h-auto w-auto" />
-              <h1 className="text-2xl text-white/80 font-bold">Travelink <br /> County</h1>
+              <Image src="/logo-bg.png" alt="Travelink County" width={500} height={500} className="h-auto w-auto" />
           </div>
           <p className="text-white/80 max-w-xs">
             Your trusted partner for travel, events, and unforgettable experiences. Explore the world with us!

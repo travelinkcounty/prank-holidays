@@ -82,15 +82,21 @@ const Locations = () => {
   const location = useSelector(selectSelectedLocation);
 
   const { id } = useParams();
-
   const locationId = id as string;
 
+  // 1. Pehle location fetch karo
   useEffect(() => {
+    if (locationId) {
       dispatch(fetchLocationById(locationId));
-    if (location) {
-      dispatch(fetchFeaturedSubLocations(location?.uid || ""));
     }
   }, [dispatch, locationId]);
+
+  // 2. Jab location mil jaye, tab sublocation fetch karo
+  useEffect(() => {
+    if (location && location.uid) {
+      dispatch(fetchFeaturedSubLocations(location.uid));
+    }
+  }, [dispatch, location]);
 
   const [tab, setTab] = useState("domestic");
   const filteredLocations = subLocations.filter(loc => loc.type === tab);
@@ -103,6 +109,7 @@ const Locations = () => {
       </div>
     )
   }
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'var(--font-main)' }}>
       {/* Hero Section */}
@@ -138,31 +145,31 @@ const Locations = () => {
       {/* Locations Grid */}
       <section className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {subLocations.length === 0 && (
-            <div className="col-span-full text-center text-gray-400 py-12">
-              <p>No locations found.</p>
-            </div>
-          )}
-          {isLoading && (
+          {isLoading ? (
             <div className="col-span-full text-center text-gray-400 py-12">
               <Loader2 className="w-10 h-10 animate-spin" />
             </div>
+          ) : filteredLocations.length === 0 ? (
+            <div className="col-span-full text-center text-gray-400 py-12">
+              <p>No locations found.</p>
+            </div>
+          ) : (
+            filteredLocations.map((loc) => (
+              <Link key={loc.id} href={`/locations/${loc.name}`} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
+                <Card className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
+                  <div className="relative w-full h-62">
+                    <ImageSlider images={Array.isArray(loc.image) ? loc.image.filter(Boolean) : loc.image ? [loc.image] : []} />
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold text-[#e30613]">{loc.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-[#1a4d8f] font-medium">{loc.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))
           )}
-          {filteredLocations.map((loc) => (
-            <Link key={loc.id} href={`/locations/${loc.name}`} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
-              <Card className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
-                <div className="relative w-full h-62">
-                <ImageSlider images={Array.isArray(loc.image) ? loc.image.filter(Boolean) : loc.image ? [loc.image] : []} />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-[#e30613]">{loc.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-[#1a4d8f] font-medium">{loc.description}</p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
         </div>
       </section>
       <PackageSection />
