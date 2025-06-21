@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchLocationById, selectSelectedLocation, Location} from "@/lib/redux/features/locationSlice";
 import { AppDispatch } from "@/lib/redux/store";
 import { Switch } from "@/components/ui/switch";
-import { fetchSubLocationById, selectSubLocations, selectSubError, selectSubLoading, deleteSubLocation, updateSubLocation, addSubLocation, fetchSubLocations} from "@/lib/redux/features/subLocationSlice";
+import { fetchSubLocationById, selectSubLocations, selectSubError, selectSubLoading, deleteSubLocation, updateSubLocation, addSubLocation, fetchSubLocations, fetchFeaturedSubLocations} from "@/lib/redux/features/subLocationSlice";
 import { useParams } from "next/navigation";
 
 export default function LocationsPage() {
@@ -38,12 +38,15 @@ export default function LocationsPage() {
 
   useEffect(() => {
     if (locationId) {
-      dispatch(fetchLocationById(locationId as string));
-      if (location) {
-        dispatch(fetchSubLocationById(location.id));
-      }
+      dispatch(fetchLocationById(locationId));
     }
   }, [dispatch, locationId]);
+
+  useEffect(() => {
+    if (location?.uid) {
+      dispatch(fetchFeaturedSubLocations(location.uid));
+    }
+  }, [dispatch, location]);
 
   // Filtered locations
   const filteredLocations = useMemo(
