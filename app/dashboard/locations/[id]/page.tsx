@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchLocationById, selectSelectedLocation, Location} from "@/lib/redux/features/locationSlice";
 import { AppDispatch } from "@/lib/redux/store";
 import { Switch } from "@/components/ui/switch";
-import { fetchFeaturedSubLocations, selectSubLocations, selectSubError, selectSubLoading, deleteSubLocation, updateSubLocation, addSubLocation} from "@/lib/redux/features/subLocationSlice";
+import { fetchSubLocationById, selectSubLocations, selectSubError, selectSubLoading, deleteSubLocation, updateSubLocation, addSubLocation, fetchSubLocations} from "@/lib/redux/features/subLocationSlice";
 import { useParams } from "next/navigation";
 
 export default function LocationsPage() {
@@ -40,7 +40,7 @@ export default function LocationsPage() {
     if (locationId) {
       dispatch(fetchLocationById(locationId as string));
       if (location) {
-        dispatch(fetchFeaturedSubLocations(location.uid));
+        dispatch(fetchSubLocationById(location.id));
       }
     }
   }, [dispatch, locationId]);
@@ -89,7 +89,7 @@ export default function LocationsPage() {
       toast.error("Failed to delete location");
     } finally {
       setIsDeleting(false);
-      dispatch(fetchFeaturedSubLocations(locationId as string));
+      dispatch(fetchSubLocationById(locationId as string));
     }
   };
 
@@ -142,7 +142,7 @@ export default function LocationsPage() {
       toast.error(editLocation ? "Failed to update location" : "Failed to add location");
     } finally {
       setIsEditing(false);
-      dispatch(fetchFeaturedSubLocations(locationId as string));
+      dispatch(fetchSubLocationById(locationId as string));
     }
   };
 
