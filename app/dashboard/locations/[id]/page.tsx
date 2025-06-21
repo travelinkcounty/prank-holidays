@@ -92,7 +92,9 @@ export default function LocationsPage() {
       toast.error("Failed to delete location");
     } finally {
       setIsDeleting(false);
-      dispatch(fetchSubLocationById(locationId as string));
+      if (location?.uid) {
+        dispatch(fetchFeaturedSubLocations(location.uid));
+      }
     }
   };
 
@@ -145,7 +147,9 @@ export default function LocationsPage() {
       toast.error(editLocation ? "Failed to update location" : "Failed to add location");
     } finally {
       setIsEditing(false);
-      dispatch(fetchSubLocationById(locationId as string));
+      if (location?.uid) {
+        dispatch(fetchFeaturedSubLocations(location.uid));
+      }
     }
   };
 
