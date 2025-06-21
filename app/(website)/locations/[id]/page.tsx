@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { fetchFeaturedSubLocations, selectSubLocations, selectSubLoading, selectSubError } from "@/lib/redux/features/subLocationSlice";
 import { fetchLocationById, selectSelectedLocation } from "@/lib/redux/features/locationSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,11 +13,6 @@ import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-
-const tabOptions = [
-  { label: "Domestic", value: "domestic" },
-  { label: "International", value: "international" },
-];
 
 const ImageSlider = ({ images }: { images: string[] }) => {
   const [current, setCurrent] = useState(0);
@@ -84,22 +79,17 @@ const Locations = () => {
   const { id } = useParams();
   const locationId = id as string;
 
-  // 1. Pehle location fetch karo
   useEffect(() => {
     if (locationId) {
       dispatch(fetchLocationById(locationId));
     }
   }, [dispatch, locationId]);
 
-  // 2. Jab location mil jaye, tab sublocation fetch karo
   useEffect(() => {
     if (location && location.uid) {
       dispatch(fetchFeaturedSubLocations(location.uid));
     }
   }, [dispatch, location]);
-
-  const [tab, setTab] = useState("domestic");
-  const filteredLocations = subLocations.filter(loc => loc.type === tab);
 
   if (error) {
     return (
@@ -126,22 +116,6 @@ const Locations = () => {
         </div>
       </div>
 
-      {/* Tabs Bar */}
-      <div className="flex justify-center mb-10">
-        <div className="inline-flex bg-[#f8fafc] rounded-full shadow border border-[#ffe066]/40 overflow-hidden">
-          {tabOptions.map(option => (
-            <button
-              key={option.value}
-              onClick={() => setTab(option.value)}
-              className={`px-7 py-2 cursor-pointer font-bold text-base transition-colors duration-200 focus:outline-none ${tab === option.value ? "bg-[#ffe066] text-[#e30613]" : "text-[#1a4d8f] hover:bg-[#ffe066]/30"}`}
-              style={{ fontFamily: 'var(--font-main)' }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Locations Grid */}
       <section className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -149,12 +123,12 @@ const Locations = () => {
             <div className="col-span-full text-center text-gray-400 py-12">
               <Loader2 className="w-10 h-10 animate-spin" />
             </div>
-          ) : filteredLocations.length === 0 ? (
+          ) : subLocations.length === 0 ? (
             <div className="col-span-full text-center text-gray-400 py-12">
               <p>No locations found.</p>
             </div>
           ) : (
-            filteredLocations.map((loc) => (
+            subLocations.map((loc) => (
               <Link key={loc.id} href={`/locations/${loc.name}`} className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
                 <Card className="overflow-hidden shadow-lg border-[#e3061320] flex flex-col">
                   <div className="relative w-full h-62">
@@ -162,6 +136,7 @@ const Locations = () => {
                   </div>
                   <CardHeader>
                     <CardTitle className="text-xl font-bold text-[#e30613]">{loc.name}</CardTitle>
+                    <CardDescription>{loc.address}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-[#1a4d8f] font-medium">{loc.description}</p>
