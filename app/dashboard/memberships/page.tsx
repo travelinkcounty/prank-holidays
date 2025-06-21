@@ -77,6 +77,7 @@ export default function MembershipsPage() {
     }, usageModal.id));
     setUsageModal(null);
     toast.success("Usage updated!");
+    dispatch(fetchMemberships());
   };
 
   const handleDelete = () => {
@@ -120,6 +121,7 @@ export default function MembershipsPage() {
     const plan = getPlan(form.plan_ref);
     const totalDays = plan?.days ? parseInt(plan.days, 10) : 0;
     const totalNights = plan?.nights ? parseInt(plan.nights, 10) : 0;
+
     if (modalMode === 'add') {
       await dispatch(addMembership({
         userId: form.userId,
@@ -179,7 +181,7 @@ export default function MembershipsPage() {
               <SelectContent>
                 <SelectItem value="all">All Plans</SelectItem>
                 {plans.map((plan) => (
-                  <SelectItem key={plan.id} value={String(plan.id)}>{plan.name}</SelectItem>
+                  <SelectItem key={plan.uid} value={String(plan.uid)}>{plan.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -216,11 +218,11 @@ export default function MembershipsPage() {
             ) : (
               filteredMemberships.map((m) => {
                 const user = getUser(m.userId);
-                const plan = getPlan(m.plan_ref);
+                const plan = getPlan(m?.plan_ref);
                 const totalDays = plan?.days ? parseInt(plan.days, 10) : 0;
                 const totalNights = plan?.nights ? parseInt(plan.nights, 10) : 0;
-                const usedDays = m.usedDays;
-                const usedNights = m.usedNights;
+                const usedDays = m.usedDays || 0;
+                const usedNights = m.usedNights || 0;
                 const remDays = Math.max(totalDays - usedDays, 0);
                 const remNights = Math.max(totalNights - usedNights, 0);
                 return (
@@ -236,8 +238,8 @@ export default function MembershipsPage() {
                       <Badge className="bg-[#264653] text-white">{usedNights}N</Badge>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <Badge className="bg-[#2ecc71] text-white mr-1">{remDays}D</Badge>
-                      <Badge className="bg-[#2d6a4f] text-white">{remNights}N</Badge>
+                      <Badge className={`${remDays === 0 ? 'bg-red-500' : 'bg-[#2ecc71]'} text-white mr-1`}>{remDays}D</Badge>
+                      <Badge className={`${remNights === 0 ? 'bg-red-500' : 'bg-[#2d6a4f]'} text-white`}>{remNights}N</Badge>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex gap-2 justify-center">
@@ -262,7 +264,7 @@ export default function MembershipsPage() {
 
       {/* Update Usage Modal */}
       <Dialog open={!!usageModal} onOpenChange={(open) => !open && setUsageModal(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <form onSubmit={handleUpdateUsage} className="space-y-4">
             <DialogHeader>
               <DialogTitle>Update Usage</DialogTitle>
@@ -307,7 +309,7 @@ export default function MembershipsPage() {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={!!deleteMembershipModal} onOpenChange={(open) => !open && setDeleteMembershipModal(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Delete Membership</DialogTitle>
           </DialogHeader>
@@ -332,7 +334,7 @@ export default function MembershipsPage() {
 
       {/* Add/Edit Membership Modal */}
       <Dialog open={modalOpen} onOpenChange={closeModal}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <form onSubmit={handleModalSubmit} className="space-y-4">
             <DialogHeader>
               <DialogTitle>{modalMode === 'add' ? 'Add Membership' : 'Edit Membership'}</DialogTitle>
@@ -359,7 +361,7 @@ export default function MembershipsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {plans.map((p) => (
-                      <SelectItem key={p.id} value={p.uid}>{p.name}</SelectItem>
+                      <SelectItem key={p.uid} value={p.uid}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

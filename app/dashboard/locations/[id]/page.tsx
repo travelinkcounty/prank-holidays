@@ -9,8 +9,7 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLocationById, selectSelectedLocation, Location} from "@/lib/redux/features/locationSlice";
 import { AppDispatch } from "@/lib/redux/store";
-import { Switch } from "@/components/ui/switch";
-import { fetchSubLocationById, selectSubLocations, selectSubError, selectSubLoading, deleteSubLocation, updateSubLocation, addSubLocation, fetchSubLocations, fetchFeaturedSubLocations} from "@/lib/redux/features/subLocationSlice";
+import { fetchSubLocationById, selectSubLocations, selectSubError, selectSubLoading, deleteSubLocation, updateSubLocation, addSubLocation, fetchSubLocations, fetchFeaturedSubLocations, SubLocation} from "@/lib/redux/features/subLocationSlice";
 import { useParams } from "next/navigation";
 
 export default function LocationsPage() {
@@ -26,9 +25,9 @@ export default function LocationsPage() {
 
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [editLocation, setEditLocation] = useState<Location | null>(null);
-  const [form, setForm] = useState({ name: "", type: "domestic", image: "", featured: false });
-  const [deleteLocation, setDeleteLocation] = useState<Location | null>(null);
+  const [editLocation, setEditLocation] = useState<SubLocation | null>(null);
+  const [form, setForm] = useState({ name: "", address: "", image: "", type: "domestic" });
+  const [deleteLocation, setDeleteLocation] = useState<SubLocation | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -55,7 +54,7 @@ export default function LocationsPage() {
         (l) =>
           (typeFilter === "all" || l.type.toLowerCase() === typeFilter) &&
           (l.name.toLowerCase().includes(search.toLowerCase()) ||
-            l.type.toLowerCase().includes(search.toLowerCase()))
+            l.address.toLowerCase().includes(search.toLowerCase()))
       ),
     [subLocations, search, typeFilter]
   );
@@ -63,15 +62,15 @@ export default function LocationsPage() {
   // Handlers
   const openAddModal = () => {
     setEditLocation(null);
-    setForm({ name: "", type: "domestic", image: "", featured: false });
+    setForm({ name: "", address: "", image: "", type: "domestic" });
     setImageFiles([]);
     setImagePreviews([]);
     setModalOpen(true);
   };
 
-  const openEditModal = (location: Location) => {
+  const openEditModal = (location: SubLocation) => {
     setEditLocation(location);
-    setForm({ ...location, featured: location.featured || false });
+    setForm({ ...location, address: location.address || "" });
     setImageFiles([]);
     setImagePreviews(
       Array.isArray(location.image)
@@ -88,13 +87,13 @@ export default function LocationsPage() {
       await dispatch(deleteSubLocation(deleteLocation.id));
       setDeleteLocation(null);
       toast.success("Location deleted!");
+      if (location?.uid) {
+        await dispatch(fetchFeaturedSubLocations(location.uid));
+      }
     } catch (error) {
       toast.error("Failed to delete location");
     } finally {
       setIsDeleting(false);
-      if (location?.uid) {
-        dispatch(fetchFeaturedSubLocations(location.uid));
-      }
     }
   };
 
@@ -121,7 +120,7 @@ export default function LocationsPage() {
     setIsEditing(true);
     const formData = new FormData();
     formData.append("name", form.name);
-    formData.append("featured", form.featured.toString());
+    formData.append("address", form.address);
     formData.append("type", location?.type || "");
     formData.append("locationId", location?.uid || "");
     // Add existing image URLs that are still in previews (for edit)
@@ -143,13 +142,13 @@ export default function LocationsPage() {
       setModalOpen(false);
       setImageFiles([]);
       setImagePreviews([]);
+      if (location?.uid) {
+        await dispatch(fetchFeaturedSubLocations(location.uid));
+      }
     } catch (error) {
       toast.error(editLocation ? "Failed to update location" : "Failed to add location");
     } finally {
       setIsEditing(false);
-      if (location?.uid) {
-        dispatch(fetchFeaturedSubLocations(location.uid));
-      }
     }
   };
 
@@ -266,12 +265,14 @@ export default function LocationsPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="block text-sm font-medium">Featured</label>
-                <Switch
-                  checked={form.featured}
-                  onCheckedChange={(checked) => setForm((f) => ({ ...f, featured: checked }))}
+                <label className="block text-sm font-medium">Address</label>
+                <Input
+                  placeholder="Address"
+                  value={form.address}
+                  onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                  required
                 />
-              </div>
+              </div>  
               <div className="flex flex-col gap-2">
                 <label className="block text-sm font-medium">Images (max 5)</label>
                 {imagePreviews.length > 0 && (

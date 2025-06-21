@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         const formData = await req.formData();
         const name = formData.get("name");
         const type = formData.get("type");
-        const featured = formData.get("featured") === "true";
+        const address = formData.get("address");
         const uid = uuidv4();
         const files = formData.getAll("image").slice(0, 5);
         const locationId = formData.get("locationId");
@@ -81,8 +81,8 @@ export async function POST(req: Request) {
             uid,
             name,
             type,
+            address,
             image: imageUrls, // Store as array
-            featured,
             locationId,
         });
 

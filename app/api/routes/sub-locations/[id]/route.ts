@@ -30,7 +30,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const formData = await req.formData();
     const name = formData.get("name");
     const type = formData.get("type");
-    const featured = formData.get("featured") === "true";
+    const address = formData.get("address");
     const locationId = formData.get("locationId");
     // Get existing image URLs to keep
     const existingImages = formData.getAll("existingImages").filter(Boolean);
@@ -41,7 +41,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const imageArray = [...existingImages, ...newImageUrls].slice(0, 5);
 
     try {
-        const updatedLocation = await SubLocationService.updateLocation(id, { name, image: imageArray, type, featured, locationId });
+        const updatedLocation = await SubLocationService.updateLocation(id, { name, image: imageArray, type, address, locationId });
         return NextResponse.json({
             statusCode: 200,
             message: "Location updated successfully",

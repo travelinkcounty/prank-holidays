@@ -59,12 +59,19 @@ class MembershipService {
                 updatedOn: timestamp,
             });
 
+            const newMembership = {
+                id: newMembershipRef.id,
+                ...membershipData,
+                createdOn: timestamp,
+                updatedOn: timestamp
+            };
+
             consoleManager.log("✅ New membership added with ID:", newMembershipRef.id);
 
             // Force refresh the cache after adding a new membership
             await this.getAllMemberships(true);
 
-            return { id: newMembershipRef.id, ...membershipData, createdOn: timestamp };
+            return newMembership;
         } catch (error) {
             consoleManager.error("❌ Error adding membership:", error);
             throw new Error("Failed to add membership");

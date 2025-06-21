@@ -9,7 +9,7 @@ export interface SubLocation {
   image: string;
   description: string;
   type: string;
-  featured: boolean;
+  address: string;
   locationId: string;
   createdOn: string;
   updatedOn: string;

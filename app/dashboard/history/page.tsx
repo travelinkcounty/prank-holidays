@@ -41,7 +41,22 @@ export default function HistoryPage() {
 
   // Helpers
   const getUser = (id: string) => users.find((u) => u.uid === id);
-  const getPackage = (id: string) => packages.find((p) => p.uid === id);
+  const getPackage = (packageRef: any) => {
+    // If it's a string (uid), use it directly
+    if (typeof packageRef === 'string') {
+      return packages.find((p) => p.uid === packageRef);
+    }
+    // If it's a Firestore reference, get the ID from segments
+    if (packageRef?._path?.segments) {
+      const packageId = packageRef._path.segments[1];
+      return packages.find((p) => p.uid === packageId);
+    }
+    // If it has packageId field
+    if (packageRef?.packageId) {
+      return packages.find((p) => p.uid === packageRef.packageId);
+    }
+    return null;
+  };
 
   // Filtered histories
   const filteredHistories = React.useMemo(() => {
@@ -74,9 +89,14 @@ export default function HistoryPage() {
   };
   const openEditModal = (history: History) => {
     setModalMode('edit');
+    // Extract package_ref ID whether it's a reference object or direct ID
+    const packageRefId = typeof history.package_ref === 'string' 
+      ? history.package_ref 
+      : (history.package_ref as { _path?: { segments: string[] } })?._path?.segments?.[1] || '';
+
     setForm({
       userId: history.userId,
-      package_ref: history.package_ref,
+      package_ref: packageRefId,
       status: history.status || 'active',
     });
     setEditHistory(history);
@@ -86,18 +106,28 @@ export default function HistoryPage() {
     setModalOpen(false);
     setEditHistory(null);
   };
-  
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
-  };
+
 
   const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Create package_ref in Firestore reference format
+    const packageRef = {
+      _firestore: {
+        projectId: "prank-holidays"
+      },
+      _path: {
+        segments: [
+          "packages",
+          form.package_ref
+        ]
+      },
+      _converter: {}
+    };
+
     if (modalMode === 'add') {
       await dispatch(addHistory({
         userId: form.userId,
-        package_ref: form.package_ref,
+        package_ref: packageRef,
         status: form.status,
       }));
       dispatch(fetchHistories());
@@ -105,7 +135,7 @@ export default function HistoryPage() {
     } else if (modalMode === 'edit' && editHistory) {
       await dispatch(updateHistory({
         userId: form.userId,
-        package_ref: form.package_ref,
+        package_ref: packageRef,
         status: form.status,
       }, editHistory.id));
       dispatch(fetchHistories());
@@ -116,6 +146,7 @@ export default function HistoryPage() {
   const handleDelete = () => {
     if (!deleteHistoryModal) return;
     dispatch(deleteHistory(deleteHistoryModal.id));
+    dispatch(fetchHistories());
     setDeleteHistoryModal(null);
     toast.success("History deleted!");
   };
@@ -228,7 +259,7 @@ export default function HistoryPage() {
       </Dialog>
       {/* Add/Edit History Modal */}
       <Dialog open={modalOpen} onOpenChange={closeModal}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <form onSubmit={handleModalSubmit} className="space-y-4">
             <DialogHeader>
               <DialogTitle>{modalMode === 'add' ? 'Add History' : 'Edit History'}</DialogTitle>

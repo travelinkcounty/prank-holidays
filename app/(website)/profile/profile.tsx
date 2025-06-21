@@ -35,6 +35,7 @@ const Profile = () => {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editForm, setEditForm] = useState({ name: "", address: "", phone: "", password: "" });
     const [editLoading, setEditLoading] = useState(false);
+    const [showMobileNav, setShowMobileNav] = useState(true);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -59,13 +60,30 @@ const Profile = () => {
         dispatch(fetchPackages());
     }, [dispatch]);
 
+    function formatFirestoreTimestamp(ts: any) {
+        if (!ts) return '';
+        if (ts instanceof Date) return ts.toLocaleString();
+        if (typeof ts === 'object' && '_seconds' in ts) {
+          return new Date(ts._seconds * 1000).toLocaleString();
+        }
+        if (typeof ts === 'string') return new Date(ts).toLocaleString();
+        return '';
+      }
+
 
     const getPlanName = (plan_ref: string) => {
         const plan = plans?.find((plan: any) => plan.uid === plan_ref);
         return plan?.name || "Unknown Plan";
     }
 
-    const getPackageName = (package_ref: string) => {
+    const getPackageName = (package_ref: any) => {
+        // If package_ref is an object with _path.segments, get the package ID from segments
+        if (package_ref && typeof package_ref === 'object' && package_ref._path?.segments) {
+            const packageId = package_ref._path.segments[package_ref._path.segments.length - 1];
+            const pkg = packages?.find((pkg: any) => pkg.uid === packageId);
+            return pkg?.name || "Unknown Package";
+        }
+        // If package_ref is a string, use it directly
         const pkg = packages?.find((pkg: any) => pkg.uid === package_ref);
         return pkg?.name || "Unknown Package";
     }
@@ -80,7 +98,11 @@ const Profile = () => {
       setEditModalOpen(true);
     };
 
-
+    // Add back button handler
+    const handleBack = () => {
+        setShowMobileNav(true);
+        setActive("profile");
+    };
 
     // Section renderers
     const renderSection = () => {
@@ -101,7 +123,7 @@ const Profile = () => {
                                 <span className="text-gray-600 text-base">{userData?.email}</span>
                             </div>
                         </div>
-                        <button className="p-2 rounded-full hover:bg-gray-100" onClick={openEditModal}><Edit className="w-5 h-5 text-gray-400" /></button>
+                        {/* <button className="p-2 rounded-full hover:bg-gray-100" onClick={openEditModal}><Edit className="w-5 h-5 text-gray-400" /></button> */}
                     </div>
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-2 text-gray-600 text-base">
@@ -120,9 +142,9 @@ const Profile = () => {
         if (active === "membership") {
             return (
                 <div className="bg-white rounded-2xl shadow p-8 md:p-10 border border-[#ffe066]/30 w-full max-w-4xl md:ml-0 flex flex-col gap-6">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center flex-col md:flex-row justify-between mb-2">
                         <h3 className="text-2xl font-bold text-[#e30613] flex items-center gap-2"><BadgeCheck className="w-6 h-6 text-[#ffe066]" /> Membership Details</h3>
-                        <button className="px-6 py-1 bg-gradient-to-r from-[#ffe066] to-[#ffd700] text-[#e30613] font-bold rounded-full shadow-lg hover:from-[#e30613] hover:to-[#cc0000] hover:text-white transition-all duration-300 text-xl w-fit transform hover:scale-105">
+                        <button className="px-6 py-1 mt-6 md:mt-0 bg-gradient-to-r from-[#ffe066] to-[#ffd700] text-[#e30613] font-bold rounded-full shadow-lg hover:from-[#e30613] hover:to-[#cc0000] hover:text-white transition-all duration-300 text-xl w-fit transform hover:scale-105">
                             Renew Membership
                         </button>
                     </div>
@@ -171,6 +193,7 @@ const Profile = () => {
                                 <thead>
                                     <tr className="text-[#1a4d8f] text-lg">
                                         <th className="pr-8">Package</th>
+                                        <th className="pr-8">Date</th>
                                         <th className="pr-8">Status</th>
                                     </tr>
                                 </thead>
@@ -178,8 +201,9 @@ const Profile = () => {
                                     {history.map((item, idx) => (
                                         <tr key={idx} className="bg-[#f8fafc] rounded-xl">
                                             <td className="font-bold text-[#e30613] pr-8 py-2">{getPackageName(item.package_ref)}</td>
+                                            <td className="pr-8 py-2">{formatFirestoreTimestamp(item.createdOn)}</td>
                                             <td className="pr-8 py-2">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${item.status === 'Expired' ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'}`}>{item.status}</span>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${item.status === 'inactive' ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'}`}>{item.status}</span>
                                             </td>
                                         </tr>
                                     ))}
@@ -201,23 +225,71 @@ const Profile = () => {
 
     return (
         <div className="min-h-screen max-w-7xl mx-auto py-0 md:py-10 px-0 md:px-6 flex flex-col md:flex-row" style={{ fontFamily: 'var(--font-main)' }}>
-            {/* Sidebar */}
-            <aside className="w-full h-fit md:w-72 bg-white/70 backdrop-blur-md shadow-xl rounded-b-3xl md:rounded-3xl md:mr-4 flex flex-row md:flex-col items-center px-6 py-4 md:py-8 mb-4 md:mb-0 z-10">
-                <div className="flex flex-row md:flex-col items-center md:items-center gap-4 md:gap-6 w-full">
-                    <div
-                        className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-[#ffe066] shadow-md bg-gray-100 flex items-center justify-center"
-                    >
+            {/* Mobile Profile Info - Only visible on mobile when showMobileNav is true */}
+            <div className="md:hidden">
+                {showMobileNav ? (
+                    <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-b-3xl p-6">
+                        <div className="flex flex-col items-center gap-4 w-full">
+                            <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-[#ffe066] shadow-md bg-gray-100 flex items-center justify-center">
+                                <span className="text-2xl font-semibold text-black">
+                                    {userData?.name?.[0]?.toLowerCase() || "?"}
+                                </span>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-xl font-bold text-[#e30613] leading-tight">{userData?.name}</div>
+                                <div className="text-sm text-gray-500">{userData?.email}</div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 w-full mt-4">
+                                {navLinks.map((link) => (
+                                    <button
+                                        key={link.label}
+                                        className={`flex items-center justify-center px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${link.danger ? 'bg-red-50 text-red-600' : 'bg-[#ffe066]/20 text-[#1a4d8f]'}`}
+                                        onClick={() => {
+                                            if (link.key === 'logout') {
+                                                router.push('/logout');
+                                            } else {
+                                                setActive(link.key);
+                                                setShowMobileNav(false);
+                                            }
+                                        }}
+                                    >
+                                        {link.icon}
+                                        <span>{link.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-b-3xl p-4 mb-4">
+                        <button
+                            onClick={handleBack}
+                            className="flex items-center gap-2 text-[#1a4d8f] font-semibold"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                            </svg>
+                            Back
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop Sidebar - Hidden on mobile */}
+            <aside className="hidden md:flex w-72 bg-white/70 backdrop-blur-md shadow-xl rounded-3xl mr-4 flex-col items-center px-6 py-8 mb-0">
+                <div className="flex flex-col items-center gap-6 w-full">
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-[#ffe066] shadow-md bg-gray-100 flex items-center justify-center">
                         <span className="text-2xl font-semibold text-black">
                             {userData?.name?.[0]?.toLowerCase() || "?"}
                         </span>
                     </div>
-                    <div className="flex-1 md:text-center">
-                        <div className="text-lg md:text-xl font-bold text-[#e30613] leading-tight">{userData?.name}</div>
-                        <div className="text-xs md:text-sm text-gray-500">{userData?.email}</div>
+                    <div className="text-center">
+                        <div className="text-xl font-bold text-[#e30613] leading-tight">{userData?.name}</div>
+                        <div className="text-sm text-gray-500">{userData?.email}</div>
                     </div>
                 </div>
-                <nav className="mt-0 md:mt-8 w-full">
-                    <ul className="flex flex-row md:flex-col gap-2 md:gap-3 w-full justify-center md:justify-start">
+                <nav className="mt-8 w-full">
+                    <ul className="flex flex-col gap-3 w-full">
                         {navLinks.map((link) => (
                             <li key={link.label}>
                                 <button
@@ -238,8 +310,8 @@ const Profile = () => {
                 </nav>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 flex flex-col items-stretch pb-10 w-full">
+            {/* Main Content - Only show on mobile when showMobileNav is false */}
+            <main className={`flex-1 flex flex-col items-stretch pb-10 w-full ${showMobileNav ? 'hidden md:flex' : 'flex'}`}>
                 <div className="w-full">
                     {renderSection()}
                 </div>
