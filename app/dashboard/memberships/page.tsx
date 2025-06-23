@@ -28,14 +28,14 @@ export default function MembershipsPage() {
   const [editMembership, setEditMembership] = useState<Membership | null>(null);
   const [usageModal, setUsageModal] = useState<Membership | null>(null);
   const [deleteMembershipModal, setDeleteMembershipModal] = useState<Membership | null>(null);
-  const [usageForm, setUsageForm] = useState({ usedDays: 0, usedNights: 0 });
+  const [usageForm, setUsageForm] = useState({ usedDays: '', usedNights: '' });
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>("add");
   const [form, setForm] = useState({
     userId: '',
     plan_ref: '',
-    usedDays: 0,
-    usedNights: 0,
+    usedDays: '0',
+    usedNights: '0',
     status: 'active',
   });
 
@@ -47,7 +47,26 @@ export default function MembershipsPage() {
 
   // Helper to get user/plan by id
   const getUser = (id: string) => users.find((u) => u.uid === id);
-  const getPlan = (id: string) => plans.find((p) => p.uid === id);
+  
+  const getPlan = (planRef: any) => {
+    // If planRef is a string, use it directly
+    if (typeof planRef === 'string') {
+      return plans.find((p) => p.uid === planRef);
+    }
+    
+    // If planRef is an object with _path.segments, extract the plan ID
+    if (planRef && typeof planRef === 'object' && planRef._path?.segments) {
+      const planId = planRef._path.segments[1];
+      return plans.find((p) => p.uid === planId);
+    }
+    
+    // If planRef has a planId property (legacy format)
+    if (planRef && typeof planRef === 'object' && planRef.planId) {
+      return plans.find((p) => p.uid === planRef.planId);
+    }
+    
+    return null;
+  };
 
   // Filtered memberships
   const filteredMemberships = React.useMemo(() => {
@@ -65,15 +84,18 @@ export default function MembershipsPage() {
   // Handlers
   const openUsageModal = (membership: Membership) => {
     setUsageModal(membership);
-    setUsageForm({ usedDays: membership.usedDays, usedNights: membership.usedNights });
+    setUsageForm({ 
+      usedDays: membership.usedDays.toString(), 
+      usedNights: membership.usedNights.toString() 
+    });
   };
 
   const handleUpdateUsage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!usageModal) return;
     dispatch(updateMembership({
-      usedDays: usageForm.usedDays,
-      usedNights: usageForm.usedNights
+      usedDays: Number(usageForm.usedDays),
+      usedNights: Number(usageForm.usedNights)
     }, usageModal.id));
     setUsageModal(null);
     toast.success("Usage updated!");
@@ -89,7 +111,7 @@ export default function MembershipsPage() {
 
   const openAddModal = () => {
     setModalMode('add');
-    setForm({ userId: '', plan_ref: '', usedDays: 0, usedNights: 0, status: 'active' });
+    setForm({ userId: '', plan_ref: '', usedDays: '0', usedNights: '0', status: 'active' });
     setModalOpen(true);
   };
 
@@ -98,8 +120,8 @@ export default function MembershipsPage() {
     setForm({
       userId: membership.userId,
       plan_ref: membership.plan_ref,
-      usedDays: membership.usedDays,
-      usedNights: membership.usedNights,
+      usedDays: membership.usedDays.toString(),
+      usedNights: membership.usedNights.toString(),
       status: membership.status || 'active',
     });
     setEditMembership(membership);
@@ -113,7 +135,7 @@ export default function MembershipsPage() {
 
   const handleFormNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: Number(value) }));
+    setForm((f) => ({ ...f, [name]: value }));
   };
 
   const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -122,12 +144,13 @@ export default function MembershipsPage() {
     const totalDays = plan?.days ? parseInt(plan.days, 10) : 0;
     const totalNights = plan?.nights ? parseInt(plan.nights, 10) : 0;
 
+    // Backend expects just the plan ID, not the full Firestore reference object
     if (modalMode === 'add') {
       await dispatch(addMembership({
         userId: form.userId,
-        plan_ref: form.plan_ref,
-        usedDays: form.usedDays,
-        usedNights: form.usedNights,
+        plan_ref: form.plan_ref, // Send just the ID, the backend will create the reference
+        usedDays: Number(form.usedDays),
+        usedNights: Number(form.usedNights),
         totalDays,
         totalNights,
         status: form.status,
@@ -137,9 +160,9 @@ export default function MembershipsPage() {
     } else if (modalMode === 'edit' && editMembership) {
       await dispatch(updateMembership({
         userId: form.userId,
-        plan_ref: form.plan_ref,
-        usedDays: form.usedDays,
-        usedNights: form.usedNights,
+        plan_ref: form.plan_ref, // Send just the ID, the backend will create the reference
+        usedDays: Number(form.usedDays),
+        usedNights: Number(form.usedNights),
         totalDays,
         totalNights,
         status: form.status,
@@ -234,7 +257,7 @@ export default function MembershipsPage() {
                       <Badge className="bg-[#457b9d] text-white">{totalNights}N</Badge>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <Badge className="bg-[#f4a261] text-black mr-1">{usedDays}D</Badge>
+                      <Badge className="bg-[#f4a261] text-black mr-1">{usedDays.toString()}D</Badge>
                       <Badge className="bg-[#264653] text-white">{usedNights}N</Badge>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -274,10 +297,9 @@ export default function MembershipsPage() {
                 <label className="block text-sm font-medium mb-1">Used Days</label>
                 <Input
                   type="number"
-                  min={0}
-                  max={usageModal ? getPlan(usageModal.plan_ref || '')?.days : 0}
+                  min="0"
                   value={usageForm.usedDays}
-                  onChange={e => setUsageForm(f => ({ ...f, usedDays: Number(e.target.value) }))}
+                  onChange={e => setUsageForm(f => ({ ...f, usedDays: e.target.value }))}
                   required
                 />
               </div>
@@ -285,10 +307,9 @@ export default function MembershipsPage() {
                 <label className="block text-sm font-medium mb-1">Used Nights</label>
                 <Input
                   type="number"
-                  min={0}
-                  max={usageModal ? getPlan(usageModal.plan_ref || '')?.nights : 0}
+                  min="0"
                   value={usageForm.usedNights}
-                  onChange={e => setUsageForm(f => ({ ...f, usedNights: Number(e.target.value) }))}
+                  onChange={e => setUsageForm(f => ({ ...f, usedNights: e.target.value }))}
                   required
                 />
               </div>
@@ -370,11 +391,25 @@ export default function MembershipsPage() {
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Used Days</label>
-                <Input type="number" name="usedDays" min={0} max={getPlan(String(form.plan_ref || ''))?.days ? (getPlan(String(form.plan_ref || ''))?.days, 10) : 0} value={form.usedDays} onChange={handleFormNumberChange} required />
+                <Input 
+                  type="number" 
+                  name="usedDays" 
+                  min="0" 
+                  value={form.usedDays} 
+                  onChange={handleFormNumberChange} 
+                  required 
+                />
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Used Nights</label>
-                <Input type="number" name="usedNights" min={0} max={getPlan(String(form.plan_ref || ''))?.nights ? (getPlan(String(form.plan_ref || ''))?.nights, 10) : 0} value={form.usedNights} onChange={handleFormNumberChange} required />
+                <Input 
+                  type="number" 
+                  name="usedNights" 
+                  min="0" 
+                  value={form.usedNights} 
+                  onChange={handleFormNumberChange} 
+                  required 
+                />
               </div>
             </div>
             <div>
