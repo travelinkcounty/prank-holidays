@@ -5,27 +5,47 @@ const testimonials = [
   {
     name: "Mohan Singh",
     text: "They offer high-quality services at a fair price. Prank Holiday ensures a pleasant and stress-free travel experience. Customer Service is quite helpful, and the workforce is equally cooperative.",
-    image: "https://randomuser.me/api/portraits/women/2.jpg",
+    image: "/testimonials/1.jpeg",
   },
   {
     name: "Ridhima Tandon",
     text: "Travelink County provide excellent service when it comes to providing luxury travel accommodations. It is a highly recommended spot to stay. They provide high-quality services at a reasonable cost. They make sure to cater to your needs efficiently and without burning a hole in your pocket.",
-    image: "https://randomuser.me/api/portraits/men/4.jpg",
+    image: "/testimonials/11.jpeg",
   },
   {
     name: "Alok Verma",
     text: "Travelink County provides you luxury and  budget packages and deals. Service  is good, it has facilities of  game and  activities. Staff is very courteous and generous. It is a great place and I would recommend it. It is worthy. I would love to come back to this place.",
-    image: "https://randomuser.me/api/portraits/women/3.jpg",
+    image: "/testimonials/2.jpeg",
   },
   {
     name: "Sapna Kumari",
     text: "Travelink County is best option to go for if your planning your vacations anytime soon. I had an amazing experience. They provide quality services at reasonable price. Travelink County provides a very smooth and hassle-free travel experience. The Customer Care is so supportive and the team is also co-operative.",
-    image: "https://randomuser.me/api/portraits/men/5.jpg",
+    image: "/testimonials/12.jpeg",
   },
   {
     name: "Amit Sharma",
     text: "I had a great experience with Travelink County. The staff was friendly and helpful, and the facilities were clean and modern. I would definitely recommend this place to others.",
-    image: "https://randomuser.me/api/portraits/men/3.jpg",
+    image: "/testimonials/3.jpeg",
+  },
+  {
+    name: "Priya Mehra",
+    text: "The team at Prank Holiday made our family trip memorable. Everything was well organized and the support was excellent.",
+    image: "/testimonials/13.jpeg",
+  },
+  {
+    name: "Rahul Gupta",
+    text: "Best travel experience ever! The packages were affordable and the service was top-notch. Highly recommended!",
+    image: "/testimonials/5.jpeg",
+  },
+  {
+    name: "Sneha Kapoor",
+    text: "From booking to the actual trip, everything was smooth. The staff is very responsive and helpful.",
+    image: "/testimonials/14.jpeg",
+  },
+  {
+    name: "Vikas Yadav",
+    text: "Amazing deals and great customer service. Will definitely book again with Prank Holiday!",
+    image: "/testimonials/4.jpeg",
   },
 ];
 
