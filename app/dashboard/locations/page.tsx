@@ -132,7 +132,9 @@ export default function LocationsPage() {
       toast.error(editLocation ? "Failed to update location" : "Failed to add location");
     } finally {
       setIsEditing(false);
-      dispatch(fetchLocations());
+      setTimeout(() => {
+        dispatch(fetchLocations());
+      }, 1000);
     }
   };
 
