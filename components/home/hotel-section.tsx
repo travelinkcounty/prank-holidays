@@ -74,7 +74,7 @@ const HotelSection = () => {
   }, [dispatch]);
 
   const getLocationName = (locationId: string) => {
-    const location = locations.find((l) => l.uid === locationId);
+    const location = locations.find((l) => l.uid == locationId);
     return location ? location.name : locationId;
   }
 

@@ -19,12 +19,15 @@ const PackagesPage = () => {
 
   useEffect(() => {
     dispatch(fetchHotels());
+  }, [dispatch]);
+
+  useEffect(() => {
     dispatch(fetchLocations());
   }, [dispatch]);
 
   const getLocationName = (locationId: string) => {
-    const location = locations.find((l) => l.uid === locationId);
-    return location ? location.name : locationId;
+    const loc = locations.find((l) => l.uid == locationId);
+    return loc ? loc.name : locationId;
   }
 
   
