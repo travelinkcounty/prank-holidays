@@ -41,7 +41,7 @@ const services = [
   },
   {
     icon: <Plane className="w-9 h-9 text-[#457b9d]" />,
-    title: "Flight Booking",
+    title: "Transportation",
     desc: "Find the best deals, flexible schedules, and seamless travel arrangements for any destination.",
   },
   {
@@ -93,7 +93,7 @@ const About = () => {
             Welcome to <span className="text-[#457b9d]">Travelink County</span>
           </h1>
           <p className="text-base text-[#222] mb-4">
-            Travelink County offers cost effective flight, train, or bus reservation to all destinations. We can give you full support to book your Holidays plan with the nominal service charge.
+            Travelink County offers cost effective hotels, transport, and event management services to all destinations. We can give you full support to book your Holidays plan with the nominal service charge.
           </p>
           <p className="text-base text-[#222] mb-4">
             Corporate Travels are proven business tools for motivating teams and individuals towards a desired behaviour. Time tested to drive sales, enhance employee engagement, boost morale and promote corporate loyalty.
