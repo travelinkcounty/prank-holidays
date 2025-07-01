@@ -41,10 +41,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
         let updateData: any = {};
         const userId = formData.userId;
+        const tlcId = formData.tlcId;
         const package_ref = formData.package_ref;
         const status = formData.status;
 
         if (userId) updateData.userId = userId;
+        if (tlcId) updateData.tlcId = tlcId;
         if (package_ref) updateData.package_ref = package_ref;
         if (status) updateData.status = status;
 

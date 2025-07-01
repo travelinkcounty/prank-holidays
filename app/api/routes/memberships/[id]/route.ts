@@ -42,19 +42,23 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         if (!id) throw new Error("Membership ID is required");
 
         let updateData: any = {};
-        const userId = formData.userId;
+        const userId = formData.userId; 
+        const tlcId = formData.tlcId;
         const plan_ref = formData.plan_ref;
         const usedDays = formData.usedDays;
         const usedNights = formData.usedNights;
         const totalDays = formData.totalDays;
         const totalNights = formData.totalNights;
+        const usage = formData.usage;
 
         if (userId) updateData.userId = userId;
+        if (tlcId) updateData.tlcId = tlcId;
         if (plan_ref) updateData.plan_ref = plan_ref;
         if (usedDays) updateData.usedDays = usedDays;
         if (usedNights) updateData.usedNights = usedNights;
         if (totalDays) updateData.totalDays = totalDays;
         if (totalNights) updateData.totalNights = totalNights;
+        if (usage) updateData.usage = usage;
 
         // Update membership in database
         const updatedMembership = await MembershipService.updateMembership(id, updateData);

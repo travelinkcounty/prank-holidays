@@ -25,7 +25,19 @@ export default function UsersPage() {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<any | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", role: "", password: "", phone: "", address: "", status: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    role: "",
+    password: "",
+    phone: "",
+    address: "",
+    status: "",
+    gender: "",
+    nationality: "",
+    dob: "",
+    maritalStatus: ""
+  });
   const [deleteUserObj, setDeleteUserObj] = useState<any | null>(null);
 
   useEffect(() => {
@@ -47,13 +59,37 @@ export default function UsersPage() {
   // Handlers
   const openAddModal = () => {
     setEditUser(null);
-    setForm({ name: "", email: "", role: "", password: "", phone: "", address: "", status: "" });
+    setForm({
+      name: "",
+      email: "",
+      role: "",
+      password: "",
+      phone: "",
+      address: "",
+      status: "",
+      gender: "",
+      nationality: "",
+      dob: "",
+      maritalStatus: ""
+    });
     setModalOpen(true);
   };
 
   const openEditModal = (user: any) => {
     setEditUser(user);
-    setForm({ name: user.name || "", email: user.email || "", role: user.role || "", password: "", phone: user.phone || "", address: user.address || "", status: user.status || "" });
+    setForm({
+      name: user.name || "",
+      email: user.email || "",
+      role: user.role || "",
+      password: "",
+      phone: user.phone || "",
+      address: user.address || "",
+      status: user.status || "",
+      gender: user.gender || "",
+      nationality: user.nationality || "",
+      dob: user.dob || "",
+      maritalStatus: user.maritalStatus || ""
+    });
     setModalOpen(true);
   };
 
@@ -83,7 +119,19 @@ export default function UsersPage() {
         dispatch(fetchUsers());
         toast.success("User updated!");
       } else {
-        await dispatch(addUser({ email: form.email, password: form.password, name: form.name, role: form.role, phone: form.phone, address: form.address, status: form.status }));
+        await dispatch(addUser({
+          email: form.email,
+          password: form.password,
+          name: form.name,
+          role: form.role,
+          phone: form.phone,
+          address: form.address,
+          status: form.status,
+          gender: form.gender,
+          nationality: form.nationality,
+          dob: form.dob,
+          maritalStatus: form.maritalStatus
+        }));
         dispatch(fetchUsers());
         toast.success("User added!");
       }
@@ -133,6 +181,7 @@ export default function UsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="text-lg font-semibold">ID</TableHead>
               <TableHead className="text-lg font-semibold">Name</TableHead>
               <TableHead className="text-lg font-semibold">Email</TableHead>
               <TableHead className="text-lg font-semibold">Role</TableHead>
@@ -156,6 +205,7 @@ export default function UsersPage() {
             ) : (
               filteredUsers.map((user) => (
                 <TableRow key={user.uid}>
+                  <TableCell>{user.tlcId}</TableCell>
                   <TableCell>{user.name || user.email}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role}</TableCell>
@@ -275,6 +325,48 @@ export default function UsersPage() {
                   <SelectItem value="user">User</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Gender</label>
+              <select
+                className="w-full border rounded px-3 py-2"
+                value={form.gender}
+                onChange={e => setForm(f => ({ ...f, gender: e.target.value }))}
+              >
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Nationality</label>
+              <Input
+                placeholder="Nationality"
+                value={form.nationality}
+                onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Date of Birth</label>
+              <Input
+                type="date"
+                value={form.dob}
+                onChange={e => setForm(f => ({ ...f, dob: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold text-[#1a4d8f]">Marital Status</label>
+              <select
+                className="w-full border rounded px-3 py-2"
+                value={form.maritalStatus}
+                onChange={e => setForm(f => ({ ...f, maritalStatus: e.target.value }))}
+              >
+                <option value="">Select status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
             <DialogFooter className="col-span-1 md:col-span-2 flex justify-end gap-2 mt-4">
               <Button type="submit" disabled={loading} className="gap-2">

@@ -1,6 +1,7 @@
 import { db } from "../config/firebase";
 import consoleManager from "../utils/consoleManager";
 import admin from "firebase-admin";
+import { generateTLCUserId } from "../../../lib/utils";
 
 class UserService {
     static users: any[] = [];
@@ -49,18 +50,35 @@ class UserService {
     // Add a new user with createdOn timestamp
     static async addUser(userData: any) {
         try {
+            // Get the last created user's tlcId for the current month
+            const now = new Date();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            // Query users ordered by createdOn desc, filter by tlcId prefix
+            const snapshot = await db.collection("users")
+                .orderBy("createdOn", "desc")
+                .where("tlcId", ">=", `TLC${month}`)
+                .where("tlcId", "<", `TLC${month}99`) // up to TLC(month)99
+                .limit(1)
+                .get();
+            let lastTlcId = undefined;
+            if (!snapshot.empty) {
+                lastTlcId = snapshot.docs[0].data().tlcId;
+            }
+            const uniqueTLCId = generateTLCUserId(lastTlcId);
+
             const timestamp = admin.firestore.FieldValue.serverTimestamp();
             const newUserRef = await db.collection("users").add({
                 ...userData,
+                tlcId: uniqueTLCId,
                 createdOn: timestamp,
             });
 
-            consoleManager.log("✅ New user added with ID:", newUserRef.id);
+            consoleManager.log("✅ New user added with ID:", newUserRef.id, "TLC ID:", uniqueTLCId);
 
             // Force refresh the cache after adding a user
             await this.getAllUsers(true);
 
-            return { id: newUserRef.id, ...userData, createdOn: timestamp };
+            return { id: newUserRef.id, tlcId: uniqueTLCId, ...userData, createdOn: timestamp };
         } catch (error) {
             consoleManager.error("❌ Error adding user:", error);
             throw new Error("Failed to add user");

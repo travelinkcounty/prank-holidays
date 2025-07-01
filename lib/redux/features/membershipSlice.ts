@@ -2,10 +2,18 @@ import { createSlice, Dispatch } from "@reduxjs/toolkit";
 import axios from "axios";
 import { RootState } from "../store";
 
+export interface UsageEntry {
+  location: string;
+  date: string; // ISO string or date range as string
+  days: number;
+  nights: number;
+}
+
 export interface Membership {
   id: string;
   uid: string;
   userId: string;
+  tlcId: string;
   plan_ref: string;
   totalDays: number;
   totalNights: number;
@@ -14,6 +22,7 @@ export interface Membership {
   createdOn: string;
   updatedOn: string;
   status: string;
+  usage: UsageEntry[];
 }
 
 export interface MembershipState {

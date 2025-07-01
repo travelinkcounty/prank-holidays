@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import MembershipService from "../../services/membershipServices";
 import consoleManager from "../../utils/consoleManager";
 import { v4 as uuidv4 } from 'uuid';
+
+
 // Get all memberships (GET)
 export async function GET(req: Request) {
     try {
@@ -45,7 +47,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const formData = await req.json();
-        const { userId, plan_ref, usedDays, usedNights, totalDays, totalNights } = formData;
+        const { userId, plan_ref, usedDays, usedNights, totalDays, totalNights, usage, tlcId } = formData;
         const uid = uuidv4();
         if (!userId || !plan_ref || !totalDays || !totalNights) {
             return NextResponse.json({
@@ -64,6 +66,8 @@ export async function POST(req: Request) {
             usedNights,
             totalDays,
             totalNights,
+            usage: usage || [],
+            tlcId: tlcId,
             status: "active",
             createdOn: new Date().toISOString(),
             updatedOn: new Date().toISOString(),

@@ -41,7 +41,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const formData = await req.json();
-        const { userId, package_ref } = formData;
+        const { userId, package_ref, tlcId } = formData;
         const uid = uuidv4();
 
         if (!userId || !package_ref) {
@@ -56,6 +56,7 @@ export async function POST(req: Request) {
         const newHistory = await HistoryService.addHistory({
             uid,
             userId,
+            tlcId,
             package_ref,
             status: "active",
             createdOn: new Date().toISOString(),

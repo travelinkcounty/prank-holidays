@@ -55,6 +55,7 @@ class MembershipService {
             const newMembershipRef = await db.collection("memberships").add({
                 ...membershipData,
                 plan_ref: planRef, // Store as reference instead of string
+                usage: membershipData.usage || [],
                 createdOn: timestamp,
                 updatedOn: timestamp,
             });
@@ -112,6 +113,7 @@ class MembershipService {
             const membershipRef = db.collection("memberships").doc(membershipId);
             await membershipRef.update({
                 ...updatedData,
+                ...(updatedData.usage !== undefined ? { usage: updatedData.usage } : {}),
                 updatedOn: timestamp,
             });
 

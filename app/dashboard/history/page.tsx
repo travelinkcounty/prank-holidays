@@ -29,6 +29,7 @@ export default function HistoryPage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>("add");
   const [form, setForm] = useState({
     userId: '',
+    tlcId: '',
     package_ref: '',
     status: 'active',
   });
@@ -84,7 +85,7 @@ export default function HistoryPage() {
   // Handlers
   const openAddModal = () => {
     setModalMode('add');
-    setForm({ userId: '', package_ref: '', status: 'active' });
+    setForm({ userId: '', tlcId: '', package_ref: '', status: 'active' });
     setModalOpen(true);
   };
   const openEditModal = (history: History) => {
@@ -93,9 +94,10 @@ export default function HistoryPage() {
     const packageRefId = typeof history.package_ref === 'string' 
       ? history.package_ref 
       : (history.package_ref as { _path?: { segments: string[] } })?._path?.segments?.[1] || '';
-
+    const user = users.find(u => u.uid === history.userId);
     setForm({
       userId: history.userId,
+      tlcId: user?.tlcId || '',
       package_ref: packageRefId,
       status: history.status || 'active',
     });
@@ -127,6 +129,7 @@ export default function HistoryPage() {
     if (modalMode === 'add') {
       await dispatch(addHistory({
         userId: form.userId,
+        tlcId: form.tlcId,
         package_ref: packageRef,
         status: form.status,
       }));
@@ -135,6 +138,7 @@ export default function HistoryPage() {
     } else if (modalMode === 'edit' && editHistory) {
       await dispatch(updateHistory({
         userId: form.userId,
+        tlcId: form.tlcId,
         package_ref: packageRef,
         status: form.status,
       }, editHistory.id));
@@ -185,6 +189,7 @@ export default function HistoryPage() {
         <table className="min-w-full">
           <thead>
             <tr className="bg-[#f8f9fa]">
+              <th className="text-lg font-bold text-[#e63946] px-4 py-3 text-left">TLC ID</th>
               <th className="text-lg font-bold text-[#e63946] px-4 py-3 text-left">User</th>
               <th className="text-lg font-bold text-[#e63946] px-4 py-3 text-left">Package</th>
               <th className="text-lg font-bold text-[#e63946] px-4 py-3 text-center">Status</th>
@@ -211,6 +216,7 @@ export default function HistoryPage() {
                 const pkg = getPackage(h.package_ref);
                 return (
                   <tr key={h.id} className="border-b last:border-none hover:bg-[#f1f3f5]">
+                    <td className="px-4 py-3 font-medium">{user?.tlcId || '-'}</td>
                     <td className="px-4 py-3 font-medium">{user?.name || user?.email}</td>
                     <td className="px-4 py-3">{pkg?.name}</td>
                     <td className="px-4 py-3 text-center">{h.status}</td>
@@ -267,7 +273,10 @@ export default function HistoryPage() {
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">User</label>
-                <Select name="userId" value={form.userId} onValueChange={(value: string) => setForm(f => ({ ...f, userId: value }))} required>
+                <Select name="userId" value={form.userId} onValueChange={(value: string) => {
+                  const selectedUser = users.find(u => u.uid === value);
+                  setForm(f => ({ ...f, userId: value, tlcId: selectedUser?.tlcId || '' }));
+                }} required>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select user" />
                   </SelectTrigger>
@@ -277,6 +286,16 @@ export default function HistoryPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">TLC ID</label>
+                <Input
+                  type="text"
+                  name="tlcId"
+                  value={form.tlcId}
+                  readOnly
+                  disabled
+                />
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1">Package</label>

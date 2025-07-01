@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { User, Users, BadgeCheck, Edit, LogOut, History as HistoryIcon, Link, Loader2 } from "lucide-react";
+import { User, Users, BadgeCheck, Edit, LogOut, History as HistoryIcon, Link, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { useRouter } from "next/navigation";
@@ -33,9 +33,19 @@ const Profile = () => {
     const [active, setActive] = useState("profile");
     const router = useRouter();
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const [editForm, setEditForm] = useState({ name: "", address: "", phone: "", password: "" });
+    const [editForm, setEditForm] = useState({
+      name: "",
+      address: "",
+      phone: "",
+      password: "",
+      gender: "",
+      nationality: "",
+      dob: "",
+      maritalStatus: ""
+    });
     const [editLoading, setEditLoading] = useState(false);
     const [showMobileNav, setShowMobileNav] = useState(true);
+    const [expandedMembershipIdx, setExpandedMembershipIdx] = useState<number | null>(null);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -93,7 +103,11 @@ const Profile = () => {
         name: userData?.name || "",
         address: userData?.address || "",
         phone: userData?.phone || "",
-        password: ""
+        password: "",
+        gender: userData?.gender || "",
+        nationality: userData?.nationality || "",
+        dob: userData?.dob || "",
+        maritalStatus: userData?.maritalStatus || ""
       });
       setEditModalOpen(true);
     };
@@ -123,14 +137,29 @@ const Profile = () => {
                                 <span className="text-gray-600 text-base">{userData?.email}</span>
                             </div>
                         </div>
-                        {/* <button className="p-2 rounded-full hover:bg-gray-100" onClick={openEditModal}><Edit className="w-5 h-5 text-gray-400" /></button> */}
+                        <button className="p-2 rounded-full hover:bg-gray-100" onClick={openEditModal}><Edit className="w-5 h-5 text-gray-400" /></button>
                     </div>
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-2 text-gray-600 text-base">
-                            <Users className="w-5 h-5" />{userData?.phone}
+                            <Users className="w-5 h-5" />{userData?.tlcId}
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-base">
+                            <span className="font-bold">Phone:</span> {userData?.phone}
                         </div>
                         <div className="flex items-center gap-2 text-gray-600 text-base">
                             <span className="font-bold">Address:</span> {userData?.address}
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-base">
+                            <span className="font-bold">Gender:</span> {userData?.gender || "N/A"}
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-base">
+                            <span className="font-bold">Nationality:</span> {userData?.nationality || "N/A"}
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-base">
+                            <span className="font-bold">Date of Birth:</span> {userData?.dob || "N/A"}
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-base">
+                            <span className="font-bold">Marital Status:</span> {userData?.maritalStatus || "N/A"}
                         </div>
                         <div className="flex items-center gap-2 text-gray-600 text-base">
                             <span className="font-bold">Status:</span> {userData?.status}
@@ -144,39 +173,86 @@ const Profile = () => {
                 <div className="bg-white rounded-2xl shadow p-8 md:p-10 border border-[#ffe066]/30 w-full max-w-4xl md:ml-0 flex flex-col gap-6">
                     <div className="flex items-center flex-col md:flex-row justify-between mb-2">
                         <h3 className="text-2xl font-bold text-[#e30613] flex items-center gap-2"><BadgeCheck className="w-6 h-6 text-[#ffe066]" /> Membership Details</h3>
-                        <button className="px-6 py-1 mt-6 md:mt-0 bg-gradient-to-r from-[#ffe066] to-[#ffd700] text-[#e30613] font-bold rounded-full shadow-lg hover:from-[#e30613] hover:to-[#cc0000] hover:text-white transition-all duration-300 text-xl w-fit transform hover:scale-105">
-                            Renew Membership
-                        </button>
+                        {membership.length === 0 ? null : (
+                          <button className="px-6 py-1 mt-6 md:mt-0 bg-gradient-to-r from-[#ffe066] to-[#ffd700] text-[#e30613] font-bold rounded-full shadow-lg hover:from-[#e30613] hover:to-[#cc0000] hover:text-white transition-all duration-300 text-xl w-fit transform hover:scale-105">
+                              Renew Membership
+                          </button>
+                        )}
                     </div>
-                    {membership.length > 0 && (
-                        membership.map((item, idx) => (
-                            <div key={idx} className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-lg border border-[#ffe066]/20 hover:shadow-xl transition-all duration-300">
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex items-center gap-2 text-xl">
-                                        <span className="font-bold text-[#e30613]">Plan:</span>
-                                        <span className="text-[#23272b]">{getPlanName(item.plan_ref)}</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-white p-4 rounded-lg shadow-sm">
-                                            <div className="text-sm text-gray-500 mb-1">Total Days</div>
-                                            <div className="text-xl font-bold text-[#23272b]">{item.totalDays}</div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-lg shadow-sm">
-                                            <div className="text-sm text-gray-500 mb-1">Used Days</div>
-                                            <div className="text-xl font-bold text-[#23272b]">{item.usedDays}</div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-lg shadow-sm">
-                                            <div className="text-sm text-gray-500 mb-1">Total Nights</div>
-                                            <div className="text-xl font-bold text-[#23272b]">{item.totalNights}</div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-lg shadow-sm">
-                                            <div className="text-sm text-gray-500 mb-1">Used Nights</div>
-                                            <div className="text-xl font-bold text-[#23272b]">{item.usedNights}</div>
-                                        </div>
-                                    </div>
+                    {membership.length === 0 ? (
+                      <div className="text-gray-500 text-lg">No active membership found.</div>
+                    ) : (
+                      membership.map((item, idx) => {
+                        // Calculate used/remaining from usage array
+                        const usage = item.usage || [];
+                        const sumUsage = usage.reduce((acc, u) => ({ days: acc.days + (u.days || 0), nights: acc.nights + (u.nights || 0) }), { days: 0, nights: 0 });
+                        const remDays = Math.max(item.totalDays - sumUsage.days, 0);
+                        const remNights = Math.max(item.totalNights - sumUsage.nights, 0);
+                        const expanded = expandedMembershipIdx === idx;
+                        return (
+                          <div key={idx} className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-lg border border-[#ffe066]/20 hover:shadow-xl transition-all duration-300 mb-4">
+                            <div className="flex flex-col gap-4">
+                              <div className="flex items-center gap-2 text-xl cursor-pointer" onClick={() => setExpandedMembershipIdx(expanded ? null : idx)}>
+                                {expanded ? <ChevronDown className="w-5 h-5 text-[#e30613]" /> : <ChevronRight className="w-5 h-5 text-[#e30613]" />}
+                                <span className="font-bold text-[#e30613]">Plan:</span>
+                                <span className="text-[#23272b]">{getPlanName(item.plan_ref)}</span>
+                                <span className="ml-4 text-xs text-[#1a4d8f]">(Click to {expanded ? 'hide' : 'view'} usage history)</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-white p-4 rounded-lg shadow-sm">
+                                  <div className="text-sm text-gray-500 mb-1">Total Days</div>
+                                  <div className="text-xl font-bold text-[#23272b]">{item.totalDays}</div>
                                 </div>
+                                <div className="bg-white p-4 rounded-lg shadow-sm">
+                                  <div className="text-sm text-gray-500 mb-1">Used Days</div>
+                                  <div className="text-xl font-bold text-[#23272b]">{sumUsage.days}</div>
+                                </div>
+                                <div className="bg-white p-4 rounded-lg shadow-sm">
+                                  <div className="text-sm text-gray-500 mb-1">Total Nights</div>
+                                  <div className="text-xl font-bold text-[#23272b]">{item.totalNights}</div>
+                                </div>
+                                <div className="bg-white p-4 rounded-lg shadow-sm">
+                                  <div className="text-sm text-gray-500 mb-1">Used Nights</div>
+                                  <div className="text-xl font-bold text-[#23272b]">{sumUsage.nights}</div>
+                                </div>
+                                <div className="bg-white p-4 rounded-lg shadow-sm col-span-2">
+                                  <div className="text-sm text-gray-500 mb-1">Remaining</div>
+                                  <div className="text-lg font-bold text-[#2ecc71]">{remDays} Days, {remNights} Nights</div>
+                                </div>
+                              </div>
+                              {expanded && (
+                                <div className="mt-4 bg-[#f8f9fa] rounded-xl p-4">
+                                  <div className="font-semibold mb-2">Usage History</div>
+                                  {usage.length === 0 ? (
+                                    <div className="text-gray-500">No usage entries yet.</div>
+                                  ) : (
+                                    <table className="w-full text-sm">
+                                      <thead>
+                                        <tr>
+                                          <th className="text-left">Location</th>
+                                          <th className="text-left">Date</th>
+                                          <th className="text-center">Days</th>
+                                          <th className="text-center">Nights</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {usage.map((u, uidx) => (
+                                          <tr key={uidx}>
+                                            <td>{u.location}</td>
+                                            <td>{u.date}</td>
+                                            <td className="text-center">{u.days}</td>
+                                            <td className="text-center">{u.nights}</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                        ))
+                          </div>
+                        );
+                      })
                     )}
                 </div>
             );
@@ -328,11 +404,15 @@ const Profile = () => {
                       setEditLoading(false);
                       return;
                     }
-                    const payload: { uid: string; name: string; address: string; phone: string; password?: string } = {
+                    const payload: any = {
                       uid: userData.uid,
                       name: editForm.name,
                       address: editForm.address,
                       phone: editForm.phone,
+                      gender: editForm.gender,
+                      nationality: editForm.nationality,
+                      dob: editForm.dob,
+                      maritalStatus: editForm.maritalStatus,
                     };
                     if (editForm.password) payload.password = editForm.password;
                     await dispatch(updateUser(payload));
@@ -367,6 +447,47 @@ const Profile = () => {
                       onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
                       required
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Gender</label>
+                    <select
+                      className="w-full border rounded px-3 py-2"
+                      value={editForm.gender}
+                      onChange={e => setEditForm(f => ({ ...f, gender: e.target.value }))}
+                    >
+                      <option value="">Select gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Nationality</label>
+                    <Input
+                      value={editForm.nationality}
+                      onChange={e => setEditForm(f => ({ ...f, nationality: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Date of Birth</label>
+                    <Input
+                      type="date"
+                      value={editForm.dob}
+                      onChange={e => setEditForm(f => ({ ...f, dob: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Marital Status</label>
+                    <select
+                      className="w-full border rounded px-3 py-2"
+                      value={editForm.maritalStatus}
+                      onChange={e => setEditForm(f => ({ ...f, maritalStatus: e.target.value }))}
+                    >
+                      <option value="">Select status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Password (leave blank to keep unchanged)</label>

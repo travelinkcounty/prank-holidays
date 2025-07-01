@@ -8,9 +8,14 @@ export interface User {
   name?: string;
   username: string;
   address: string;
+  gender: string;
+  nationality: string;
+  dob: string;
+  maritalStatus: string;
   phone: string;
   status: string;
   role: string;
+  tlcId?: string;
   createdOn: string;
   updatedOn: string;
 }
@@ -194,7 +199,7 @@ export const updateUser = (payload: { uid: string; [key: string]: any }) => asyn
   }
 };
 
-export const addUser = (payload: { email: string; password: string; name?: string; role?: string; phone?: string; address?: string; status?: string }) => async (dispatch: Dispatch) => {
+export const addUser = (payload: { email: string; password: string; name?: string; role?: string; phone?: string; address?: string; status?: string; gender?: string; nationality?: string; dob?: string; maritalStatus?: string }) => async (dispatch: Dispatch) => {
   dispatch(setIsLoading(true));
   try {
     const response = await axios.put("/api/routes/auth", payload);
