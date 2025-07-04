@@ -137,7 +137,7 @@ const About = () => {
               className="w-full bg-[#ffe066] text-[#e63946] font-bold px-6 py-3 rounded-lg shadow hover:bg-[#e63946] hover:text-white transition-colors text-base mt-2"
               style={{ fontFamily: 'var(--font-main)' }}
             >
-              Book Now
+              Enquiry Now
             </button>
           </form>
         </div>

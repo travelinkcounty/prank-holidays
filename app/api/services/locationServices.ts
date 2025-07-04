@@ -31,7 +31,8 @@ class LocationService {
         } else {
             consoleManager.log("Returning cached locations. No Firestore read.");
         }
-        return this.locations;
+        // Sort locations alphabetically by name (case-insensitive)
+        return this.locations.slice().sort((a, b) => a.name?.toLowerCase().localeCompare(b.name?.toLowerCase()));
     }
 
     // Get all featured locations

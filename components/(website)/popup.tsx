@@ -16,6 +16,7 @@ const Popup = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boo
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showContact, setShowContact] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -47,10 +48,12 @@ const Popup = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boo
         }
     };
 
-    // Auto-close modal after success
+    // Auto-close modal after showing contact details
     useEffect(() => {
         if (success) {
+            setShowContact(true);
             const timer = setTimeout(() => {
+                setShowContact(false);
                 setSuccess(false);
                 onOpenChange(false);
             }, 2000);
@@ -77,7 +80,20 @@ const Popup = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boo
                             <DialogTitle className="text-3xl font-extrabold text-[#e30613] mb-1">Join Travelink County</DialogTitle>
                             <DialogDescription className="text-gray-500 text-lg mb-4">Fill the form and we'll get back to you soon!</DialogDescription>
                         </DialogHeader>
-                        {success ? (
+                        {showContact ? (
+                            <div className="flex flex-col items-center justify-center gap-4 py-8">
+                                <CheckCircle2 className="w-16 h-16 text-green-500" />
+                                <div className="text-2xl font-semibold text-green-700 text-center mb-2">Thank you! We received your details.</div>
+                                <div className="text-base text-gray-700 text-center mt-2">
+                                    <div><b>Contact us:</b></div>
+                                    <div>+91 - 9717308208</div>
+                                    <div>+91 - 9220413324</div>
+                                    <div>Toll Free: 1800 890 5660</div>
+                                    <div>Landline: +91-45725977</div>
+                                    <div>info@travelinkcounty.com</div>
+                                </div>
+                            </div>
+                        ) : success ? (
                             <div className="flex flex-col items-center justify-center gap-4 py-12">
                                 <CheckCircle2 className="w-16 h-16 text-green-500" />
                                 <div className="text-2xl font-semibold text-green-700 text-center">Thank you! We received your details.</div>

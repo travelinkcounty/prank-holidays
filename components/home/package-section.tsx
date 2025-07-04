@@ -52,7 +52,7 @@ const PackageSection = () => {
               </CardContent>
               <CardFooter className="flex justify-center pb-4">
                 <Button className="bg-[#ffe066] text-[#e63946] font-bold px-6 py-2 rounded-full shadow hover:bg-[#e63946] hover:text-white transition-all cursor-pointer text-base">
-                  Book Now
+                  Enquire Now
                 </Button>
               </CardFooter>
             </Card>

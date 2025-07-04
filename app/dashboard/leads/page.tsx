@@ -23,7 +23,7 @@ export default function LeadsPage() {
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editLead, setEditLead] = useState<any>(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", status: "New" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", status: "new" });
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -50,7 +50,7 @@ export default function LeadsPage() {
   // Handlers
   const openAddModal = () => {
     setEditLead(null);
-    setForm({ name: "", email: "", phone: "", message: "", status: "New" });
+    setForm({ name: "", email: "", phone: "", message: "", status: "new" });
     setModalOpen(true);
   };
 
@@ -65,6 +65,7 @@ export default function LeadsPage() {
     setIsDeleting(true);
     await dispatch(deleteLead(leadToDelete));
     setIsDeleting(false); 
+    setLeadToDelete(null); // Close the modal immediately after delete
     dispatch(fetchLeads());
     toast.success("Lead deleted!");
   };
@@ -165,20 +166,20 @@ export default function LeadsPage() {
                   <TableCell>
                     <Badge
                       variant={
-                        lead.status === "New"
+                        lead.status === "new"
                           ? "default"
-                          : lead.status === "Contacted"
+                          : lead.status === "contacted"
                           ? "default"
-                          : lead.status === "Converted"
+                          : lead.status === "converted"
                           ? "default"
                           : "default"
                       }
                       className={
-                        lead.status === "New"
+                        lead.status === "new"
                           ? "bg-[#ffe066] text-[#b8860b]"
-                          : lead.status === "Contacted"
+                          : lead.status === "contacted"
                           ? "bg-[#a2d2ff] text-[#1864ab]"
-                          : lead.status === "Converted"
+                          : lead.status === "converted"
                           ? "bg-[#43aa8b] text-white"
                           : ""
                       }
@@ -246,9 +247,9 @@ export default function LeadsPage() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="New">New</SelectItem>
-                <SelectItem value="Contacted">Contacted</SelectItem>
-                <SelectItem value="Converted">Converted</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="contacted">Contacted</SelectItem>
+                <SelectItem value="converted">Converted</SelectItem>
               </SelectContent>
             </Select>
             <DialogFooter>

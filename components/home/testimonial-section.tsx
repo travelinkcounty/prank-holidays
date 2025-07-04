@@ -1,5 +1,12 @@
+"use client";
+
 import React from "react";
 import { Quote } from "lucide-react";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination, A11y, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/autoplay';
+import 'swiper/css/pagination';
 
 const testimonials = [
   {
@@ -58,25 +65,38 @@ const TestimonialSection = () => (
       <h2 className="text-4xl font-extrabold text-center mb-12 text-[#e63946]" style={{ fontFamily: 'var(--font-main)' }}>
         What Our Customers Say
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <Swiper
+        modules={[Autoplay, Pagination, A11y]}
+        spaceBetween={24}
+        slidesPerView={1}
+        autoplay={{ delay: 3500, disableOnInteraction: false }}
+        pagination={{ clickable: true }}
+        breakpoints={{
+          640: { slidesPerView: 1 },
+          768: { slidesPerView: 2 },
+          1024: { slidesPerView: 3 },
+        }}
+        className="pb-12 w-full h-full items-stretch"
+      >
         {testimonials.map((t, idx) => (
-          <div
-            key={idx}
-            className="bg-white rounded-2xl border-2 border-[#ffe066] shadow-md hover:shadow-xl transition hover:scale-105 flex flex-col items-center text-center p-8 relative group"
-          >
-            <Quote className="w-8 h-8 text-[#e63946] mb-3 absolute -top-5 left-1/2 -translate-x-1/2 bg-white rounded-full p-1 shadow" />
-            <img
-              src={t.image}
-              alt={t.name}
-              className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-[#ffe066] shadow-lg group-hover:scale-105 transition"
-            />
-            <p className="text-gray-700 mb-4 text-lg font-medium" style={{ fontFamily: 'var(--font-main)' }}>
-              "{t.text}"
-            </p>
-            <div className="font-bold text-[#e63946] text-base" style={{ fontFamily: 'var(--font-main)' }}>- {t.name}</div>
-          </div>
+          <SwiperSlide key={idx} className="h-full flex items-stretch">
+            <div
+              className="bg-white rounded-2xl border-2 border-[#ffe066] shadow-md hover:shadow-xl transition hover:scale-105 flex flex-col items-center text-center p-8 pt-12 group h-full min-h-[420px] flex-1 justify-between"
+            >
+              <Quote className="w-8 h-8 text-[#e63946] mb-3 bg-white rounded-full p-1 shadow" />
+              <img
+                src={t.image}
+                alt={t.name}
+                className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-[#ffe066] shadow-lg group-hover:scale-105 transition"
+              />
+              <p className="text-gray-700 mb-4 text-lg font-medium flex-1" style={{ fontFamily: 'var(--font-main)' }}>
+                "{t.text}"
+              </p>
+              <div className="font-bold text-[#e63946] text-base mt-auto" style={{ fontFamily: 'var(--font-main)' }}>- {t.name}</div>
+            </div>
+          </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
     </div>
   </section>
 );

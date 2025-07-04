@@ -46,6 +46,16 @@ const ServiceSection = () => (
           </div>
         ))}
       </div>
+      {/* View All Services Button */}
+      <div className="flex justify-center mt-12">
+        <a
+          href="/about"
+          className="bg-[#ffe066] hover:bg-[#ffe066]/90 text-[#e63946] font-bold text-lg px-8 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#e63946]/40"
+          style={{ fontFamily: 'var(--font-main)' }}
+        >
+          View All Services
+        </a>
+      </div>
     </div>
   </section>
 );

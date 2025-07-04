@@ -81,8 +81,15 @@ const Profile = () => {
       }
 
 
-    const getPlanName = (plan_ref: string) => {
-        const plan = plans?.find((plan: any) => plan.uid === plan_ref);
+    const getPlanName = (plan_ref: any) => {
+        // If plan_ref is an object with _path.segments, get the plan ID from segments
+        if (plan_ref && typeof plan_ref === 'object' && plan_ref._path?.segments) {
+            const planId = plan_ref._path.segments[plan_ref._path.segments.length - 1];
+            const plan = plans?.find((plan: any) => plan.uid === planId);
+            return plan?.name || "Unknown Plan";
+        }
+        // If plan_ref is a string, use it directly
+        const plan = plans?.find((plan: any) => plan.id === plan_ref);
         return plan?.name || "Unknown Plan";
     }
 
