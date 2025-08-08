@@ -1,5 +1,5 @@
 import React from "react";
-
+import Link from "next/link";
 const MaintenancePage = () => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-300">
@@ -9,6 +9,7 @@ const MaintenancePage = () => {
                 </svg>
                 <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Maintenance Mode</h1>
                 <p className="text-lg text-gray-600 text-center mb-4">We are currently performing scheduled maintenance.<br />Please check back soon!</p>
+                <Link href="mailto:ceo@cmtai.in" className="text-blue-500 hover:text-blue-600">For any queries, contact us at ceo@cmtai.in</Link>
                 <div className="mt-2 text-sm text-gray-400">&copy; {new Date().getFullYear()} Travelink County</div>
             </div>
         </div>
